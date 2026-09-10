@@ -1,0 +1,312 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Mahfouz Contracting — design tokens
+   Direction: the engineering drawing set. Blueprint navy, drawing-paper ground,
+   copper reserved strictly for interactive and active state.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* Ground and ink */
+  --color-ink: #0a1628;
+  --color-ink-soft: #14243d;
+  --color-navy: #16305c;
+  --color-navy-soft: #24457a;
+  --color-steel: #5b6b7f;
+  --color-steel-light: #8b98a6;
+  --color-paper: #eae8e3;
+  --color-paper-bright: #f4f2ee;
+  --color-paper-deep: #ded9d0;
+
+  /* The single accent. Active + interactive state only. */
+  --color-copper: #a9673a;
+  --color-copper-bright: #c9854f;
+
+  /* Hairlines — the drawing-sheet vocabulary */
+  --color-rule: color-mix(in srgb, #0a1628 15%, transparent);
+  --color-rule-strong: color-mix(in srgb, #0a1628 32%, transparent);
+  --color-rule-dark: color-mix(in srgb, #ffffff 14%, transparent);
+  --color-rule-dark-strong: color-mix(in srgb, #ffffff 26%, transparent);
+
+  --font-display: var(--font-archivo), "Archivo", system-ui, sans-serif;
+  --font-body: var(--font-plex-sans), "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Motion — one easing so the whole site moves as one system */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+    /* Page shell: the measured sheet the whole site is set on */
+    --gutter: clamp(1.25rem, 4vw, 3.5rem);
+    --shell: min(100% - var(--gutter) * 2, 90rem);
+    /* Left metadata column — drawing-sheet furniture, desktop only */
+    --meta-col: 9.5rem;
+  }
+
+  * {
+    min-width: 0;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: color-mix(in srgb, var(--color-copper) 22%, transparent);
+  }
+
+  /* Anchored sections must clear the fixed header */
+  :where(section, footer)[id] {
+    scroll-margin-top: 5.5rem;
+  }
+
+  :focus {
+    outline: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-copper);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-copper) 28%, transparent);
+  }
+
+  img,
+  video {
+    display: block;
+    max-width: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Type scale. Headings are set in Archivo on its width axis — the expanded
+   width is what stops it reading as default Archivo.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@utility display {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 118;
+  font-weight: 700;
+  letter-spacing: -0.032em;
+  line-height: 0.94;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+/**
+ * Sentence case at expanded width. Caps are reserved for the hero headline and
+ * the wordmark — a whole sentence set in caps at section-heading size shouts
+ * rather than reads, which is the opposite of premium.
+ */
+@utility display-sentence {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 114;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+/* Same face, normal width — for sub-headings that should not shout */
+@utility display-narrow {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 100;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.06;
+  text-wrap: balance;
+}
+
+@utility t-hero {
+  /* The lower bound is set so the longest headline line still fits on one
+     line at 390px — at 2.625rem it widowed the last word. */
+  font-size: clamp(2.3rem, 7.6vw, 7rem);
+}
+
+@utility t-plate {
+  font-size: clamp(2.125rem, 5.4vw, 4.75rem);
+}
+
+@utility t-h2 {
+  font-size: clamp(1.875rem, 4.2vw, 3.75rem);
+}
+
+@utility t-h3 {
+  font-size: clamp(1.25rem, 2.1vw, 1.875rem);
+}
+
+@utility t-h4 {
+  font-size: clamp(1.0625rem, 1.4vw, 1.25rem);
+}
+
+@utility t-lead {
+  font-size: clamp(1.0625rem, 1.15vw, 1.1875rem);
+  line-height: 1.62;
+  text-wrap: pretty;
+}
+
+@utility t-body {
+  font-size: 0.9375rem;
+  line-height: 1.68;
+  text-wrap: pretty;
+}
+
+/* Genuine sheet metadata only — never a decorative label */
+@utility t-meta {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+@utility t-figure {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 112;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Layout helpers
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@utility shell {
+  width: var(--shell);
+  margin-inline: auto;
+}
+
+/* The sheet grid: metadata margin column + content. Collapses under 64rem. */
+@utility sheet {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(1.75rem, 3vw, 2.5rem);
+
+  @media (width >= 64rem) {
+    grid-template-columns: var(--meta-col) minmax(0, 1fr);
+    gap: clamp(2rem, 4vw, 4rem);
+  }
+}
+
+/* Duotone: maps the client's mismatched renders onto the brand navy so a
+   mixed image set coheres. Real photography is exempt from this. */
+@utility duotone {
+  filter: grayscale(1) contrast(1.06) brightness(0.97);
+}
+
+@utility mask-fade-b {
+  mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   The hero entrance — the one orchestrated page-load sequence on the site.
+   Done in CSS so nothing above the fold waits on JavaScript.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes wipe-up {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@utility animate-rise {
+  animation: rise 0.9s var(--ease-out-expo) both;
+}
+
+@utility animate-wipe-up {
+  animation: wipe-up 1s var(--ease-out-expo) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-wipe-up {
+    animation: none;
+    opacity: 1;
+    clip-path: none;
+    transform: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Scroll reveals.
+
+   The hidden state is scoped to `.js`, which an inline script in the document
+   head sets before first paint. Without JavaScript — or if hydration fails —
+   these selectors never match and the page is simply visible. Transform and
+   opacity only, so nothing here can shift layout.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.js [data-reveal] {
+  will-change: opacity, transform;
+}
+
+.js [data-reveal="rise"] {
+  opacity: 0;
+  transform: translateY(var(--reveal-y, 14px));
+}
+
+.js [data-reveal="wipe"] {
+  clip-path: inset(0 0 100% 0);
+}
+
+.js [data-reveal].is-revealed {
+  opacity: 1;
+  clip-path: inset(0 0 0 0);
+  transform: none;
+  transition:
+    opacity 0.55s var(--ease-out-expo),
+    transform 0.55s var(--ease-out-expo),
+    clip-path 0.9s var(--ease-out-expo);
+  transition-delay: var(--reveal-delay, 0s);
+  will-change: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal],
+  .js [data-reveal="rise"],
+  .js [data-reveal="wipe"] {
+    opacity: 1;
+    clip-path: none;
+    transform: none;
+    transition: none;
+    will-change: auto;
+  }
+}
