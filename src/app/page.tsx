@@ -31,7 +31,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero hero={hero} settings={settings} />
+      <Hero hero={hero} settings={settings} services={services} />
 
       <About about={about} condensed />
 

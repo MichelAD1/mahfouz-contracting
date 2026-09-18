@@ -1,22 +1,27 @@
+import Link from "next/link";
 import { ButtonLink } from "@/components/primitives/Button";
 import { BlueprintPlate } from "@/components/primitives/BlueprintPlate";
 import { SiteImage } from "@/components/primitives/SiteImage";
 import { Parallax } from "@/components/motion/Parallax";
-import { Counter } from "@/components/motion/Counter";
 import { hasImage } from "@/sanity/lib/image";
-import type { Hero as HeroContent, SiteSettings } from "@/sanity/lib/types";
+import type {
+  Hero as HeroContent,
+  Service,
+  SiteSettings,
+} from "@/sanity/lib/types";
 
 /**
  * The hero is a server component: its entrance is CSS, so nothing above the
- * fold waits on JavaScript. Only the background parallax and the counters are
- * client islands.
+ * fold waits on JavaScript. Only the background parallax is a client island.
  */
 export function Hero({
   hero,
   settings,
+  services,
 }: {
   hero: HeroContent;
   settings: SiteSettings;
+  services: Service[];
 }) {
   const showPhoto = hasImage(hero.background);
 
@@ -107,72 +112,79 @@ export function Hero({
         </div>
       </div>
 
-      <DataStrip metrics={hero.metrics} settings={settings} />
+      <DivisionStrip services={services} settings={settings} />
     </section>
   );
 }
 
 /**
- * Replaces the four vague noun-phrases that occupied this space in the original
- * design. Every figure here is checkable against the company's own material —
- * big type has to be earned by the content under it.
+ * The five divisions, named rather than counted.
+ *
+ * This replaced a four-figure metrics band — 5 divisions, 2 countries, 6
+ * standards, 1 point of responsibility. Big numbers under a hero is the most
+ * worn pattern on the web, and only one of those four earned its numeral:
+ * "2 countries" undersells, "6 standards" buries the list that was the actual
+ * asset, and "1 point of responsibility" was a slogan wearing a number.
+ *
+ * Naming the divisions does more work than counting them. It is the company's
+ * real differentiator, it is scannable in a second, and every entry is a way
+ * into the page that explains it — so the band under the fold has a job rather
+ * than a statistic.
  */
-function DataStrip({
-  metrics,
+function DivisionStrip({
+  services,
   settings,
 }: {
-  metrics: HeroContent["metrics"];
+  services: Service[];
   settings: SiteSettings;
 }) {
-  if (metrics.length === 0) return null;
+  if (services.length === 0) return null;
 
   return (
     <div
       className="animate-rise border-t border-rule-dark bg-ink/90"
-      style={{ animationDelay: "1.15s" }}
+      style={{ animationDelay: "1.05s" }}
     >
       <div className="shell">
+        <p className="pt-6 t-meta text-steel-light lg:pt-7">
+          Five divisions, one point of responsibility
+        </p>
+
         {/*
          * Rules are placed by nth-child rather than by index, because the
-         * column count changes at the breakpoint and only CSS knows it:
-         * two columns with a row rule on mobile, four columns with column
-         * rules from lg up.
+         * column count changes at the breakpoint and only CSS knows it.
          */}
-        <dl
-          className="grid grid-cols-2 lg:grid-cols-4
-            [&>div]:flex [&>div]:flex-col [&>div]:gap-2 [&>div]:py-6 [&>div]:pr-6 lg:[&>div]:py-7
-            [&>div:nth-child(n+3)]:border-t [&>div:nth-child(n+3)]:border-rule-dark
-            lg:[&>div:nth-child(n+3)]:border-t-0
-            [&>div:nth-child(even)]:border-l [&>div:nth-child(even)]:border-rule-dark [&>div:nth-child(even)]:pl-6
-            lg:[&>div:not(:first-child)]:border-l lg:[&>div:not(:first-child)]:border-rule-dark lg:[&>div:not(:first-child)]:pl-6"
+        <ul
+          className="grid grid-cols-2 pb-6 lg:grid-cols-5 lg:pb-7
+            [&>li]:py-5 [&>li]:pr-5
+            [&>li:nth-child(n+3)]:border-t [&>li:nth-child(n+3)]:border-rule-dark
+            lg:[&>li:nth-child(n+3)]:border-t-0
+            [&>li:nth-child(even)]:border-l [&>li:nth-child(even)]:border-rule-dark [&>li:nth-child(even)]:pl-5
+            lg:[&>li:not(:first-child)]:border-l lg:[&>li:not(:first-child)]:border-rule-dark lg:[&>li:not(:first-child)]:pl-5"
         >
-          {metrics.map((metric) => (
-            <div key={metric.label}>
-              <dd className="t-figure text-[clamp(2.25rem,4vw,3.5rem)] text-paper-bright">
-                {metric.prefix}
-                {typeof metric.countTo === "number" ? (
-                  <Counter to={metric.countTo} display={metric.figure} />
-                ) : (
-                  metric.figure
-                )}
-                {metric.suffix}
-              </dd>
-              <dt className="display-narrow text-[0.9375rem] font-medium text-paper-bright/85">
-                {metric.label}
-              </dt>
-              {metric.note ? (
-                <p className="max-w-[28ch] text-[0.8125rem] leading-relaxed text-steel-light">
-                  {metric.note}
-                </p>
-              ) : null}
-            </div>
+          {services.map((service) => (
+            <li key={service._id}>
+              <Link
+                href={`/services#${service.slug}`}
+                className="group flex flex-col gap-1.5"
+              >
+                <span className="t-meta text-copper-bright">{service.code}</span>
+                <span className="display-narrow text-[clamp(1rem,1.25vw,1.1875rem)] text-paper-bright transition-colors duration-300 group-hover:text-copper-bright">
+                  {service.title}
+                </span>
+              </Link>
+            </li>
           ))}
-        </dl>
+        </ul>
       </div>
 
       {/* Title block: the sheet's own footer line. */}
       <div className="shell flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-t border-rule-dark py-4">
-        <span className="t-meta text-steel-light">{settings.footerNote}</span>
+        <span className="t-meta text-steel-light">
+          {settings.standards && settings.standards.length > 0
+            ? `Worked to ${settings.standards.join(" · ")}`
+            : settings.footerNote}
+        </span>
         <span className="t-meta text-steel-light">
           {settings.address.lines.slice(-2).join(", ")}
         </span>

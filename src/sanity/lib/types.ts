@@ -53,6 +53,8 @@ export type SiteSettings = {
   address: { lines: string[] };
   socials: { platform: string; url: string }[];
   nav: NavItem[];
+  /** Standards the company works to, shown under the home hero. */
+  standards?: string[];
   footerNote: string;
 };
 

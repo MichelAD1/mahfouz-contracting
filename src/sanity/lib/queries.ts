@@ -33,6 +33,7 @@ const SETTINGS = groq`{
   address{ lines },
   socials[]{ platform, url },
   nav[]{ label, href },
+  standards,
   footerNote
 }`;
 

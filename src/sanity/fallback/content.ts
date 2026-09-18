@@ -79,6 +79,13 @@ export const fallbackHome: HomePageContent = {
       { label: "Projects", href: "/projects" },
       { label: "Contact", href: "/contact" },
     ],
+    /**
+     * Shown as the line under the home hero, in place of a "6 standards worked
+     * to" metric. The count was meaningless — nobody cares that it is six, they
+     * care that it is these six, and to the people who evaluate contractors
+     * these read as credentials.
+     */
+    standards: ["IEC", "NEC", "BS", "NFPA", "ASHRAE", "SMACNA"],
     footerNote: "Engineering, contracting and maintenance",
   },
 
