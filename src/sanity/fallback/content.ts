@@ -1,4 +1,42 @@
-import type { HomePageContent } from "@/sanity/lib/types";
+import type {
+  Contact,
+  HomePageContent,
+  ProjectDivision,
+  ProjectFull,
+} from "@/sanity/lib/types";
+
+/**
+ * Division tags, in the short form the project cards and the filter use. These
+ * mirror the `service` documents by `_id`, so the same records come back once
+ * the dataset is populated.
+ */
+const DIVISION = {
+  engineering: {
+    _id: "svc-engineering",
+    title: "Engineering",
+    slug: "engineering-design-consultancy",
+  },
+  electrical: {
+    _id: "svc-electrical",
+    title: "Electrical",
+    slug: "electrical-division",
+  },
+  mechanical: {
+    _id: "svc-mechanical",
+    title: "Mechanical",
+    slug: "mechanical-division",
+  },
+  it: {
+    _id: "svc-it",
+    title: "IT & Automation",
+    slug: "information-technology-automation-division",
+  },
+  maintenance: {
+    _id: "svc-maintenance",
+    title: "Maintenance",
+    slug: "maintenance-facility-support",
+  },
+} satisfies Record<string, ProjectDivision>;
 
 /**
  * Fallback content — used whenever no Sanity project is configured.
@@ -35,23 +73,31 @@ export const fallbackHome: HomePageContent = {
     // TODO(client): the live site's social links point at AxiomThemes accounts.
     socials: [],
     nav: [
-      { label: "About", href: "#about" },
-      { label: "Capabilities", href: "#capabilities" },
-      { label: "Work", href: "#work" },
-      { label: "Process", href: "#process" },
-      { label: "Contact", href: "#contact" },
+      { label: "Home", href: "/" },
+      { label: "About", href: "/about" },
+      { label: "Services", href: "/services" },
+      { label: "Projects", href: "/projects" },
+      { label: "Contact", href: "/contact" },
     ],
+    /**
+     * Shown as the line under the home hero, in place of a "6 standards worked
+     * to" metric. The count was meaningless — nobody cares that it is six, they
+     * care that it is these six, and to the people who evaluate contractors
+     * these read as credentials.
+     */
+    standards: ["IEC", "NEC", "BS", "NFPA", "ASHRAE", "SMACNA"],
     footerNote: "Engineering, contracting and maintenance",
   },
 
   hero: {
     headingLines: ["Engineering", "solutions.", "Built to last."],
     lead: "Integrated electrical, mechanical, IT and automation works for commercial, industrial and institutional clients — engineered, installed and maintained in-house.",
-    primaryCta: { label: "Request a Quote", href: "#contact" },
-    secondaryCta: { label: "See Our Work", href: "#work" },
+    primaryCta: { label: "Request a Quote", href: "/contact" },
+    secondaryCta: { label: "See Our Work", href: "/projects" },
     background: {
-      alt: "",
-      slotHint: "Wide site photograph — switchgear room, plant room or a live installation",
+      src: "/images/hero-skyline.webp",
+      alt: "City skyline of high-rise towers seen from above at first light",
+      aspectRatio: 16 / 9,
     },
     // Every figure here is checkable against the company's own material.
     metrics: [
@@ -89,7 +135,7 @@ export const fallbackHome: HomePageContent = {
       "Mahfouz Contracting delivers integrated electrical, mechanical, IT and automation works for commercial, industrial and institutional clients. Design, supply, installation and commissioning are handled by our own divisions.",
       "The approach is straightforward: understand the requirement, engineer it properly, build it to standard, and support it for as long as it runs.",
     ],
-    cta: { label: "See our capabilities", href: "#capabilities" },
+    cta: { label: "See our capabilities", href: "/services" },
     // One image only. TODO(client): replace with a dedicated photograph of the
     // team on site — this file is also used by the Electrical division.
     images: [
@@ -115,6 +161,7 @@ export const fallbackHome: HomePageContent = {
       _id: "svc-engineering",
       code: "ED",
       title: "Engineering & Design Consultancy",
+      shortTitle: "Engineering",
       slug: "engineering-design-consultancy",
       shortDescription:
         "Coordinated MEP and IT design — load calculations, BOQs, tender documents and BIM development, issued before work starts on site.",
@@ -172,6 +219,7 @@ export const fallbackHome: HomePageContent = {
       _id: "svc-it",
       code: "IT",
       title: "Information Technology & Automation",
+      shortTitle: "IT & Automation",
       slug: "information-technology-automation-division",
       shortDescription:
         "Structured cabling, networks, security and building automation, integrated with the electrical and mechanical scope.",
@@ -191,6 +239,7 @@ export const fallbackHome: HomePageContent = {
       _id: "svc-maintenance",
       code: "MF",
       title: "Maintenance & Facility Support",
+      shortTitle: "Maintenance",
       slug: "maintenance-facility-support",
       shortDescription:
         "Preventive and corrective programs, annual contracts and compliance testing that keep installed systems performing after handover.",
@@ -214,6 +263,12 @@ export const fallbackHome: HomePageContent = {
    * site's own entries are lorem ipsum on stock solar photography. The section
    * renders whatever metadata is present, so real records enrich it with no
    * code change. See temp/PLAN.md §8, item 2.
+   *
+   * TODO(client): the division tags below are inferred from the project names
+   * and the design canvas, not confirmed by the client. They drive the tags on
+   * every card and the filter on /projects, so they need checking before
+   * launch. Location, year and client are deliberately left unset rather than
+   * guessed — those are claims about specific work.
    */
   projects: [
     {
@@ -222,9 +277,11 @@ export const fallbackHome: HomePageContent = {
       slug: "panels-maintenance",
       category: "Commercial",
       featured: true,
+      divisions: [DIVISION.electrical, DIVISION.maintenance],
       cover: {
-        alt: "",
-        slotHint: "Distribution panels under maintenance — wide crop",
+        src: "/images/switchgear-assembly.webp",
+        alt: "Electricians assembling and wiring switchgear panels in a workshop",
+        aspectRatio: 1,
       },
     },
     {
@@ -232,9 +289,11 @@ export const fallbackHome: HomePageContent = {
       name: "Green Enterprises",
       slug: "green-enterprises",
       category: "Commercial",
+      divisions: [DIVISION.electrical, DIVISION.mechanical],
       cover: {
-        alt: "",
-        slotHint: "Building exterior or plant room — vertical crop",
+        src: "/images/site-team-review.webp",
+        alt: "Site team reviewing drawings in front of a concrete frame",
+        aspectRatio: 1,
       },
     },
     {
@@ -242,9 +301,11 @@ export const fallbackHome: HomePageContent = {
       name: "Reliable Energy",
       slug: "reliable-energy",
       category: "Commercial",
+      divisions: [DIVISION.electrical],
       cover: {
-        alt: "",
-        slotHint: "Power backup, generator or switchgear installation",
+        src: "/images/switchgear-assembly.webp",
+        alt: "Electricians assembling and wiring switchgear panels in a workshop",
+        aspectRatio: 1,
       },
     },
     {
@@ -252,9 +313,11 @@ export const fallbackHome: HomePageContent = {
       name: "Branding Ideas",
       slug: "branding-ideas",
       category: "Commercial",
+      divisions: [DIVISION.it],
       cover: {
-        alt: "",
-        slotHint: "Fit-out or interior systems installation",
+        src: "/images/site-tower-construction.webp",
+        alt: "Tower under construction with a crane above the exposed frame",
+        aspectRatio: 1289 / 860,
       },
     },
   ],
@@ -266,6 +329,11 @@ export const fallbackHome: HomePageContent = {
       title: "Understand",
       description:
         "Requirements, site conditions and constraints are established before anything is priced.",
+      image: {
+        src: "/images/site-team-review.webp",
+        alt: "Site team reviewing drawings in front of a concrete frame",
+        aspectRatio: 1,
+      },
     },
     {
       _id: "prc-2",
@@ -273,6 +341,11 @@ export const fallbackHome: HomePageContent = {
       title: "Design",
       description:
         "Drawings, load calculations and specifications are issued for approval.",
+      image: {
+        src: "/images/divisions/engineering.webp",
+        alt: "Rolled drawings, a floor plan on a clipboard and a pair of dividers",
+        aspectRatio: 1,
+      },
     },
     {
       _id: "prc-3",
@@ -280,6 +353,11 @@ export const fallbackHome: HomePageContent = {
       title: "Build",
       description:
         "Installation, testing and commissioning by in-house crews across every discipline.",
+      image: {
+        src: "/images/site-tower-construction.webp",
+        alt: "Tower under construction with a crane above the exposed frame",
+        aspectRatio: 1289 / 860,
+      },
     },
     {
       _id: "prc-4",
@@ -287,27 +365,164 @@ export const fallbackHome: HomePageContent = {
       title: "Support",
       description:
         "Scheduled maintenance and fault response continue after handover.",
+      image: {
+        src: "/images/divisions/maintenance.webp",
+        alt: "Servicing tools laid out for a scheduled maintenance visit",
+        aspectRatio: 1,
+      },
     },
   ],
 
-  // TODO(client): vector logo assets, and confirmation of the right to display them.
+  /**
+   * TODO(client): these six SVGs are stand-ins, not supplied assets. Four come
+   * from simple-icons (CC0) and two from Wikimedia Commons; the trademarks
+   * belong to their owners either way. Before launch the client needs to
+   * confirm in writing that they may display these marks — manufacturer brand
+   * guidelines usually permit "authorised dealer" use and prohibit anything
+   * implying endorsement — and ideally supply the official assets from their
+   * supplier relationships.
+   *
+   * Gewiss is deliberately left without one: no clean vector was available, and
+   * a traced approximation of somebody's trademark is worse than a wordmark.
+   * The strip renders the name instead, which is also what every partner looked
+   * like before this step.
+   *
+   * `aspectRatio` is each file's own viewBox ratio, so the strip sizes by
+   * height and nothing is stretched.
+   */
   partners: [
-    { _id: "ptn-legrand", name: "Legrand" },
-    { _id: "ptn-schneider", name: "Schneider Electric" },
-    { _id: "ptn-abb", name: "ABB" },
-    { _id: "ptn-siemens", name: "Siemens" },
+    {
+      _id: "ptn-legrand",
+      name: "Legrand",
+      logo: {
+        src: "/images/partners/legrand.svg",
+        alt: "Legrand",
+        aspectRatio: 250 / 62.096,
+      },
+    },
+    {
+      _id: "ptn-schneider",
+      name: "Schneider Electric",
+      logo: {
+        src: "/images/partners/schneider-electric.svg",
+        alt: "Schneider Electric",
+        aspectRatio: 188.74001 / 57,
+      },
+    },
+    {
+      _id: "ptn-abb",
+      name: "ABB",
+      logo: { src: "/images/partners/abb.svg", alt: "ABB", aspectRatio: 88.2 / 35 },
+    },
+    {
+      _id: "ptn-siemens",
+      name: "Siemens",
+      logo: {
+        src: "/images/partners/siemens.svg",
+        alt: "Siemens",
+        aspectRatio: 210 / 50,
+      },
+    },
     { _id: "ptn-gewiss", name: "Gewiss" },
-    { _id: "ptn-daikin", name: "Daikin" },
-    { _id: "ptn-lg", name: "LG" },
+    {
+      _id: "ptn-daikin",
+      name: "Daikin",
+      logo: {
+        src: "/images/partners/daikin.svg",
+        alt: "Daikin",
+        aspectRatio: 300 / 64.616861,
+      },
+    },
+    {
+      _id: "ptn-lg",
+      name: "LG",
+      logo: { src: "/images/partners/lg.svg", alt: "LG", aspectRatio: 113.983 / 17.009 },
+    },
   ],
 
   closingCta: {
     heading: "Have a project in mind?",
     lead: "Send us the scope and we will come back with an engineered answer, not a guess.",
-    cta: { label: "Request a Quote", href: "#contact" },
+    cta: { label: "Request a Quote", href: "/contact" },
     background: {
-      alt: "",
-      slotHint: "Wide building or site photograph for the closing banner",
+      src: "/images/hero-skyline.webp",
+      alt: "City skyline of high-rise towers seen from above at first light",
+      aspectRatio: 16 / 9,
     },
   },
+};
+
+/**
+ * Detail-page content, keyed by slug.
+ *
+ * TODO(client): EVERYTHING BELOW IS PLACEHOLDER AND MUST BE CONFIRMED OR
+ * REPLACED BEFORE LAUNCH. It is transcribed from the design canvas, which was
+ * written to show the layout, not to record what was actually done on this
+ * job. It reads as fact and is not — a prospective client could ask about work
+ * that never happened.
+ *
+ * It is here so the detail layout can be reviewed against real-looking copy,
+ * and it is deliberately limited to the one project the canvas specifies. The
+ * other three render the sparse version, which is what an unfilled record
+ * genuinely looks like. Project detail pages carry `noindex` until this is
+ * resolved — see generateMetadata in src/app/projects/[slug]/page.tsx.
+ */
+export const fallbackProjectDetails: Record<string, Partial<ProjectFull>> = {
+  "panels-maintenance": {
+    status: "Delivered, under maintenance",
+    summary:
+      "Distribution panels inspected, repaired and brought back to specification.",
+    description: [
+      "Mahfouz Contracting surveyed the existing distribution boards, recorded their condition and loads, and set out the corrective works required. Damaged components were replaced, terminations remade and circuits re-labelled, with the installation tested before being returned to service.",
+      "The panels are now covered by a scheduled maintenance programme, with periodic inspection, thermal checks and a record kept of every intervention.",
+    ],
+    scopeOfWorks: [
+      "Condition survey and load recording",
+      "Component replacement and re-termination",
+      "Circuit identification and as-built records",
+      "Testing and return to service",
+      "Scheduled preventive maintenance",
+    ],
+    equipment: [
+      { _id: "ptn-schneider", name: "Schneider Electric" },
+      { _id: "ptn-legrand", name: "Legrand" },
+      { _id: "ptn-abb", name: "ABB" },
+    ],
+  },
+};
+
+/**
+ * The contact page, used until a `contact` document exists.
+ *
+ * The hours are the only figures here taken from the live WordPress site; the
+ * address and phone numbers are the same records as `settings` above, kept in
+ * one place there rather than repeated.
+ *
+ * TODO(client): `recipientEmail` is deliberately unset. Every email address
+ * published on the live site is a theme placeholder (info@mail.com,
+ * info@email.com, info@yoursite.com), so there is no real inbox to point at
+ * yet. Until one is confirmed the form delivers to CONTACT_RECIPIENT_EMAIL
+ * from the environment, which is a developer address for testing only.
+ */
+export const fallbackContact: Contact = {
+  heading: "Request a quote",
+  description:
+    "Send us the scope and we will come back with an engineered answer, not a guess. For tenders and prequalification we can issue project records and references on request.",
+  details: [
+    {
+      label: "Office",
+      value:
+        "Sink 14th Street, Bishop Roland J. Diggs Building, Monrovia, Montserrado County, Liberia",
+    },
+    { label: "Hours", value: "Mon-Fri 06:00-18:00, Sat 06:00-16:00, Sun closed" },
+    { label: "Enquiries", value: "Answered 24/7" },
+  ],
+  formSubjects: [
+    "Electrical",
+    "Mechanical",
+    "IT & Automation",
+    "Engineering & Design Consultancy",
+    "Maintenance & Facility Support",
+    "General enquiry",
+  ],
 };

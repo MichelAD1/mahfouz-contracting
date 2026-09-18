@@ -1,29 +1,46 @@
+import Link from "next/link";
 import { ButtonLink } from "@/components/primitives/Button";
 import { BlueprintPlate } from "@/components/primitives/BlueprintPlate";
 import { SiteImage } from "@/components/primitives/SiteImage";
 import { Parallax } from "@/components/motion/Parallax";
-import { Counter } from "@/components/motion/Counter";
 import { hasImage } from "@/sanity/lib/image";
-import type { Hero as HeroContent, SiteSettings } from "@/sanity/lib/types";
+import type {
+  Hero as HeroContent,
+  Service,
+  SiteSettings,
+} from "@/sanity/lib/types";
 
 /**
  * The hero is a server component: its entrance is CSS, so nothing above the
- * fold waits on JavaScript. Only the background parallax and the counters are
- * client islands.
+ * fold waits on JavaScript. Only the background parallax is a client island.
  */
 export function Hero({
   hero,
   settings,
+  services,
 }: {
   hero: HeroContent;
   settings: SiteSettings;
+  services: Service[];
 }) {
   const showPhoto = hasImage(hero.background);
 
+  /**
+   * A full viewport, with no cap.
+   *
+   * `svh` rather than `vh` so a mobile browser's expanded address bar cannot
+   * push the sheet's footer line under the fold — `vh` measures the viewport as
+   * if that bar were hidden, which it is not on first load.
+   *
+   * The section is `justify-end`, so the content sits on the bottom edge and
+   * the extra height opens above the headline. That is why there is no cap: any
+   * ceiling shows a band of the next section on a tall screen, and the point
+   * here is that the hero holds the whole first screen.
+   */
   return (
-    <section id="top" className="relative isolate flex min-h-[min(94svh,54rem)] flex-col justify-end overflow-hidden bg-ink">
+    <section id="top" className="relative isolate flex min-h-svh flex-col justify-end overflow-hidden bg-ink">
       {/* Background layer */}
-      <Parallax className="absolute inset-0 -z-10" distance={60}>
+      <Parallax className="absolute inset-0 -z-10" distance={78}>
         {showPhoto ? (
           <>
             <SiteImage
@@ -47,23 +64,39 @@ export function Hero({
         )}
       </Parallax>
 
-      <div className="shell pb-[clamp(2.5rem,4vw,4rem)] pt-[clamp(9rem,16vw,13rem)]">
+      {/*
+       * Tightened so the whole hero — headline, lead, action and the metrics
+       * below — lands inside a 1080p screen. The top padding was 13rem sitting
+       * under an 80px header, and because it is clamped the gap stayed put as
+       * the viewport grew, which is why the page looked better at 80% zoom.
+       *
+       * This is the home page only. The section rhythm elsewhere is untouched:
+       * the air around the type is doing real work on the inner pages, and
+       * "fits on one screen" only matters on the screen everybody sees.
+       */}
+      <div className="shell pb-[clamp(2rem,3vw,3rem)] pt-[clamp(6.5rem,10vw,8.5rem)]">
         <h1 className="display t-hero max-w-[18ch] text-paper-bright">
           {hero.headingLines.map((line, index) => (
             <span
               key={line}
               className="block animate-rise"
-              style={{ animationDelay: `${0.08 + index * 0.11}s` }}
+              style={{ animationDelay: `${0.12 + index * 0.19}s` }}
             >
               {line}
             </span>
           ))}
         </h1>
 
-        <div className="mt-[clamp(2rem,4vw,3.25rem)] flex flex-col gap-9 lg:grid lg:grid-cols-[minmax(0,34rem)_auto] lg:items-end lg:justify-start lg:gap-x-14">
+        {/*
+         * The lead sits left, the call to action hard right. `justify-between`
+         * pushes the two grid columns to opposite edges of the shell, which is
+         * what gives the band its width — packed together at the left they read
+         * as one paragraph with a button stuck to it.
+         */}
+        <div className="mt-[clamp(1.75rem,3vw,2.5rem)] flex flex-col gap-7 lg:grid lg:grid-cols-[minmax(0,34rem)_auto] lg:items-end lg:justify-between lg:gap-x-14">
           <p
             className="max-w-[54ch] t-lead animate-rise text-paper-bright/75"
-            style={{ animationDelay: `${0.08 + hero.headingLines.length * 0.11}s` }}
+            style={{ animationDelay: `${0.12 + hero.headingLines.length * 0.19}s` }}
           >
             {hero.lead}
           </p>
@@ -71,17 +104,13 @@ export function Hero({
           <div
             className="flex flex-col gap-3 animate-rise sm:flex-row sm:flex-wrap"
             style={{
-              animationDelay: `${0.16 + hero.headingLines.length * 0.11}s`,
+              animationDelay: `${0.3 + hero.headingLines.length * 0.19}s`,
             }}
           >
-            <ButtonLink
-              href={hero.primaryCta.href}
-              tone="onInk"
-              variant="solid"
-              className="justify-center sm:justify-start"
-            >
-              {hero.primaryCta.label}
-            </ButtonLink>
+            {/*
+             * One call to action only. The quote request is already the
+             * closing banner's single job, and the header carries it too.
+             */}
             <ButtonLink
               href={hero.secondaryCta.href}
               tone="onInk"
@@ -95,72 +124,87 @@ export function Hero({
         </div>
       </div>
 
-      <DataStrip metrics={hero.metrics} settings={settings} />
+      <DivisionStrip services={services} settings={settings} />
     </section>
   );
 }
 
 /**
- * Replaces the four vague noun-phrases that occupied this space in the original
- * design. Every figure here is checkable against the company's own material —
- * big type has to be earned by the content under it.
+ * The five divisions, named rather than counted.
+ *
+ * This replaced a four-figure metrics band — 5 divisions, 2 countries, 6
+ * standards, 1 point of responsibility. Big numbers under a hero is the most
+ * worn pattern on the web, and only one of those four earned its numeral:
+ * "2 countries" undersells, "6 standards" buries the list that was the actual
+ * asset, and "1 point of responsibility" was a slogan wearing a number.
+ *
+ * Naming the divisions does more work than counting them. It is the company's
+ * real differentiator, it is scannable in a second, and every entry is a way
+ * into the page that explains it — so the band under the fold has a job rather
+ * than a statistic.
  */
-function DataStrip({
-  metrics,
+function DivisionStrip({
+  services,
   settings,
 }: {
-  metrics: HeroContent["metrics"];
+  services: Service[];
   settings: SiteSettings;
 }) {
-  if (metrics.length === 0) return null;
+  if (services.length === 0) return null;
 
   return (
     <div
-      className="animate-rise border-t border-rule-dark"
-      style={{ animationDelay: "0.62s" }}
+      className="animate-rise border-t border-rule-dark bg-ink/90"
+      style={{ animationDelay: "1.05s" }}
     >
       <div className="shell">
+        <p className="pt-4 t-meta text-steel-light lg:pt-5">
+          Five divisions, one point of responsibility
+        </p>
+
         {/*
          * Rules are placed by nth-child rather than by index, because the
-         * column count changes at the breakpoint and only CSS knows it:
-         * two columns with a row rule on mobile, four columns with column
-         * rules from lg up.
+         * column count changes at the breakpoint and only CSS knows it.
          */}
-        <dl
-          className="grid grid-cols-2 lg:grid-cols-4
-            [&>div]:flex [&>div]:flex-col [&>div]:gap-2 [&>div]:py-7 [&>div]:pr-6 lg:[&>div]:py-9
-            [&>div:nth-child(n+3)]:border-t [&>div:nth-child(n+3)]:border-rule-dark
-            lg:[&>div:nth-child(n+3)]:border-t-0
-            [&>div:nth-child(even)]:border-l [&>div:nth-child(even)]:border-rule-dark [&>div:nth-child(even)]:pl-6
-            lg:[&>div:not(:first-child)]:border-l lg:[&>div:not(:first-child)]:border-rule-dark lg:[&>div:not(:first-child)]:pl-6"
+        <ul
+          className="grid grid-cols-2 pb-4 lg:grid-cols-5 lg:pb-5
+            [&>li]:py-3.5 [&>li]:pr-5
+            [&>li:nth-child(n+3)]:border-t [&>li:nth-child(n+3)]:border-rule-dark
+            lg:[&>li:nth-child(n+3)]:border-t-0
+            [&>li:nth-child(even)]:border-l [&>li:nth-child(even)]:border-rule-dark [&>li:nth-child(even)]:pl-5
+            lg:[&>li:not(:first-child)]:border-l lg:[&>li:not(:first-child)]:border-rule-dark lg:[&>li:not(:first-child)]:pl-5"
         >
-          {metrics.map((metric) => (
-            <div key={metric.label}>
-              <dd className="t-figure text-[clamp(2.25rem,4vw,3.5rem)] text-paper-bright">
-                {metric.prefix}
-                {typeof metric.countTo === "number" ? (
-                  <Counter to={metric.countTo} display={metric.figure} />
-                ) : (
-                  metric.figure
-                )}
-                {metric.suffix}
-              </dd>
-              <dt className="display-narrow text-[0.9375rem] font-medium text-paper-bright/85">
-                {metric.label}
-              </dt>
-              {metric.note ? (
-                <p className="max-w-[28ch] text-[0.8125rem] leading-relaxed text-steel-light">
-                  {metric.note}
-                </p>
-              ) : null}
-            </div>
+          {services.map((service) => (
+            <li key={service._id}>
+              <Link
+                href={`/services#${service.slug}`}
+                className="group flex items-baseline gap-2.5"
+              >
+                <span className="t-meta shrink-0 text-copper-bright">
+                  {service.code}
+                </span>
+                {/*
+                 * The short name, so every division sits on one line. At full
+                 * length "Engineering & Design Consultancy" wraps and the row
+                 * grows by a line it does not need — which is what was pushing
+                 * the footer off a 1080p screen.
+                 */}
+                <span className="display-narrow text-[clamp(0.9375rem,1.1vw,1.0625rem)] text-paper-bright transition-colors duration-300 group-hover:text-copper-bright">
+                  {service.shortTitle ?? service.title}
+                </span>
+              </Link>
+            </li>
           ))}
-        </dl>
+        </ul>
       </div>
 
       {/* Title block: the sheet's own footer line. */}
-      <div className="shell flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-t border-rule-dark py-4">
-        <span className="t-meta text-steel-light">{settings.footerNote}</span>
+      <div className="shell flex flex-wrap items-center justify-between gap-x-8 gap-y-1.5 border-t border-rule-dark py-3">
+        <span className="t-meta text-steel-light">
+          {settings.standards && settings.standards.length > 0
+            ? `Worked to ${settings.standards.join(" · ")}`
+            : settings.footerNote}
+        </span>
         <span className="t-meta text-steel-light">
           {settings.address.lines.slice(-2).join(", ")}
         </span>

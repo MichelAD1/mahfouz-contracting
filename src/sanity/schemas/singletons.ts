@@ -38,6 +38,15 @@ export const siteSettings = defineType({
     }),
     defineField({ name: "tagline", type: "string", group: "identity" }),
     defineField({
+      name: "standards",
+      title: "Standards worked to",
+      type: "array",
+      of: [{ type: "string" }],
+      group: "identity",
+      description:
+        "e.g. IEC, NEC, BS, NFPA. Shown as the line under the home page hero — credentials for the people who evaluate contractors.",
+    }),
+    defineField({
       name: "phones",
       type: "array",
       group: "contact",

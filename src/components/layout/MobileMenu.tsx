@@ -3,7 +3,9 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
+import { usePathname } from "next/navigation";
 import { EASE } from "@/components/motion/ease";
+import { isActivePath } from "@/lib/nav";
 import type { NavItem, SiteSettings } from "@/sanity/lib/types";
 import { telHref } from "@/lib/format";
 
@@ -15,6 +17,7 @@ type Props = {
 };
 
 export function MobileMenu({ open, onClose, nav, settings }: Props) {
+  const pathname = usePathname();
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -96,17 +99,30 @@ export function MobileMenu({ open, onClose, nav, settings }: Props) {
 
           <nav aria-label="Main" className="mt-12">
             <ul className="border-t border-rule-dark">
-              {nav.map((item) => (
-                <li key={item.href} className="border-b border-rule-dark">
-                  <Link
-                    href={item.href}
-                    onClick={onClose}
-                    className="flex items-baseline gap-4 py-5 display text-[clamp(1.9rem,9vw,2.75rem)] text-paper-bright transition-colors duration-300 hover:text-copper-bright"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
+              {nav.map((item) => {
+                const active = isActivePath(pathname, item.href);
+
+                return (
+                  <li key={item.href} className="border-b border-rule-dark">
+                    <Link
+                      href={item.href}
+                      onClick={onClose}
+                      aria-current={active ? "page" : undefined}
+                      className={`flex items-baseline gap-4 py-5 display text-[clamp(1.9rem,9vw,2.75rem)] transition-colors duration-300 hover:text-copper-bright ${
+                        active ? "text-copper-bright" : "text-paper-bright"
+                      }`}
+                    >
+                      {item.label}
+                      {active ? (
+                        <span
+                          aria-hidden="true"
+                          className="h-1.5 w-1.5 shrink-0 self-center bg-copper-bright"
+                        />
+                      ) : null}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
 
@@ -124,7 +140,7 @@ export function MobileMenu({ open, onClose, nav, settings }: Props) {
               ))}
             </ul>
             <Link
-              href="#contact"
+              href="/contact"
               onClick={onClose}
               className="mt-6 flex w-full items-center justify-center bg-paper-bright px-6 py-5 display-narrow text-[0.8125rem] font-semibold uppercase tracking-[0.08em] text-ink transition-colors duration-300 hover:bg-copper hover:text-paper-bright"
             >

@@ -34,6 +34,14 @@
 
   /* Motion — one easing so the whole site moves as one system */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  /*
+   * Entrances need a flatter curve than hovers do. ease-out-expo covers 75% of
+   * its distance in the first 20% of its duration, so a 0.55s reveal on it
+   * looks 90% finished after 0.18s — the reason these read as instant whatever
+   * the duration said. This is ease-out-cubic: 49% at t=0.2, 87% at t=0.5, so
+   * the time on the clock is the time you actually see.
+   */
+  --ease-reveal: cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 @layer base {
@@ -140,8 +148,12 @@
 
 @utility t-hero {
   /* The lower bound is set so the longest headline line still fits on one
-     line at 390px — at 2.625rem it widowed the last word. */
-  font-size: clamp(2.3rem, 7.6vw, 7rem);
+     line at 390px — at 2.625rem it widowed the last word.
+
+     The cap came down from 5rem so the hero's data strip lands inside a 1080p
+     screen. Used by the home headline and nothing else, so this is a home-page
+     change despite living in the global scale. */
+  font-size: clamp(2rem, 5.2vw, 4.25rem);
 }
 
 @utility t-plate {
@@ -230,7 +242,7 @@
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(1.5rem);
+    transform: translateY(2.5rem);
   }
   to {
     opacity: 1;
@@ -248,11 +260,11 @@
 }
 
 @utility animate-rise {
-  animation: rise 0.9s var(--ease-out-expo) both;
+  animation: rise 1.35s var(--ease-reveal) both;
 }
 
 @utility animate-wipe-up {
-  animation: wipe-up 1s var(--ease-out-expo) both;
+  animation: wipe-up 1.6s var(--ease-reveal) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -266,47 +278,47 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   Scroll reveals.
+   The partner marquee.
 
-   The hidden state is scoped to `.js`, which an inline script in the document
-   head sets before first paint. Without JavaScript — or if hydration fails —
-   these selectors never match and the page is simply visible. Transform and
-   opacity only, so nothing here can shift layout.
+   The track holds the logos twice and travels exactly -50%, so the moment the
+   first copy leaves the frame the second is sitting where it started and the
+   loop has no seam. Distance is a percentage of the track, so adding a partner
+   changes how far it travels, not how it looks.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-.js [data-reveal] {
-  will-change: opacity, transform;
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
-.js [data-reveal="rise"] {
-  opacity: 0;
-  transform: translateY(var(--reveal-y, 14px));
+@utility animate-marquee {
+  animation: marquee var(--marquee-duration, 42s) linear infinite;
 }
 
-.js [data-reveal="wipe"] {
-  clip-path: inset(0 0 100% 0);
-}
-
-.js [data-reveal].is-revealed {
-  opacity: 1;
-  clip-path: inset(0 0 0 0);
-  transform: none;
-  transition:
-    opacity 0.55s var(--ease-out-expo),
-    transform 0.55s var(--ease-out-expo),
-    clip-path 0.9s var(--ease-out-expo);
-  transition-delay: var(--reveal-delay, 0s);
-  will-change: auto;
+/* Pausing on focus-within is the keyboard equivalent of pausing on hover:
+   without it, tabbing to a logo scrolls the thing you are trying to reach. */
+.marquee:hover .animate-marquee,
+.marquee:focus-within .animate-marquee {
+  animation-play-state: paused;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .js [data-reveal],
-  .js [data-reveal="rise"],
-  .js [data-reveal="wipe"] {
-    opacity: 1;
-    clip-path: none;
-    transform: none;
-    transition: none;
-    will-change: auto;
+  /* Held still, not slowed. A slow crawl is still motion to someone who asked
+     for none, and the whole strip is legible without it. */
+  .animate-marquee {
+    animation: none;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Scroll reveals now live in src/components/motion/Reveal.tsx.
+
+   They are scrubbed by scroll position rather than triggered once, so they run
+   backwards when the visitor scrolls back up — which a CSS transition behind a
+   one-shot class could not do. Nothing here hides content any more, so the
+   `.js` class this block relied on is gone from the document head too.
+   ═══════════════════════════════════════════════════════════════════════════ */

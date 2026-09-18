@@ -15,6 +15,16 @@ import type { Service } from "@/sanity/lib/types";
  * own: one division open at a time, its detail in the row, its photograph in
  * the panel beside it.
  */
+/**
+ * The sticky panel sizes itself against the viewport, not against its own
+ * column width. A fixed `aspect-3/4` made it 566px tall; anchored at `top-28`
+ * in a 900px viewport that left a 222px dead band under it, and at the end of
+ * the sticky range it dragged up under the header while the list beside it was
+ * still fully in view.
+ */
+const PANEL_HEIGHT = "min(30rem, calc(100svh - 12rem))";
+const HEADER_HEIGHT = "5rem";
+
 export function Capabilities({ services }: { services: Service[] }) {
   const [openIndex, setOpenIndex] = useState(0);
   const baseId = useId();
@@ -101,7 +111,7 @@ export function Capabilities({ services }: { services: Service[] }) {
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.4, ease: EASE }}
+                      transition={{ duration: 0.62, ease: EASE }}
                       className="overflow-hidden"
                     >
                       <div className="pb-7 pl-0 sm:pl-[calc(2.5rem+clamp(0.75rem,2vw,2rem))]">
@@ -111,7 +121,6 @@ export function Capabilities({ services }: { services: Service[] }) {
                             image={service.image}
                             sizes="100vw"
                             maxWidth={900}
-                            duotone
                           />
                         </div>
 
@@ -145,7 +154,12 @@ export function Capabilities({ services }: { services: Service[] }) {
        */}
       <div
         aria-hidden="true"
-        className="sticky top-28 hidden aspect-3/4 w-full overflow-hidden bg-paper-deep lg:block"
+        className="sticky hidden w-full overflow-hidden bg-paper-deep lg:block"
+        style={{
+          height: PANEL_HEIGHT,
+          // Centred in whatever the header leaves, at any viewport height.
+          top: `calc(${HEADER_HEIGHT} + (100svh - ${HEADER_HEIGHT} - ${PANEL_HEIGHT}) / 2)`,
+        }}
       >
         {services.map((service, index) => (
           <motion.div
@@ -153,13 +167,12 @@ export function Capabilities({ services }: { services: Service[] }) {
             className="absolute inset-0"
             initial={false}
             animate={{ opacity: index === panelIndex ? 1 : 0 }}
-            transition={{ duration: 0.5, ease: EASE }}
+            transition={{ duration: 0.8, ease: EASE }}
           >
             <SiteImage
               image={service.image}
               sizes="(min-width: 1024px) 34vw, 0px"
               maxWidth={1000}
-              duotone
             />
           </motion.div>
         ))}

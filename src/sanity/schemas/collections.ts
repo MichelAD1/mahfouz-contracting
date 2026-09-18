@@ -28,6 +28,13 @@ export const service = defineType({
       validation: (rule) => rule.max(3),
     }),
     defineField({
+      name: "shortTitle",
+      title: "Short name",
+      type: "string",
+      description:
+        "Used on project tags and the projects filter, where the full title is too long — e.g. Maintenance for Maintenance & Facility Support. Falls back to the title.",
+    }),
+    defineField({
       name: "slug",
       type: "slug",
       options: { source: "title", maxLength: 96 },
@@ -43,8 +50,9 @@ export const service = defineType({
     defineField({
       name: "fullDescription",
       type: "array",
-      of: [{ type: "block" }],
-      description: "The service's own page.",
+      of: [{ type: "text", rows: 4 }],
+      description:
+        "One entry per paragraph, shown on the services page. Falls back to the short description when empty.",
     }),
     defineField({
       name: "features",
@@ -99,9 +107,21 @@ export const project = defineType({
     }),
     defineField({
       name: "description",
+      title: "Body",
       type: "array",
-      of: [{ type: "block" }],
+      of: [{ type: "text", rows: 4 }],
       group: "main",
+      description:
+        "One entry per paragraph. Plain text, matching the About section, so no rich-text renderer is needed.",
+    }),
+    defineField({
+      name: "scopeOfWorks",
+      title: "Scope of works",
+      type: "array",
+      of: [{ type: "string" }],
+      group: "main",
+      description:
+        "One entry per line of work, in the order it was carried out. Numbered automatically on the project page.",
     }),
     defineField({
       name: "category",
@@ -126,11 +146,29 @@ export const project = defineType({
     }),
     defineField({ name: "client", type: "string", group: "meta" }),
     defineField({
+      name: "status",
+      type: "string",
+      group: "meta",
+      description:
+        "Where the work stands, e.g. Delivered, or Delivered and under maintenance.",
+    }),
+    defineField({
       name: "services",
       title: "Divisions involved",
       type: "array",
       group: "meta",
       of: [{ type: "reference", to: [{ type: "service" }] }],
+      description:
+        "Drives the tags on each project card and the filter on the projects index. A project with no divisions cannot be filtered to.",
+    }),
+    defineField({
+      name: "equipment",
+      title: "Equipment specified",
+      type: "array",
+      group: "meta",
+      of: [{ type: "reference", to: [{ type: "partner" }] }],
+      description:
+        "The manufacturers whose equipment was specified. These are the same partner documents as the logo strip, so a brand is described once.",
     }),
     defineField({
       name: "details",
@@ -205,12 +243,18 @@ export const process = defineType({
       rows: 3,
       validation: (rule) => rule.required(),
     }),
+    defineField({
+      name: "image",
+      type: "imageWithAlt",
+      description:
+        "Portrait crop. The four stage images step down the page, so tall images sit best.",
+    }),
     orderField,
   ],
   orderings: [
     { name: "manual", title: "Manual order", by: [{ field: "order", direction: "asc" }] },
   ],
-  preview: { select: { title: "title", subtitle: "step" } },
+  preview: { select: { title: "title", subtitle: "step", media: "image" } },
 });
 
 export const partner = defineType({

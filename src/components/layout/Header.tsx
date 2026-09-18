@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { MobileMenu } from "./MobileMenu";
+import { isActivePath } from "@/lib/nav";
 import type { SiteSettings } from "@/sanity/lib/types";
 
 /**
@@ -14,6 +16,7 @@ import type { SiteSettings } from "@/sanity/lib/types";
 export function Header({ settings }: { settings: SiteSettings }) {
   const [solid, setSolid] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const onScroll = () => setSolid(window.scrollY > 60);
@@ -24,6 +27,7 @@ export function Header({ settings }: { settings: SiteSettings }) {
 
   const ink = solid ? "text-ink" : "text-paper-bright";
   const hover = solid ? "hover:text-copper" : "hover:text-copper-bright";
+  const accent = solid ? "text-copper" : "text-copper-bright";
 
   return (
     <>
@@ -49,22 +53,30 @@ export function Header({ settings }: { settings: SiteSettings }) {
 
           <nav aria-label="Main" className="hidden lg:block">
             <ul className="flex items-center gap-9">
-              {settings.nav.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={`display-narrow text-[0.875rem] font-medium transition-colors duration-300 ${ink} ${hover}`}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
+              {settings.nav.map((item) => {
+                const active = isActivePath(pathname, item.href);
+
+                return (
+                  <li key={item.href}>
+                    {/* Colour alone marks the current page — no underline. */}
+                    <Link
+                      href={item.href}
+                      aria-current={active ? "page" : undefined}
+                      className={`block py-1 display-narrow text-[0.875rem] transition-colors duration-300 ${
+                        active ? `${accent} font-semibold` : `${ink} ${hover} font-medium`
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
 
           <div className="flex items-center gap-3">
             <Link
-              href="#contact"
+              href="/contact"
               className={`hidden items-center px-6 py-3.5 display-narrow text-[0.75rem] font-semibold uppercase tracking-[0.08em] transition-colors duration-300 lg:inline-flex ${
                 solid
                   ? "bg-ink text-paper-bright hover:bg-copper"

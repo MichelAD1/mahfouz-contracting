@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { mailHref, telHref } from "@/lib/format";
-import type { Service, SiteSettings } from "@/sanity/lib/types";
+import type { NavService, SiteSettings } from "@/sanity/lib/types";
 
 /** Set as a drawing title block: labelled fields, hairlines, no ornament. */
 export function Footer({
@@ -8,7 +8,7 @@ export function Footer({
   services,
 }: {
   settings: SiteSettings;
-  services: Service[];
+  services: NavService[];
 }) {
   const year = new Date().getFullYear();
 
@@ -47,14 +47,16 @@ export function Footer({
           </nav>
 
           <div>
-            <h2 className="t-meta text-steel">Divisions</h2>
+            <h2 className="t-meta text-steel">Services</h2>
             <ul className="mt-5 flex flex-col gap-2.5">
               {services.map((service) => (
-                <li
-                  key={service._id}
-                  className="text-[0.9375rem] text-paper-bright/75"
-                >
-                  {service.title}
+                <li key={service._id}>
+                  <Link
+                    href={`/services#${service.slug}`}
+                    className="text-[0.9375rem] text-paper-bright/85 transition-colors duration-300 hover:text-copper-bright"
+                  >
+                    {service.title}
+                  </Link>
                 </li>
               ))}
             </ul>
