@@ -60,7 +60,13 @@ export function Hero({
           ))}
         </h1>
 
-        <div className="mt-[clamp(2rem,4vw,3.25rem)] flex flex-col gap-9 lg:grid lg:grid-cols-[minmax(0,34rem)_auto] lg:items-end lg:justify-start lg:gap-x-14">
+        {/*
+         * The lead sits left, the call to action hard right. `justify-between`
+         * pushes the two grid columns to opposite edges of the shell, which is
+         * what gives the band its width — packed together at the left they read
+         * as one paragraph with a button stuck to it.
+         */}
+        <div className="mt-[clamp(2rem,4vw,3.25rem)] flex flex-col gap-9 lg:grid lg:grid-cols-[minmax(0,34rem)_auto] lg:items-end lg:justify-between lg:gap-x-14">
           <p
             className="max-w-[54ch] t-lead animate-rise text-paper-bright/75"
             style={{ animationDelay: `${0.12 + hero.headingLines.length * 0.19}s` }}
