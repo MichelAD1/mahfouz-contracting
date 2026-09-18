@@ -363,15 +363,71 @@ export const fallbackHome: HomePageContent = {
     },
   ],
 
-  // TODO(client): vector logo assets, and confirmation of the right to display them.
+  /**
+   * TODO(client): these six SVGs are stand-ins, not supplied assets. Four come
+   * from simple-icons (CC0) and two from Wikimedia Commons; the trademarks
+   * belong to their owners either way. Before launch the client needs to
+   * confirm in writing that they may display these marks — manufacturer brand
+   * guidelines usually permit "authorised dealer" use and prohibit anything
+   * implying endorsement — and ideally supply the official assets from their
+   * supplier relationships.
+   *
+   * Gewiss is deliberately left without one: no clean vector was available, and
+   * a traced approximation of somebody's trademark is worse than a wordmark.
+   * The strip renders the name instead, which is also what every partner looked
+   * like before this step.
+   *
+   * `aspectRatio` is each file's own viewBox ratio, so the strip sizes by
+   * height and nothing is stretched.
+   */
   partners: [
-    { _id: "ptn-legrand", name: "Legrand" },
-    { _id: "ptn-schneider", name: "Schneider Electric" },
-    { _id: "ptn-abb", name: "ABB" },
-    { _id: "ptn-siemens", name: "Siemens" },
+    {
+      _id: "ptn-legrand",
+      name: "Legrand",
+      logo: {
+        src: "/images/partners/legrand.svg",
+        alt: "Legrand",
+        aspectRatio: 250 / 62.096,
+      },
+    },
+    {
+      _id: "ptn-schneider",
+      name: "Schneider Electric",
+      logo: {
+        src: "/images/partners/schneider-electric.svg",
+        alt: "Schneider Electric",
+        aspectRatio: 1,
+      },
+    },
+    {
+      _id: "ptn-abb",
+      name: "ABB",
+      logo: { src: "/images/partners/abb.svg", alt: "ABB", aspectRatio: 24 / 9.4 },
+    },
+    {
+      _id: "ptn-siemens",
+      name: "Siemens",
+      logo: {
+        src: "/images/partners/siemens.svg",
+        alt: "Siemens",
+        aspectRatio: 24 / 4.2,
+      },
+    },
     { _id: "ptn-gewiss", name: "Gewiss" },
-    { _id: "ptn-daikin", name: "Daikin" },
-    { _id: "ptn-lg", name: "LG" },
+    {
+      _id: "ptn-daikin",
+      name: "Daikin",
+      logo: {
+        src: "/images/partners/daikin.svg",
+        alt: "Daikin",
+        aspectRatio: 300 / 64.616861,
+      },
+    },
+    {
+      _id: "ptn-lg",
+      name: "LG",
+      logo: { src: "/images/partners/lg.svg", alt: "LG", aspectRatio: 23.6 / 11 },
+    },
   ],
 
   closingCta: {

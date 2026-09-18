@@ -1,11 +1,29 @@
 # Mahfouz Contracting — remaining work to launch
 
-**Status:** Step 4 of 7 complete — awaiting go-ahead for Step 5
+**Status:** Step 5 of 7 complete — awaiting go-ahead for Step 6
 
 Supersedes the previous draft. Companion to `temp/PLAN.md`, which covers the
 original build; this file is only what is left.
 
 ---
+
+## Deliverable running alongside the steps
+
+**`docs/CLIENT-SETUP.md` — everything the client has to create themselves**,
+written as they go and finished in Step 7. Accounts, who owns them, what each
+costs, what I need from each one, and what breaks if it is skipped. Accumulating
+so far:
+
+| What | Why | Raised in |
+|---|---|---|
+| **Resend** account + API key | Enquiry form delivery; the domain must be verified there or mail only reaches the account owner | Step 4 |
+| **Sanity** account + organisation | Owns the CMS and all content; `wwicg618` is currently under a personal account and must transfer | Steps 1, 7 |
+| **Vercel or Netlify** account | Hosting. Vercel's free tier is personal/non-commercial only, so a company site wants Pro (~$20/mo); Netlify's free tier permits commercial use | Step 7 |
+| **Domain control** | DNS for the host, and the Resend sending records | Steps 4, 6 |
+| **Google Search Console** | Verify the domain, submit the sitemap | Step 6 |
+| **Google Business Profile** | For a contractor with a physical address this outranks most on-page work | Step 6 |
+| **Written confirmation on partner logos** | Six marks are currently third-party stopgaps; official assets wanted, permission required either way | Step 5 |
+| **A real enquiry inbox address** | Every email on the live site is a theme placeholder | Step 4 |
 
 ## Steps
 
@@ -13,7 +31,7 @@ original build; this file is only what is left.
 - [x] Step 2: Convert the single page into a multi-page site (nav, `/about`, `/services`, shared layout)
 - [x] Step 3: Projects — home section, `/projects` index, `/projects/[slug]` detail
 - [x] Step 4: Contact page with a working enquiry form
-- [ ] Step 5: Partner logo bar with an auto-scrolling marquee
+- [x] Step 5: Partner logo bar with an auto-scrolling marquee
 - [ ] Step 6: SEO — canonicals, sitemap, robots, OG image, structured data, redirects
 - [ ] Step 7: Seed the dataset, then hand Sanity over to the client
 
@@ -447,16 +465,64 @@ live WordPress site is a theme placeholder (`info@mail.com`, `info@email.com`,
 
 ## Step 5 — Partner logo bar with auto-scrolling marquee
 
-- [ ] Source proper **SVG** logos for all seven from the manufacturers' own
-      brand resources
-- [ ] Add to `public/images/partners/`, reference from the fallback; the Sanity
-      `partner.logo` field already exists, so Step 7 uploads the same assets
-- [ ] Rebuild `Partners.tsx` as a marquee: duplicate the track, translate -50%
-      for a seamless loop, `aria-hidden` on the duplicate so a screen reader
-      does not read every brand twice
-- [ ] Pause on hover **and** `focus-within`
-- [ ] Honour `prefers-reduced-motion` — hold it static, do not merely slow it
-- [ ] Keep the greyscale treatment; colour on hover optional
+**Done.** `npm run lint` exit 0, `npx tsc --noEmit` exit 0, `npm run build`
+exit 0.
+
+- [x] SVG logos for **six of seven**, in `public/images/partners/`
+- [x] Referenced from the fallback; the Sanity `partner.logo` field already
+      exists, so Step 7 uploads the same assets and nothing in code changes
+- [x] `Partners.tsx` rebuilt as a marquee: the track rendered twice and
+      translated -50%, so the loop has no seam; `aria-hidden` on the duplicate
+      so a screen reader does not read every brand a second time
+- [x] Pauses on hover **and** `focus-within` — without the latter, tabbing to a
+      logo scrolls the thing you are trying to reach
+- [x] `prefers-reduced-motion` holds it **static**, not slowed
+- [x] Edges masked, so logos fade in and out rather than being clipped
+- [x] Duration scales with the number of logos, so adding a partner changes how
+      far the track travels, not how fast it reads
+
+### Where the logos came from, and why that matters
+
+Four are from **simple-icons** (CC0), two from **Wikimedia Commons**. The
+trademarks belong to their owners either way, so this is a stopgap: **the
+client needs to confirm in writing that they may display these marks**, and
+ideally supply official assets from their supplier relationships.
+
+**Gewiss has no logo.** No clean vector was available, and tracing somebody's
+trademark by hand is worse than not having it. The strip renders the name in
+the display face instead, which is what all seven looked like before this step.
+
+### Two problems the assets had, and what was done
+
+**They were mismatched in kind.** Legrand and Daikin are full-colour wordmarks
+with inline `fill` styles; the simple-icons four are monochrome glyphs. A row
+of mismatched brand colours at a fraction of their intended size is exactly
+what makes a partner bar look like a stock template. Every logo is therefore
+flattened to one ink silhouette with `brightness(0)`, and opacity carries the
+tone — so the strip holds together whatever an editor uploads next.
+
+**They were mismatched in size, badly.** I measured the ink bounds of each file
+rather than trusting the viewBox, and the numbers were damning:
+
+| | Ink fills this much of its viewBox height |
+|---|---|
+| Siemens | **17%** |
+| ABB | 38% |
+| LG | 44% |
+| Schneider, Legrand, Daikin | ~100% |
+
+At a 26px row height the Siemens wordmark would have rendered **4px tall** —
+illegible. Each viewBox is now cropped to its ink, so all six fill 94–107% of
+their box.
+
+Then the row is optically balanced: a square mark at the same height as a long
+wordmark reads as much smaller, because the eye compares area rather than
+height. Squarer marks get up to 1.5× the height, so Schneider's square glyph
+renders at 39px beside Siemens at 26px. That is how logo strips are set, and it
+matters here because the six assets are a mix of glyphs and wordmarks.
+
+**Still worth saying:** a consistent official set would beat all of this. The
+component does not care which arrives.
 
 **Why vectors, concretely.** The seven files in `~/Downloads` are not usable
 as-is: only `abb.png` has transparency, the other six are opaque white

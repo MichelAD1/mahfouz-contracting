@@ -274,6 +274,43 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   The partner marquee.
+
+   The track holds the logos twice and travels exactly -50%, so the moment the
+   first copy leaves the frame the second is sitting where it started and the
+   loop has no seam. Distance is a percentage of the track, so adding a partner
+   changes how far it travels, not how it looks.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@utility animate-marquee {
+  animation: marquee var(--marquee-duration, 42s) linear infinite;
+}
+
+/* Pausing on focus-within is the keyboard equivalent of pausing on hover:
+   without it, tabbing to a logo scrolls the thing you are trying to reach. */
+.marquee:hover .animate-marquee,
+.marquee:focus-within .animate-marquee {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Held still, not slowed. A slow crawl is still motion to someone who asked
+     for none, and the whole strip is legible without it. */
+  .animate-marquee {
+    animation: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    Scroll reveals now live in src/components/motion/Reveal.tsx.
 
    They are scrubbed by scroll position rather than triggered once, so they run
