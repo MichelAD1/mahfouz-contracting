@@ -1,6 +1,6 @@
 # Mahfouz Contracting — remaining work to launch
 
-**Status:** Step 2 of 7 complete — awaiting go-ahead for Step 3
+**Status:** Step 3 of 7 complete — awaiting go-ahead for Step 4
 
 Supersedes the previous draft. Companion to `temp/PLAN.md`, which covers the
 original build; this file is only what is left.
@@ -11,7 +11,7 @@ original build; this file is only what is left.
 
 - [x] Step 1: Sanity foundation — connect `wwicg618`, expand the project schema, finish the read layer
 - [x] Step 2: Convert the single page into a multi-page site (nav, `/about`, `/services`, shared layout)
-- [ ] Step 3: Projects — home section, `/projects` index, `/projects/[slug]` detail
+- [x] Step 3: Projects — home section, `/projects` index, `/projects/[slug]` detail
 - [ ] Step 4: Contact page with a working enquiry form
 - [ ] Step 5: Partner logo bar with an auto-scrolling marquee
 - [ ] Step 6: SEO — canonicals, sitemap, robots, OG image, structured data, redirects
@@ -31,8 +31,8 @@ Both quality gates are **clean** on `main`: `npm run lint` exit 0,
 | `/studio` | 200, and now on an allowed CORS origin | — |
 | `/about` | 200 | done |
 | `/services` | 200 | done |
-| `/projects` | **404** — linked from "All projects" | Step 3 |
-| `/projects/<slug>` | **404** — every project tile links here | Step 3 |
+| `/projects` | 200 | done |
+| `/projects/<slug>` | 200, unknown slugs 404 | done |
 | `/contact` | **404** | Step 4 |
 | `/sitemap.xml` | **404** | Step 6 |
 | `/robots.txt` | **404** | Step 6 |
@@ -238,17 +238,55 @@ banner and pulling the entire home page to render it would be absurd.
 
 ## Step 3 — Projects: section, index, detail
 
-- [ ] Rebuild the home projects section to the PNG: new heading, staggered grid,
-      `ALL PROJECTS →`
-- [ ] Extract the card into `components/projects/ProjectCard.tsx` so the home
-      section and the index stay identical by construction, not copy-paste
-- [ ] `app/projects/page.tsx` — hero, breadcrumb, division filter, live count,
-      4:3 greyscale grid, "More work, on request", closing CTA
-- [ ] `app/projects/[slug]/page.tsx` — the full detail layout above
-- [ ] `generateStaticParams` from `PROJECT_SLUGS_QUERY`
-- [ ] `generateMetadata` per project; OG image from the cover
-- [ ] `notFound()` for unknown slugs
-- [ ] Empty state per the design: *"No projects listed under this division yet."*
+**Done.** `npm run lint` exit 0, `npx tsc --noEmit` exit 0, `npm run build`
+exit 0 with all four detail pages prerendered via `generateStaticParams`.
+
+- [x] Home projects section rebuilt to the PNG: new heading, four cards with
+      cycling aspect ratios so the rules step down the row, `All projects` link
+- [x] `components/projects/ProjectCard.tsx`, shared by the home section and the
+      index so the two cannot drift
+- [x] `app/projects/page.tsx` — image-backed hero, breadcrumb, division filter,
+      live count, card grid, "More work, on request", closing CTA
+- [x] `app/projects/[slug]/page.tsx` — hero, facts bar, overview, scope of
+      works, equipment chips, gallery, next project, closing CTA
+- [x] `generateStaticParams` from `PROJECT_SLUGS_QUERY`
+- [x] `generateMetadata` per project; OG image from the cover; `noindex`
+- [x] `notFound()` for unknown slugs — verified, `/projects/does-not-exist` 404s
+- [x] Empty state per the design
+
+### Filters are derived, not hard-coded
+
+The canvas hard-codes four filter buttons. Ours are built from the divisions
+actually present on the projects, so a division the client stops working in
+stops appearing on its own, and a new one needs no code. Verified rendering as
+All work · Electrical · Maintenance · Mechanical · IT & Automation.
+
+Every project stays in the server-rendered markup and the filter only hides
+them, so there is no `?division=` variant for Google to treat as a near-duplicate
+and no request per click.
+
+### `shortTitle` added to the service schema
+
+The canvas tags projects "Electrical · Maintenance" while our divisions are
+named "Maintenance & Facility Support". Rather than shorten the division names —
+the services page wants the full ones — the `DIVISION` projection resolves
+`coalesce(shortTitle, title)`. A tag reads "Maintenance"; the division's own
+page stays headed "Maintenance & Facility Support".
+
+### Placeholder content, contained on purpose
+
+`fallbackProjectDetails` carries the canvas copy for **Panels Maintenance
+only** — overview, five-line scope, Schneider/Legrand/ABB, status. The other
+three render the sparse version, which is what an unfilled record actually
+looks like. That contrast is deliberate: it shows both layouts, and it keeps the
+invented material to one page under a shouting TODO.
+
+Division tags on all four are inferred from the project names and the canvas,
+**not confirmed by the client** — they drive every card tag and the whole
+filter, so they need checking. Location, year and client are left unset rather
+than guessed; those are claims about specific work.
+
+All four detail pages carry `noindex, follow`, verified in the rendered HTML.
 
 **Next 16 note:** `params` is a `Promise` and must be awaited
 (`params: Promise<{ slug: string }>`) — confirmed against

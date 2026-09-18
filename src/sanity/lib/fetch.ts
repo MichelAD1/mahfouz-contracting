@@ -12,7 +12,11 @@ import {
   SERVICES_QUERY,
   SITE_FRAME_QUERY,
 } from "./queries";
-import { fallbackContact, fallbackHome } from "@/sanity/fallback/content";
+import {
+  fallbackContact,
+  fallbackHome,
+  fallbackProjectDetails,
+} from "@/sanity/fallback/content";
 import type {
   About,
   ClosingCta,
@@ -240,9 +244,10 @@ export function getProjectSlugs(): Promise<string[]> {
 }
 
 /**
- * Builds a detail-page project out of the fallback content. Only the card
- * fields exist there, so the page renders a real but sparse record rather than
- * a 404 while the dataset is still empty.
+ * Builds a detail-page project out of the fallback content: the card fields,
+ * plus whatever placeholder detail exists for that slug. Projects with no
+ * entry in the details map render the sparse version rather than 404, which is
+ * what an unfilled record genuinely looks like.
  */
 function fallbackProject(slug: string): ProjectFull | null {
   const project = fallbackHome.projects.find((entry) => entry.slug === slug);
@@ -250,6 +255,7 @@ function fallbackProject(slug: string): ProjectFull | null {
 
   return {
     ...project,
+    ...fallbackProjectDetails[slug],
     related: fallbackHome.projects.filter((entry) => entry.slug !== slug).slice(0, 3),
   };
 }

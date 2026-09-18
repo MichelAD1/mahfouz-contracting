@@ -28,6 +28,13 @@ export const service = defineType({
       validation: (rule) => rule.max(3),
     }),
     defineField({
+      name: "shortTitle",
+      title: "Short name",
+      type: "string",
+      description:
+        "Used on project tags and the projects filter, where the full title is too long — e.g. Maintenance for Maintenance & Facility Support. Falls back to the title.",
+    }),
+    defineField({
       name: "slug",
       type: "slug",
       options: { source: "title", maxLength: 96 },

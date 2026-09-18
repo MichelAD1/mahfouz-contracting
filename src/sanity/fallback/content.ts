@@ -1,4 +1,42 @@
-import type { Contact, HomePageContent } from "@/sanity/lib/types";
+import type {
+  Contact,
+  HomePageContent,
+  ProjectDivision,
+  ProjectFull,
+} from "@/sanity/lib/types";
+
+/**
+ * Division tags, in the short form the project cards and the filter use. These
+ * mirror the `service` documents by `_id`, so the same records come back once
+ * the dataset is populated.
+ */
+const DIVISION = {
+  engineering: {
+    _id: "svc-engineering",
+    title: "Engineering",
+    slug: "engineering-design-consultancy",
+  },
+  electrical: {
+    _id: "svc-electrical",
+    title: "Electrical",
+    slug: "electrical-division",
+  },
+  mechanical: {
+    _id: "svc-mechanical",
+    title: "Mechanical",
+    slug: "mechanical-division",
+  },
+  it: {
+    _id: "svc-it",
+    title: "IT & Automation",
+    slug: "information-technology-automation-division",
+  },
+  maintenance: {
+    _id: "svc-maintenance",
+    title: "Maintenance",
+    slug: "maintenance-facility-support",
+  },
+} satisfies Record<string, ProjectDivision>;
 
 /**
  * Fallback content — used whenever no Sanity project is configured.
@@ -215,6 +253,12 @@ export const fallbackHome: HomePageContent = {
    * site's own entries are lorem ipsum on stock solar photography. The section
    * renders whatever metadata is present, so real records enrich it with no
    * code change. See temp/PLAN.md §8, item 2.
+   *
+   * TODO(client): the division tags below are inferred from the project names
+   * and the design canvas, not confirmed by the client. They drive the tags on
+   * every card and the filter on /projects, so they need checking before
+   * launch. Location, year and client are deliberately left unset rather than
+   * guessed — those are claims about specific work.
    */
   projects: [
     {
@@ -223,6 +267,7 @@ export const fallbackHome: HomePageContent = {
       slug: "panels-maintenance",
       category: "Commercial",
       featured: true,
+      divisions: [DIVISION.electrical, DIVISION.maintenance],
       cover: {
         src: "/images/switchgear-assembly.webp",
         alt: "Electricians assembling and wiring switchgear panels in a workshop",
@@ -234,6 +279,7 @@ export const fallbackHome: HomePageContent = {
       name: "Green Enterprises",
       slug: "green-enterprises",
       category: "Commercial",
+      divisions: [DIVISION.electrical, DIVISION.mechanical],
       cover: {
         src: "/images/site-team-review.webp",
         alt: "Site team reviewing drawings in front of a concrete frame",
@@ -245,6 +291,7 @@ export const fallbackHome: HomePageContent = {
       name: "Reliable Energy",
       slug: "reliable-energy",
       category: "Commercial",
+      divisions: [DIVISION.electrical],
       cover: {
         src: "/images/switchgear-assembly.webp",
         alt: "Electricians assembling and wiring switchgear panels in a workshop",
@@ -256,6 +303,7 @@ export const fallbackHome: HomePageContent = {
       name: "Branding Ideas",
       slug: "branding-ideas",
       category: "Commercial",
+      divisions: [DIVISION.it],
       cover: {
         src: "/images/site-tower-construction.webp",
         alt: "Tower under construction with a crane above the exposed frame",
@@ -335,6 +383,45 @@ export const fallbackHome: HomePageContent = {
       alt: "City skyline of high-rise towers seen from above at first light",
       aspectRatio: 16 / 9,
     },
+  },
+};
+
+/**
+ * Detail-page content, keyed by slug.
+ *
+ * TODO(client): EVERYTHING BELOW IS PLACEHOLDER AND MUST BE CONFIRMED OR
+ * REPLACED BEFORE LAUNCH. It is transcribed from the design canvas, which was
+ * written to show the layout, not to record what was actually done on this
+ * job. It reads as fact and is not — a prospective client could ask about work
+ * that never happened.
+ *
+ * It is here so the detail layout can be reviewed against real-looking copy,
+ * and it is deliberately limited to the one project the canvas specifies. The
+ * other three render the sparse version, which is what an unfilled record
+ * genuinely looks like. Project detail pages carry `noindex` until this is
+ * resolved — see generateMetadata in src/app/projects/[slug]/page.tsx.
+ */
+export const fallbackProjectDetails: Record<string, Partial<ProjectFull>> = {
+  "panels-maintenance": {
+    status: "Delivered, under maintenance",
+    summary:
+      "Distribution panels inspected, repaired and brought back to specification.",
+    description: [
+      "Mahfouz Contracting surveyed the existing distribution boards, recorded their condition and loads, and set out the corrective works required. Damaged components were replaced, terminations remade and circuits re-labelled, with the installation tested before being returned to service.",
+      "The panels are now covered by a scheduled maintenance programme, with periodic inspection, thermal checks and a record kept of every intervention.",
+    ],
+    scopeOfWorks: [
+      "Condition survey and load recording",
+      "Component replacement and re-termination",
+      "Circuit identification and as-built records",
+      "Testing and return to service",
+      "Scheduled preventive maintenance",
+    ],
+    equipment: [
+      { _id: "ptn-schneider", name: "Schneider Electric" },
+      { _id: "ptn-legrand", name: "Legrand" },
+      { _id: "ptn-abb", name: "ABB" },
+    ],
   },
 };
 

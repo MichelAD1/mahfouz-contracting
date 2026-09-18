@@ -17,8 +17,13 @@ const METRIC = groq`{ figure, label, note, countTo, prefix, suffix }`;
 
 const CTA = groq`{ label, href }`;
 
-/** A division, dereferenced from the service it points at. */
-const DIVISION = groq`{ _id, title, "slug": slug.current }`;
+/**
+ * A division, dereferenced from the service it points at.
+ *
+ * `shortTitle` wins here and only here: a project tag reads "Maintenance"
+ * where the division's own page is headed "Maintenance & Facility Support".
+ */
+const DIVISION = groq`{ _id, "title": coalesce(shortTitle, title), "slug": slug.current }`;
 
 /** Site-wide settings. Shared by the home query and the layout frame. */
 const SETTINGS = groq`{
