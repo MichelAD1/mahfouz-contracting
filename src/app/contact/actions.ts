@@ -91,6 +91,19 @@ export async function submitEnquiry(
     };
   }
 
+  /**
+   * The development no-op. Saying "thank you, we will be in touch" over an
+   * email that was never sent is the precise failure this page exists to
+   * prevent, so it says what actually happened instead.
+   */
+  if (!result.delivered) {
+    return {
+      status: "success",
+      message:
+        "Validated and composed, but NOT SENT — no RESEND_API_KEY is configured, so the enquiry was written to the server console instead. Set the key in .env.local to send for real.",
+    };
+  }
+
   return {
     status: "success",
     message: `Thank you — your enquiry is with us and we will come back to you. If it is urgent, call ${settings.phones[0]?.number ?? "us"}.`,

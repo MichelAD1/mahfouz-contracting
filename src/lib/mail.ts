@@ -18,7 +18,18 @@
 
 const ENDPOINT = "https://api.resend.com/emails";
 
-export type MailResult = { ok: true; id: string } | { ok: false; reason: string };
+export type MailResult =
+  | {
+      ok: true;
+      id: string;
+      /**
+       * False when nothing actually left the building — the development no-op
+       * below. The caller must say so, because a success message over an email
+       * that was never sent is the exact failure this page exists to prevent.
+       */
+      delivered: boolean;
+    }
+  | { ok: false; reason: string };
 
 export type Enquiry = {
   to: string;
@@ -48,7 +59,7 @@ export async function sendEnquiry(enquiry: Enquiry): Promise<MailResult> {
     }
 
     console.warn("[mail] no RESEND_API_KEY — enquiry logged, not sent:\n", enquiry);
-    return { ok: true, id: "dev-no-op" };
+    return { ok: true, id: "dev-no-op", delivered: false };
   }
 
   try {
@@ -79,7 +90,7 @@ export async function sendEnquiry(enquiry: Enquiry): Promise<MailResult> {
     }
 
     const body = (await response.json()) as { id?: string };
-    return { ok: true, id: body.id ?? "unknown" };
+    return { ok: true, id: body.id ?? "unknown", delivered: true };
   } catch (error) {
     console.error("[mail] request to Resend threw; enquiry NOT delivered", {
       error,
