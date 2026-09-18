@@ -58,28 +58,15 @@ export function Header({ settings }: { settings: SiteSettings }) {
 
                 return (
                   <li key={item.href}>
+                    {/* Colour alone marks the current page — no underline. */}
                     <Link
                       href={item.href}
                       aria-current={active ? "page" : undefined}
-                      className={`group relative block py-1 display-narrow text-[0.875rem] font-medium transition-colors duration-300 ${
-                        active ? accent : `${ink} ${hover}`
+                      className={`block py-1 display-narrow text-[0.875rem] transition-colors duration-300 ${
+                        active ? `${accent} font-semibold` : `${ink} ${hover} font-medium`
                       }`}
                     >
                       {item.label}
-                      {/*
-                       * The same hairline the rest of the site underlines links
-                       * with: held at full strength on the current page, and
-                       * drawn on hover everywhere else, so the two states are
-                       * one idea rather than two.
-                       */}
-                      <span
-                        aria-hidden="true"
-                        className={`absolute -bottom-0.5 left-0 h-px w-full transition-opacity duration-300 ${
-                          active
-                            ? "bg-current opacity-100"
-                            : "bg-current opacity-0 group-hover:opacity-50"
-                        }`}
-                      />
                     </Link>
                   </li>
                 );
