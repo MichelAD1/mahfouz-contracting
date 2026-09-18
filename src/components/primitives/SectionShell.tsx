@@ -9,11 +9,9 @@ import type { ReactNode } from "react";
  * section as you scroll.
  */
 export function SheetMeta({
-  code,
   label,
   tone = "onPaper",
 }: {
-  code: string;
   label: string;
   tone?: "onPaper" | "onInk";
 }) {
@@ -23,7 +21,6 @@ export function SheetMeta({
   return (
     <div className="lg:sticky lg:top-28 lg:self-start">
       <div className="flex items-baseline gap-4 lg:flex-col lg:items-start lg:gap-3">
-        <span className={`t-meta ${muted}`}>{code}</span>
         <span aria-hidden="true" className={`h-px w-10 ${line} lg:w-full`} />
         <span className={`t-meta ${muted}`}>{label}</span>
       </div>
@@ -33,8 +30,6 @@ export function SheetMeta({
 
 type SectionProps = {
   id?: string;
-  /** Sheet number, e.g. S.02. Real metadata, not decoration. */
-  code?: string;
   /** Section name for the margin column. */
   label?: string;
   tone?: "onPaper" | "onInk";
@@ -48,7 +43,6 @@ type SectionProps = {
 
 export function SectionShell({
   id,
-  code,
   label,
   tone = "onPaper",
   className = "",
@@ -56,7 +50,7 @@ export function SectionShell({
   divided = true,
   size = "default",
 }: SectionProps) {
-  const hasMeta = Boolean(code && label);
+  const hasMeta = Boolean(label);
   const border = tone === "onInk" ? "border-rule-dark" : "border-rule-strong";
 
   return (
@@ -73,7 +67,7 @@ export function SectionShell({
       >
         {hasMeta ? (
           <div className="sheet">
-            <SheetMeta code={code!} label={label!} tone={tone} />
+            <SheetMeta label={label!} tone={tone} />
             <div>{children}</div>
           </div>
         ) : (

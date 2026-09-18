@@ -83,7 +83,6 @@ export function ServiceDetail({
               image={service.image}
               sizes="(min-width: 1024px) 42vw, 100vw"
               maxWidth={1100}
-              duotone
               fallback="plate"
               fallbackSeed={index + 1}
             />

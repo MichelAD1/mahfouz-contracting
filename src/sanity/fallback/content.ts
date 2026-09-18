@@ -396,13 +396,13 @@ export const fallbackHome: HomePageContent = {
       logo: {
         src: "/images/partners/schneider-electric.svg",
         alt: "Schneider Electric",
-        aspectRatio: 1,
+        aspectRatio: 188.74001 / 57,
       },
     },
     {
       _id: "ptn-abb",
       name: "ABB",
-      logo: { src: "/images/partners/abb.svg", alt: "ABB", aspectRatio: 24 / 9.4 },
+      logo: { src: "/images/partners/abb.svg", alt: "ABB", aspectRatio: 88.2 / 35 },
     },
     {
       _id: "ptn-siemens",
@@ -410,7 +410,7 @@ export const fallbackHome: HomePageContent = {
       logo: {
         src: "/images/partners/siemens.svg",
         alt: "Siemens",
-        aspectRatio: 24 / 4.2,
+        aspectRatio: 210 / 50,
       },
     },
     { _id: "ptn-gewiss", name: "Gewiss" },
@@ -426,7 +426,7 @@ export const fallbackHome: HomePageContent = {
     {
       _id: "ptn-lg",
       name: "LG",
-      logo: { src: "/images/partners/lg.svg", alt: "LG", aspectRatio: 23.6 / 11 },
+      logo: { src: "/images/partners/lg.svg", alt: "LG", aspectRatio: 113.983 / 17.009 },
     },
   ],
 

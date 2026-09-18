@@ -121,7 +121,6 @@ export function Capabilities({ services }: { services: Service[] }) {
                             image={service.image}
                             sizes="100vw"
                             maxWidth={900}
-                            duotone
                           />
                         </div>
 
@@ -174,7 +173,6 @@ export function Capabilities({ services }: { services: Service[] }) {
               image={service.image}
               sizes="(min-width: 1024px) 34vw, 0px"
               maxWidth={1000}
-              duotone
             />
           </motion.div>
         ))}

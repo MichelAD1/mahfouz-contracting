@@ -43,17 +43,26 @@ const ENTER = 0.9;
  * Viewport fraction at which a scene has fully arrived.
  *
  * Measured, not guessed: at 0.74 the first Process card reached full opacity
- * with its top 725px down a 900px viewport — a 175px sliver, 26% of the card.
- * Arriving at 0.52 puts the top near the middle of the screen, so the block is
- * comfortably in view while it is still moving.
+ * with its top 725px down a 900px viewport — a 175px sliver, 26% of the card,
+ * so it had finished before there was anything to watch. 0.52 fixed that but
+ * went too far the other way: on a tall viewport the block was still visibly
+ * travelling well after it was fully readable. 0.64 sits between them.
  */
-const ARRIVE = 0.52;
+const ARRIVE = 0.64;
 /** How far up the viewport each step of a sequence pushes its arrival point. */
 const SEQUENCE_SPREAD = 0.28;
 /** A long sequence must not push arrival past here, or it never completes. */
 const ARRIVE_FLOOR = 0.3;
-/** Opacity before arrival. Low enough to read as an entrance, never zero. */
-const REST_OPACITY = 0.15;
+/**
+ * Opacity before arrival.
+ *
+ * Raised from 0.15 after seeing the site at 80% browser zoom, where a taller
+ * viewport leaves the next section peeking above the fold for much longer. At
+ * 0.15 that section sat there visibly half-finished, which reads as a bug
+ * rather than as anticipation. At 0.34 an un-arrived block is legible and
+ * merely quiet, so being caught mid-travel costs nothing.
+ */
+const REST_OPACITY = 0.34;
 
 type SceneProps = {
   children: ReactNode;

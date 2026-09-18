@@ -31,6 +31,7 @@ export default async function AboutPage() {
     <>
       <PageHero
         crumbs={[{ label: "Home", href: "/" }, { label: "About" }]}
+        seed={1}
         heading="Engineering, contracting and maintenance, in-house."
         lead="Five divisions under one roof, working to a single project program, so design, supply, installation and commissioning meet where they are supposed to."
       />
@@ -39,7 +40,7 @@ export default async function AboutPage() {
 
       <SectionShell
         id="process"
-        code="S.04"
+       
         label="How we work"
         className="bg-paper-bright"
       >

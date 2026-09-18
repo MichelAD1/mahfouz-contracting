@@ -50,7 +50,6 @@ export function ProjectCard({
             image={project.cover}
             sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
             maxWidth={1200}
-            duotone
             fallback="plate"
             fallbackSeed={index}
           />

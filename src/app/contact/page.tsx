@@ -26,6 +26,7 @@ export default async function ContactPage() {
     <>
       <PageHero
         crumbs={[{ label: "Home", href: "/" }, { label: "Contact" }]}
+        seed={3}
         heading={contact.heading}
         lead={contact.description}
       />

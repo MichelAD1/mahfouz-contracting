@@ -27,6 +27,7 @@ export default async function ServicesPage() {
     <>
       <PageHero
         crumbs={[{ label: "Home", href: "/" }, { label: "Services" }]}
+        seed={2}
         heading="Five divisions, one scope of responsibility."
         lead="Each division works in-house and to a single project program, so design, supply, installation and commissioning meet where they are supposed to."
       />

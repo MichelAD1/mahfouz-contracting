@@ -32,7 +32,7 @@ export function About({
   const cta = condensed ? { label: "More about us", href: "/about" } : about.cta;
 
   return (
-    <SectionShell id="about" code="S.01" label={about.sheet} divided={false}>
+    <SectionShell id="about" label={about.sheet} divided={false}>
       <Reveal>
         <h2 className="display-sentence t-plate max-w-[24ch] text-ink">
           {about.statement}
@@ -63,7 +63,6 @@ export function About({
               image={image}
               sizes="(min-width: 1024px) 40vw, 100vw"
               maxWidth={1200}
-              duotone
               fallback="plate"
               fallbackSeed={2}
             />

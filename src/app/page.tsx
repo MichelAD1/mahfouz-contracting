@@ -35,14 +35,14 @@ export default async function HomePage() {
 
       <About about={about} condensed />
 
-      <SectionShell id="services" code="S.02" label="Capabilities">
+      <SectionShell id="services" label="Capabilities">
         <Capabilities services={services} />
         <div className="mt-[clamp(2rem,3.5vw,3rem)] border-t border-rule-strong pt-6">
           <LinkUnderline href="/services">All services</LinkUnderline>
         </div>
       </SectionShell>
 
-      <SectionShell id="work" code="S.03" label="Selected work">
+      <SectionShell id="work" label="Selected work">
         <SelectedWork projects={projects} />
       </SectionShell>
 

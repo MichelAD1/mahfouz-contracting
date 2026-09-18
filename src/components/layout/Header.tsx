@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { MobileMenu } from "./MobileMenu";
+import { isActivePath } from "@/lib/nav";
 import type { SiteSettings } from "@/sanity/lib/types";
 
 /**
@@ -14,6 +16,7 @@ import type { SiteSettings } from "@/sanity/lib/types";
 export function Header({ settings }: { settings: SiteSettings }) {
   const [solid, setSolid] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const onScroll = () => setSolid(window.scrollY > 60);
@@ -24,6 +27,7 @@ export function Header({ settings }: { settings: SiteSettings }) {
 
   const ink = solid ? "text-ink" : "text-paper-bright";
   const hover = solid ? "hover:text-copper" : "hover:text-copper-bright";
+  const accent = solid ? "text-copper" : "text-copper-bright";
 
   return (
     <>
@@ -49,16 +53,37 @@ export function Header({ settings }: { settings: SiteSettings }) {
 
           <nav aria-label="Main" className="hidden lg:block">
             <ul className="flex items-center gap-9">
-              {settings.nav.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={`display-narrow text-[0.875rem] font-medium transition-colors duration-300 ${ink} ${hover}`}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
+              {settings.nav.map((item) => {
+                const active = isActivePath(pathname, item.href);
+
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      aria-current={active ? "page" : undefined}
+                      className={`group relative block py-1 display-narrow text-[0.875rem] font-medium transition-colors duration-300 ${
+                        active ? accent : `${ink} ${hover}`
+                      }`}
+                    >
+                      {item.label}
+                      {/*
+                       * The same hairline the rest of the site underlines links
+                       * with: held at full strength on the current page, and
+                       * drawn on hover everywhere else, so the two states are
+                       * one idea rather than two.
+                       */}
+                      <span
+                        aria-hidden="true"
+                        className={`absolute -bottom-0.5 left-0 h-px w-full transition-opacity duration-300 ${
+                          active
+                            ? "bg-current opacity-100"
+                            : "bg-current opacity-0 group-hover:opacity-50"
+                        }`}
+                      />
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
 

@@ -60,7 +60,6 @@ export function Process({ steps }: { steps: ProcessStep[] }) {
                 image={step.image}
                 sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 100vw"
                 maxWidth={900}
-                duotone
               />
             </Parallax>
 

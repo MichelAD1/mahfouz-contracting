@@ -248,7 +248,6 @@ function Gallery({ project }: { project: ProjectFull }) {
                   image={image}
                   sizes="(min-width: 1024px) 31vw, (min-width: 640px) 47vw, 100vw"
                   maxWidth={1100}
-                  duotone
                 />
               </ImageReveal>
             ))}
@@ -256,7 +255,7 @@ function Gallery({ project }: { project: ProjectFull }) {
         ) : null}
 
         <ImageReveal className="relative mt-[clamp(1rem,2.5vw,2rem)] aspect-16/7 w-full">
-          <SiteImage image={wide} sizes="100vw" maxWidth={2000} duotone />
+          <SiteImage image={wide} sizes="100vw" maxWidth={2000} />
         </ImageReveal>
       </div>
     </section>

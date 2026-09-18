@@ -115,10 +115,9 @@ function PartnerMark({ partner }: { partner: Partner }) {
       width={Math.round(height * ratio)}
       height={height}
       style={{ height }}
-      // brightness(0) collapses every logo, colour or not, to the same solid
-      // ink. Opacity then carries the tone, so the strip holds together
-      // whatever an editor uploads next.
-      className="w-auto object-contain opacity-55 brightness-0 transition-opacity duration-300 hover:opacity-100"
+      // Shown in their own colours. Opacity holds the row back from competing
+      // with the page, and lifts to full on hover.
+      className="w-auto object-contain opacity-80 transition-opacity duration-300 hover:opacity-100"
     />
   );
 }
