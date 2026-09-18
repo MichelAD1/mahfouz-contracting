@@ -1,6 +1,6 @@
 # Mahfouz Contracting — remaining work to launch
 
-**Status:** Step 3 of 7 complete — awaiting go-ahead for Step 4
+**Status:** Step 4 of 7 complete — awaiting go-ahead for Step 5
 
 Supersedes the previous draft. Companion to `temp/PLAN.md`, which covers the
 original build; this file is only what is left.
@@ -12,7 +12,7 @@ original build; this file is only what is left.
 - [x] Step 1: Sanity foundation — connect `wwicg618`, expand the project schema, finish the read layer
 - [x] Step 2: Convert the single page into a multi-page site (nav, `/about`, `/services`, shared layout)
 - [x] Step 3: Projects — home section, `/projects` index, `/projects/[slug]` detail
-- [ ] Step 4: Contact page with a working enquiry form
+- [x] Step 4: Contact page with a working enquiry form
 - [ ] Step 5: Partner logo bar with an auto-scrolling marquee
 - [ ] Step 6: SEO — canonicals, sitemap, robots, OG image, structured data, redirects
 - [ ] Step 7: Seed the dataset, then hand Sanity over to the client
@@ -33,7 +33,7 @@ Both quality gates are **clean** on `main`: `npm run lint` exit 0,
 | `/services` | 200 | done |
 | `/projects` | 200 | done |
 | `/projects/<slug>` | 200, unknown slugs 404 | done |
-| `/contact` | **404** | Step 4 |
+| `/contact` | 200, form working | done |
 | `/sitemap.xml` | **404** | Step 6 |
 | `/robots.txt` | **404** | Step 6 |
 
@@ -44,8 +44,8 @@ Defects, and where they stand:
 2. ~~The `contact` schema wired to nothing~~ — **fixed in Step 1.** It has a
    type, a query and a fetcher; the page that uses them arrives in Step 4.
 3. ~~All three "Request a Quote" CTAs resolving to a footer `mailto:`~~ —
-   **repointed to `/contact` in Step 2.** That route 404s until Step 4, so the
-   CTA is not usable end to end yet. It is the next visitor-facing gap.
+   **fixed.** Repointed to `/contact` in Step 2, and Step 4 made that route a
+   working form. The site's primary call to action now works end to end.
 4. No Open Graph image — shared links still render a blank card. Step 6.
 
 ---
@@ -322,18 +322,64 @@ it otherwise.
 The primary call to action on the entire site currently opens a mail client.
 For a business whose whole funnel is quote requests, this is the thing to fix.
 
-- [ ] `app/contact/page.tsx` — address, both phones, hours and email stay
-      visible alongside the form, so the page works even if the form does not
-- [ ] `components/contact/ContactForm.tsx` — client component, `useActionState`
-- [ ] `app/contact/actions.ts` — server action: validation, honeypot plus a
-      submit-time trap, then delivery
-- [ ] Repoint all three "Request a Quote" CTAs and the nav item to `/contact`
-- [ ] Keep `#contact` on the footer so old anchor links still land
+**Done.** `npm run lint` exit 0, `npx tsc --noEmit` exit 0, `npm run build`
+exit 0 with `/contact` prerendered. 32 behaviour checks pass against the rules
+and the delivery adapter.
+
+- [x] `app/contact/page.tsx` — address, both phones, hours and email stay
+      visible beside the form, as plain links
+- [x] `components/contact/ContactForm.tsx` — client component, `useActionState`
+- [x] `app/contact/actions.ts` — a thin shell over `lib/enquiry.ts`
+- [x] `lib/enquiry.ts` — validation, honeypot, time trap, message composition
+- [x] `lib/mail.ts` — Resend delivery
+- [x] The three CTAs and the nav item already pointed at `/contact` from Step 2,
+      and now resolve to a working page
+- [x] `#contact` still lands on the footer
+
+### The failure path does real work
+
+Delivery is email-only by your decision, so a send that does not land cannot
+just shrug:
+
+- The form says what went wrong **and renders both phone numbers and the direct
+  email inline**, so the visitor has a way through
+- `lib/mail.ts` logs the entire submission on any failure, so the enquiry is
+  recoverable from the host's logs even though no email arrived
+- A success state is never shown for a send that did not succeed. In
+  **production** a missing `RESEND_API_KEY` fails loudly; in **development** it
+  logs the enquiry and reports success so the form can be exercised. Both are
+  covered by checks.
+- A rejected submit echoes the values back, so nobody retypes a scope because
+  they mistyped an email
+
+### How it was verified
+
+A Next server action cannot be replayed with `curl` — its arguments are encoded
+into the React flight stream, and a hand-built POST returns "Connection closed".
+So the rules moved out of the action into `lib/enquiry.ts`, which has no
+framework attached, and were exercised directly with Node's type stripping: 25
+checks on validation, the honeypot, the time trap and composition, plus 7 on the
+delivery adapter.
+
+Those checks live in the scratchpad, not the repo — this repo has no test setup
+and adding one was not in scope. They need no dependencies, so they are cheap to
+adopt properly if wanted.
+
+One behaviour worth calling out: **a missing time stamp passes.** The stamp is
+written on mount, so no stamp means JavaScript never ran. That is the
+progressive-enhancement path, not a bot, and rejecting it would silently turn
+away real people.
 
 ### Delivery — Resend, to `michel.a.abidaoud@gmail.com` for now
 
-Decided. One new dependency, `resend`; per `CLAUDE.md` I will flag it and wait
-before installing.
+**No `resend` package was needed.** Its REST API is one
+`POST https://api.resend.com/emails` with a bearer token; the SDK wraps that
+single endpoint, so it would have been a dependency shipped on every deploy to
+save eight lines. `lib/mail.ts` calls it with `fetch`.
+
+The REST body field is **`reply_to`**, snake_case — the Node SDK spells it
+`replyTo`. Getting that wrong loses the reply address silently, so a check
+asserts it.
 
 **The constraint worth knowing now:** until a sending domain is verified,
 Resend only sends **from** `onboarding@resend.dev` and only **to** the address
