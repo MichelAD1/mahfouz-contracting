@@ -1,6 +1,6 @@
 # Mahfouz Contracting — remaining work to launch
 
-**Status:** Step 5 of 7 complete — awaiting go-ahead for Step 6
+**Status:** Steps 1-5 complete, plus an unplanned design pass — Step 6 next
 
 Supersedes the previous draft. Companion to `temp/PLAN.md`, which covers the
 original build; this file is only what is left.
@@ -32,8 +32,71 @@ so far:
 - [x] Step 3: Projects — home section, `/projects` index, `/projects/[slug]` detail
 - [x] Step 4: Contact page with a working enquiry form
 - [x] Step 5: Partner logo bar with an auto-scrolling marquee
+- [x] Design pass (unplanned, requested after Step 5 — see below)
 - [ ] Step 6: SEO — canonicals, sitemap, robots, OG image, structured data, redirects
 - [ ] Step 7: Seed the dataset, then hand Sanity over to the client
+
+---
+
+## Design pass — 18/19 Sep 2026
+
+Requested after Step 5 and done before Step 6. All gates clean, `npm run build`
+exit 0.
+
+- [x] **Colour restored.** Photography was running through a greyscale duotone
+      and the partner logos through `brightness(0)`. Both now show as they are,
+      and the logos were re-sourced in colour so the strip is one consistent set
+- [x] **LG logo clipping fixed.** My fault: I had cropped each viewBox to ink
+      bounds measured by a parser that reads an arc's endpoint but not its
+      bulge, so a circular glyph lost its widest point
+- [x] **Schneider swapped** to the current single-line mark — the stacked
+      version halves its type at a shared row height
+- [x] **`S.01` / `S.02` sheet codes removed.** The margin column keeps its rule
+      and label
+- [x] **Inner-page heroes** use the blueprint plate instead of flat navy, each
+      seeded to a different wash, with the home page's CSS entrance
+- [x] **Navbar marks the current page** in copper (no underline — tried, removed
+      on request). A project detail page still marks Projects
+- [x] **Scroll reveal** resting opacity 0.15 → 0.34, arrival 0.52 → 0.64. At
+      0.15 a section peeking above the fold sat visibly half-finished
+- [x] **Home hero fills the viewport** (`min-h-svh`, no cap) with its whole
+      content inside it
+- [x] **The metrics band became a division strip** — see below
+
+### The metrics band, replaced
+
+`5 divisions · 2 countries · 6 standards · 1 point of responsibility` was cut.
+Big numbers under a hero is the most worn pattern on the web, and only one of
+those four earned its numeral: "2 countries" undersells, "6 standards" buried
+the list that was the actual asset, and "1 point of responsibility" was a slogan
+wearing a number.
+
+It is now the five divisions, **named**, each linking to `/services#slug` — the
+real differentiator, scannable in a second, and a route into the site rather
+than a statistic. The standards moved to the sheet's footer line as credentials,
+and gained a `standards` field on `siteSettings` so they are editable.
+
+`hero.metrics` is still in the schema but no longer rendered. **If this stays,
+strip the field** so an editor is not filling in something nothing displays.
+
+### Open design questions, carried forward
+
+1. **`IT  IT & Automation`** in the division strip — the code and the short name
+   both read "IT" side by side. One word to change, either way.
+2. **The About section still has "5 Divisions / 2 Countries"** as metrics — the
+   same counting pattern, and the same weak numbers, as the band just replaced.
+3. **Site-wide type scale.** The hero now fits one screen; the inner pages were
+   deliberately left at their current rhythm. Matching 80% browser zoom across
+   the whole site would mean scaling sections down too, which changes its
+   character rather than its density.
+
+### Tooling worth reusing
+
+Headless Chrome drives visual checks now — `scratchpad/shot.sh`. Two things it
+taught: it cannot settle CSS animations under virtual time, so captures force
+`prefers-reduced-motion` (which conveniently verifies that path); and screenshots
+must be diffed by hash, because a change that renders identically is a change
+that did nothing. That is how the first hero-height attempt was caught.
 
 ---
 
