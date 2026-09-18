@@ -23,7 +23,7 @@ export function Hero({
   return (
     <section id="top" className="relative isolate flex min-h-[min(94svh,54rem)] flex-col justify-end overflow-hidden bg-ink">
       {/* Background layer */}
-      <Parallax className="absolute inset-0 -z-10" distance={60}>
+      <Parallax className="absolute inset-0 -z-10" distance={78}>
         {showPhoto ? (
           <>
             <SiteImage
@@ -53,7 +53,7 @@ export function Hero({
             <span
               key={line}
               className="block animate-rise"
-              style={{ animationDelay: `${0.08 + index * 0.11}s` }}
+              style={{ animationDelay: `${0.12 + index * 0.19}s` }}
             >
               {line}
             </span>
@@ -63,7 +63,7 @@ export function Hero({
         <div className="mt-[clamp(2rem,4vw,3.25rem)] flex flex-col gap-9 lg:grid lg:grid-cols-[minmax(0,34rem)_auto] lg:items-end lg:justify-start lg:gap-x-14">
           <p
             className="max-w-[54ch] t-lead animate-rise text-paper-bright/75"
-            style={{ animationDelay: `${0.08 + hero.headingLines.length * 0.11}s` }}
+            style={{ animationDelay: `${0.12 + hero.headingLines.length * 0.19}s` }}
           >
             {hero.lead}
           </p>
@@ -71,17 +71,13 @@ export function Hero({
           <div
             className="flex flex-col gap-3 animate-rise sm:flex-row sm:flex-wrap"
             style={{
-              animationDelay: `${0.16 + hero.headingLines.length * 0.11}s`,
+              animationDelay: `${0.3 + hero.headingLines.length * 0.19}s`,
             }}
           >
-            <ButtonLink
-              href={hero.primaryCta.href}
-              tone="onInk"
-              variant="solid"
-              className="justify-center sm:justify-start"
-            >
-              {hero.primaryCta.label}
-            </ButtonLink>
+            {/*
+             * One call to action only. The quote request is already the
+             * closing banner's single job, and the header carries it too.
+             */}
             <ButtonLink
               href={hero.secondaryCta.href}
               tone="onInk"
@@ -116,8 +112,8 @@ function DataStrip({
 
   return (
     <div
-      className="animate-rise border-t border-rule-dark"
-      style={{ animationDelay: "0.62s" }}
+      className="animate-rise border-t border-rule-dark bg-ink/90"
+      style={{ animationDelay: "1.15s" }}
     >
       <div className="shell">
         {/*

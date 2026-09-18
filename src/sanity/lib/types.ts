@@ -109,6 +109,7 @@ export type ProcessStep = {
   step: string;
   title: string;
   description: string;
+  image?: SiteImage;
 };
 
 export type Partner = {

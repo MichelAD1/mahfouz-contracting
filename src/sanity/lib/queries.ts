@@ -53,7 +53,10 @@ export const HOME_QUERY = groq`{
     "cover": cover${IMAGE},
     "details": details[]{ label, value }
   },
-  "process": *[_type == "process"]|order(order asc){ _id, step, title, description },
+  "process": *[_type == "process"]|order(order asc){
+    _id, step, title, description,
+    "image": image${IMAGE}
+  },
   "partners": *[_type == "partner"]|order(order asc){
     _id, name, url, "logo": logo${IMAGE}
   },

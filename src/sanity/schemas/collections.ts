@@ -205,12 +205,18 @@ export const process = defineType({
       rows: 3,
       validation: (rule) => rule.required(),
     }),
+    defineField({
+      name: "image",
+      type: "imageWithAlt",
+      description:
+        "Portrait crop. The four stage images step down the page, so tall images sit best.",
+    }),
     orderField,
   ],
   orderings: [
     { name: "manual", title: "Manual order", by: [{ field: "order", direction: "asc" }] },
   ],
-  preview: { select: { title: "title", subtitle: "step" } },
+  preview: { select: { title: "title", subtitle: "step", media: "image" } },
 });
 
 export const partner = defineType({

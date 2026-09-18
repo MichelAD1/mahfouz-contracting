@@ -46,7 +46,7 @@ export function SelectedWork({ projects }: { projects: Project[] }) {
             href={`/projects/${featured.slug}`}
             className="group block lg:col-span-8"
           >
-            <Parallax className="relative aspect-16/11 w-full" distance={36}>
+            <Parallax className="relative aspect-16/11 w-full" distance={52}>
               <div className="absolute inset-0 transition-transform duration-[0.9s] ease-[var(--ease-out-expo)] group-hover:scale-[1.035]">
                 <SiteImage
                   image={featured.cover}
@@ -80,7 +80,7 @@ export function SelectedWork({ projects }: { projects: Project[] }) {
       {rest.length > 0 ? (
         <Stagger
           className="mt-[clamp(2.5rem,5vw,4.5rem)] grid gap-x-[clamp(1.5rem,3vw,3rem)] gap-y-[clamp(2.5rem,4vw,3.5rem)] lg:grid-cols-12"
-          gap={0.08}
+          gap={0.16}
         >
           {rest.map((project, index) => {
             const layout = TILE_LAYOUTS[index % TILE_LAYOUTS.length];

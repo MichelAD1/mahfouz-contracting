@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { MotionProvider } from "@/components/motion/MotionProvider";
-import { RevealObserver } from "@/components/motion/RevealObserver";
 import "./globals.css";
 
 /**
@@ -63,22 +62,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${archivo.variable} ${plexSans.variable} ${plexMono.variable}`}
-      // The inline script below adds a `js` class to this element before
-      // hydration, which React would otherwise report as a className mismatch.
-      suppressHydrationWarning
     >
-      <head>
-        {/*
-         * Marks the document as scripted before first paint, which is what
-         * arms the scroll reveals in globals.css. Without it every section
-         * renders visible — the reveals are an enhancement, not a dependency.
-         */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: "document.documentElement.classList.add('js')",
-          }}
-        />
-      </head>
       <body>
         <a
           href="#main"
@@ -87,7 +71,6 @@ export default function RootLayout({
           Skip to content
         </a>
         <MotionProvider>{children}</MotionProvider>
-        <RevealObserver />
       </body>
     </html>
   );

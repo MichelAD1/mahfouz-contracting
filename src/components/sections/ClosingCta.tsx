@@ -12,19 +12,27 @@ export function ClosingCta({ content }: { content: ClosingCtaContent }) {
 
   return (
     <section className="relative isolate overflow-hidden bg-ink">
-      <Parallax className="absolute inset-0 -z-10" distance={50}>
+      <Parallax className="absolute inset-0 -z-10" distance={66}>
         {showPhoto ? (
           <>
             <SiteImage
               image={content.background}
               sizes="100vw"
               maxWidth={2400}
-              duotone
               fallback="plate"
             />
+            {/*
+             * Graded rather than a flat wash, so the photograph stays legible
+             * as a photograph while the type keeps its contrast. Matches the
+             * hero, which carries the same image.
+             */}
             <div
               aria-hidden="true"
-              className="absolute inset-0 bg-ink/70"
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(10,22,40,0.72) 0%, rgba(10,22,40,0.78) 45%, rgba(10,22,40,0.9) 100%)",
+              }}
             />
           </>
         ) : (

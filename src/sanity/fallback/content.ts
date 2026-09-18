@@ -50,8 +50,9 @@ export const fallbackHome: HomePageContent = {
     primaryCta: { label: "Request a Quote", href: "#contact" },
     secondaryCta: { label: "See Our Work", href: "#work" },
     background: {
-      alt: "",
-      slotHint: "Wide site photograph — switchgear room, plant room or a live installation",
+      src: "/images/hero-skyline.webp",
+      alt: "City skyline of high-rise towers seen from above at first light",
+      aspectRatio: 16 / 9,
     },
     // Every figure here is checkable against the company's own material.
     metrics: [
@@ -223,8 +224,9 @@ export const fallbackHome: HomePageContent = {
       category: "Commercial",
       featured: true,
       cover: {
-        alt: "",
-        slotHint: "Distribution panels under maintenance — wide crop",
+        src: "/images/switchgear-assembly.webp",
+        alt: "Electricians assembling and wiring switchgear panels in a workshop",
+        aspectRatio: 1,
       },
     },
     {
@@ -233,8 +235,9 @@ export const fallbackHome: HomePageContent = {
       slug: "green-enterprises",
       category: "Commercial",
       cover: {
-        alt: "",
-        slotHint: "Building exterior or plant room — vertical crop",
+        src: "/images/site-team-review.webp",
+        alt: "Site team reviewing drawings in front of a concrete frame",
+        aspectRatio: 1,
       },
     },
     {
@@ -243,8 +246,9 @@ export const fallbackHome: HomePageContent = {
       slug: "reliable-energy",
       category: "Commercial",
       cover: {
-        alt: "",
-        slotHint: "Power backup, generator or switchgear installation",
+        src: "/images/switchgear-assembly.webp",
+        alt: "Electricians assembling and wiring switchgear panels in a workshop",
+        aspectRatio: 1,
       },
     },
     {
@@ -253,8 +257,9 @@ export const fallbackHome: HomePageContent = {
       slug: "branding-ideas",
       category: "Commercial",
       cover: {
-        alt: "",
-        slotHint: "Fit-out or interior systems installation",
+        src: "/images/site-tower-construction.webp",
+        alt: "Tower under construction with a crane above the exposed frame",
+        aspectRatio: 1289 / 860,
       },
     },
   ],
@@ -266,6 +271,11 @@ export const fallbackHome: HomePageContent = {
       title: "Understand",
       description:
         "Requirements, site conditions and constraints are established before anything is priced.",
+      image: {
+        src: "/images/site-team-review.webp",
+        alt: "Site team reviewing drawings in front of a concrete frame",
+        aspectRatio: 1,
+      },
     },
     {
       _id: "prc-2",
@@ -273,6 +283,11 @@ export const fallbackHome: HomePageContent = {
       title: "Design",
       description:
         "Drawings, load calculations and specifications are issued for approval.",
+      image: {
+        src: "/images/divisions/engineering.webp",
+        alt: "Rolled drawings, a floor plan on a clipboard and a pair of dividers",
+        aspectRatio: 1,
+      },
     },
     {
       _id: "prc-3",
@@ -280,6 +295,11 @@ export const fallbackHome: HomePageContent = {
       title: "Build",
       description:
         "Installation, testing and commissioning by in-house crews across every discipline.",
+      image: {
+        src: "/images/site-tower-construction.webp",
+        alt: "Tower under construction with a crane above the exposed frame",
+        aspectRatio: 1289 / 860,
+      },
     },
     {
       _id: "prc-4",
@@ -287,6 +307,11 @@ export const fallbackHome: HomePageContent = {
       title: "Support",
       description:
         "Scheduled maintenance and fault response continue after handover.",
+      image: {
+        src: "/images/divisions/maintenance.webp",
+        alt: "Servicing tools laid out for a scheduled maintenance visit",
+        aspectRatio: 1,
+      },
     },
   ],
 
@@ -306,8 +331,9 @@ export const fallbackHome: HomePageContent = {
     lead: "Send us the scope and we will come back with an engineered answer, not a guess.",
     cta: { label: "Request a Quote", href: "#contact" },
     background: {
-      alt: "",
-      slotHint: "Wide building or site photograph for the closing banner",
+      src: "/images/hero-skyline.webp",
+      alt: "City skyline of high-rise towers seen from above at first light",
+      aspectRatio: 16 / 9,
     },
   },
 };

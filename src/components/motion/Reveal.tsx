@@ -1,48 +1,134 @@
-import { Children, cloneElement, isValidElement } from "react";
-import type { CSSProperties, ReactElement, ReactNode } from "react";
+"use client";
+
+import {
+  Children,
+  cloneElement,
+  isValidElement,
+  useRef,
+  useSyncExternalStore,
+} from "react";
+import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import type { ReactElement, ReactNode } from "react";
 
 /**
- * Scroll reveals, built as progressive enhancement.
+ * Scroll-linked reveals.
  *
- * These are server components that emit a `data-reveal` attribute and nothing
- * else — no per-instance JavaScript. The hidden state lives in CSS behind a
- * `.js` class that an inline script in the document head sets before first
- * paint, so:
+ * These are tied to scroll *position*, not to a one-shot trigger: an element
+ * arrives as you scroll down to it and retreats as you scroll back up, and if
+ * you stop halfway it sits halfway. Nothing is ever latched, so there is no
+ * state to get stuck and no "already revealed" flag to reason about.
  *
- *   - without JavaScript, or if hydration fails, every section is simply
- *     visible rather than a page of invisible content;
- *   - under `prefers-reduced-motion` the CSS opts out entirely;
- *   - one IntersectionObserver (`RevealObserver`) drives the whole page.
+ * The earlier version was an IntersectionObserver that added `.is-revealed`
+ * once and unobserved the node. That could only ever play forwards.
  *
- * The earlier version used Motion's `initial={{ opacity: 0 }}`, which bakes
- * `opacity: 0` into the server-rendered HTML — the page depended on JS to
- * become readable at all.
+ * Two properties are load-bearing:
+ *
+ *   - Arrival completes while the element is still low in the viewport, well
+ *     before it reaches a comfortable reading position. Anything you can read
+ *     is at full opacity, and the last block on the page still finishes even
+ *     though the document runs out of scroll underneath it.
+ *   - The server renders no hidden state. Without JavaScript, or before
+ *     hydration, the page is simply visible — the `.js` class trick the old CSS
+ *     needed is gone with it.
  */
 
-type RevealStyle = CSSProperties & {
-  "--reveal-delay"?: string;
-  "--reveal-y"?: string;
-};
+/**
+ * Viewport fraction at which a scene starts moving — its top edge a tenth of
+ * the way in, rather than the instant it clears the bottom edge. A tall block
+ * that starts on the boundary has already finished by the time enough of it is
+ * on screen to be worth watching.
+ */
+const ENTER = 0.9;
+/**
+ * Viewport fraction at which a scene has fully arrived.
+ *
+ * Measured, not guessed: at 0.74 the first Process card reached full opacity
+ * with its top 725px down a 900px viewport — a 175px sliver, 26% of the card.
+ * Arriving at 0.52 puts the top near the middle of the screen, so the block is
+ * comfortably in view while it is still moving.
+ */
+const ARRIVE = 0.52;
+/** How far up the viewport each step of a sequence pushes its arrival point. */
+const SEQUENCE_SPREAD = 0.28;
+/** A long sequence must not push arrival past here, or it never completes. */
+const ARRIVE_FLOOR = 0.3;
+/** Opacity before arrival. Low enough to read as an entrance, never zero. */
+const REST_OPACITY = 0.15;
 
-type RevealProps = {
+type SceneProps = {
   children: ReactNode;
   className?: string;
-  /** Seconds. Use sparingly — a long chain of delays reads as a slideshow. */
-  delay?: number;
-  /** Travel distance in px. Kept small on purpose. */
+  /**
+   * Position in a sequence. Unlike a delay in seconds, this shifts *where in
+   * the scroll* the element arrives, so the sequence reads the same however
+   * fast you scroll — and runs backwards when you scroll up.
+   */
+  order?: number;
+  /** Travel distance in px. Enough to read as movement, not as a slide. */
   y?: number;
 };
 
-export function Reveal({ children, className, delay = 0, y = 14 }: RevealProps) {
-  const style: RevealStyle = {
-    "--reveal-delay": `${delay}s`,
-    "--reveal-y": `${y}px`,
-  };
+/**
+ * Motion renders its values into the markup, and on the server scroll progress
+ * is necessarily zero — so styling these scenes unconditionally would ship
+ * `opacity: 0.15`, `translateY(32px)` and a closed clip-path to anyone without
+ * JavaScript, leaving the page permanently dimmed and the About photograph
+ * invisible. The styles are therefore withheld until after hydration: the
+ * server sends an ordinary, fully visible page, which is what the retired
+ * `.js` class was protecting.
+ *
+ * Nothing visible moves when they land. An element already on screen measures
+ * at progress 1, so it is styled to exactly where it already was; only content
+ * below the fold starts from its resting state, where no one can see it.
+ */
+const neverChanges = () => () => {};
+
+function useHydrated() {
+  // Read as an external store rather than a state-setting effect, matching
+  // useMediaQuery: the server snapshot is false, the client snapshot is true,
+  // and there is nothing to subscribe to because it only ever resolves once.
+  return useSyncExternalStore(
+    neverChanges,
+    () => true,
+    () => false,
+  );
+}
+
+/**
+ * The scroll range for one scene, and whether it should move at all.
+ * `useScroll` is called unconditionally — hooks cannot be skipped — and its
+ * output is simply ignored when motion is not wanted.
+ */
+function useScene(order: number) {
+  const ref = useRef<HTMLDivElement>(null);
+  const prefersReduced = useReducedMotion();
+  const hydrated = useHydrated();
+  const arrive = Math.max(ARRIVE_FLOOR, ARRIVE - order * SEQUENCE_SPREAD);
+
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: [`start ${ENTER}`, `start ${arrive}`],
+  });
+
+  return { ref, progress: scrollYProgress, enabled: hydrated && !prefersReduced };
+}
+
+export function Reveal({ children, className, order = 0, y = 32 }: SceneProps) {
+  const { ref, progress, enabled } = useScene(order);
+
+  // Opacity lands ahead of the travel, so the element is readable while it is
+  // still settling rather than arriving all at once.
+  const opacity = useTransform(progress, [0, 0.7], [REST_OPACITY, 1]);
+  const translate = useTransform(progress, [0, 1], [y, 0]);
 
   return (
-    <div className={className} data-reveal="rise" style={style}>
+    <motion.div
+      ref={ref}
+      className={className}
+      style={enabled ? { opacity, y: translate } : undefined}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }
 
@@ -50,26 +136,26 @@ export function Reveal({ children, className, delay = 0, y = 14 }: RevealProps) 
  * A list whose items arrive in sequence. Only used where the content is
  * genuinely a list — a stagger applied to unrelated blocks reads as decoration.
  *
- * Delays are handed to the children here rather than computed in CSS, so the
- * sequence survives any number of items.
+ * The sequence is handed to the children here rather than computed in CSS, so
+ * it survives any number of items.
  */
 export function Stagger({
   children,
   className,
   gap = 0.06,
-  delay = 0,
+  order = 0,
 }: {
   children: ReactNode;
   className?: string;
   gap?: number;
-  delay?: number;
+  order?: number;
 }) {
   return (
     <div className={className}>
       {Children.map(children, (child, index) =>
-        isValidElement<{ delay?: number }>(child)
-          ? cloneElement(child as ReactElement<{ delay?: number }>, {
-              delay: delay + index * gap,
+        isValidElement<{ order?: number }>(child)
+          ? cloneElement(child as ReactElement<{ order?: number }>, {
+              order: order + index * gap,
             })
           : child,
       )}
@@ -77,33 +163,35 @@ export function Stagger({
   );
 }
 
-export function StaggerItem({
-  children,
-  className,
-  y = 14,
-  delay = 0,
-}: RevealProps) {
+export function StaggerItem({ children, className, y = 32, order = 0 }: SceneProps) {
   return (
-    <Reveal className={className} y={y} delay={delay}>
+    <Reveal className={className} y={y} order={order}>
       {children}
     </Reveal>
   );
 }
 
 /**
- * A wipe that uncovers an image from its lower edge. Used on the two large
- * images only; on every image it would be a gimmick.
+ * A wipe that uncovers an image from its lower edge, scrubbed by scroll so it
+ * covers again on the way back up. Used on the two large images only; on every
+ * image it would be a gimmick.
+ *
+ * This one arrives earlier than a `Reveal` does — a half-wiped photograph is
+ * more conspicuous than a half-faded paragraph.
  */
 export function ImageReveal({
   children,
   className,
-  delay = 0,
-}: Omit<RevealProps, "y">) {
-  const style: RevealStyle = { "--reveal-delay": `${delay}s` };
+  order = 0,
+}: Omit<SceneProps, "y">) {
+  const { ref, progress, enabled } = useScene(order);
+
+  const inset = useTransform(progress, [0, 0.85], [100, 0]);
+  const clipPath = useTransform(inset, (value) => `inset(${value}% 0 0 0)`);
 
   return (
-    <div className={className} data-reveal="wipe" style={style}>
+    <motion.div ref={ref} className={className} style={enabled ? { clipPath } : undefined}>
       {children}
-    </div>
+    </motion.div>
   );
 }

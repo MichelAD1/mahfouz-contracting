@@ -27,7 +27,7 @@ export function About({ about }: { about: AboutContent }) {
       </Reveal>
 
       <div className="mt-[clamp(2.5rem,5vw,4.5rem)] grid gap-[clamp(2.5rem,5vw,5rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,0.88fr)] lg:items-start">
-        <Reveal delay={0.08}>
+        <Reveal order={0.14}>
           <div className="max-w-[62ch]">
             {about.body.map((paragraph, index) => (
               <p
@@ -58,7 +58,7 @@ export function About({ about }: { about: AboutContent }) {
 
           {about.metrics.length > 0 ? (
             <Reveal
-              delay={0.24}
+              order={0.42}
               className="lg:absolute lg:bottom-0 lg:left-0 lg:w-[16.5rem] lg:translate-y-8"
             >
               <dl className="bg-ink p-6 lg:p-7">
