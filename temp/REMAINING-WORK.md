@@ -352,14 +352,51 @@ just shrug:
 - A rejected submit echoes the values back, so nobody retypes a scope because
   they mistyped an email
 
-### How it was verified
+### The bug this step shipped, and what it changes
 
-A Next server action cannot be replayed with `curl` — its arguments are encoded
-into the React flight stream, and a hand-built POST returns "Connection closed".
-So the rules moved out of the action into `lib/enquiry.ts`, which has no
-framework attached, and were exercised directly with Node's type stripping: 25
-checks on validation, the honeypot, the time trap and composition, plus 7 on the
-delivery adapter.
+The first version exported `initialContactState` from `actions.ts`. A
+`"use server"` module may export **only async functions**, so every submission
+died at module evaluation:
+
+> A "use server" file can only export async functions, found object.
+
+`ContactState` and `initialContactState` now live in `lib/enquiry.ts`. A type
+export is erased and harmless; a value export is not.
+
+**Why it was not caught:** the checks covered the rules and the delivery
+adapter, and the build passes — this fails at runtime on POST, not at compile
+time. Attempts to replay the action with `curl` returned "Connection closed",
+which I read as a `curl` limitation. It was the bug, surfacing as a broken
+stream, and reading it as a tooling limit is what let it ship.
+
+**The lesson, worth keeping:** "the pure logic is tested and the build is green"
+is not the same as "the feature works". Anything with a framework seam needs
+that seam exercised. A `"use server"` file should be audited for non-async
+exports:
+
+```
+for f in $(grep -rl '^"use server"' src/); do grep -nE '^export ' "$f"; done
+```
+
+### How it is verified now
+
+The action was exercised end to end through a temporary route handler that
+calls `submitEnquiry` in the real Next runtime, then deleted. All four paths
+confirmed:
+
+| Input | Result |
+|---|---|
+| Valid enquiry | `success`, with the phone number resolved from site settings |
+| Bad email, one-char name, two-char message | `error` with all three field messages **and the values echoed back** |
+| Honeypot filled | Silent discard — indistinguishable from success, so a bot learns nothing |
+| Submitted instantly | Silent discard |
+
+The recipient resolved to `CONTACT_RECIPIENT_EMAIL`, and the composed subject
+and body were confirmed in the server log.
+
+Alongside that, the rules live in `lib/enquiry.ts` with no framework attached
+and are exercised directly with Node's type stripping: 25 checks on validation,
+the honeypot, the time trap and composition, plus 7 on the delivery adapter.
 
 Those checks live in the scratchpad, not the repo — this repo has no test setup
 and adding one was not in scope. They need no dependencies, so they are cheap to

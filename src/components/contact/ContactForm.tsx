@@ -1,11 +1,8 @@
 "use client";
 
 import { useActionState, useEffect, useId, useRef } from "react";
-import {
-  initialContactState,
-  submitEnquiry,
-  type ContactState,
-} from "@/app/contact/actions";
+import { submitEnquiry } from "@/app/contact/actions";
+import { initialContactState, type ContactState } from "@/lib/enquiry";
 import { mailHref, telHref } from "@/lib/format";
 import type { SiteSettings } from "@/sanity/lib/types";
 

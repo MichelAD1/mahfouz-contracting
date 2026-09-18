@@ -7,6 +7,26 @@
  * only ever gets tested by hand.
  */
 
+export type ContactState = {
+  status: "idle" | "success" | "error";
+  message?: string;
+  /** Keyed by input name, so each field can show its own problem. */
+  errors?: Record<string, string>;
+  /**
+   * Echoed back on failure. Without this a rejected submit clears the form and
+   * the visitor retypes everything, which is how one mistake becomes a lost
+   * enquiry.
+   */
+  values?: Record<string, string>;
+};
+
+/**
+ * Lives here rather than beside the action because a `"use server"` module may
+ * only export async functions — exporting this object from there makes every
+ * submission fail with "A 'use server' file can only export async functions".
+ */
+export const initialContactState: ContactState = { status: "idle" };
+
 /** Deliberately loose. The only authority on whether an address works is sending to it. */
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 

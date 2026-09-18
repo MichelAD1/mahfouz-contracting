@@ -8,23 +8,17 @@ import {
   isTooFast,
   readValues,
   validate,
+  type ContactState,
 } from "@/lib/enquiry";
 import { getContact, getSiteFrame } from "@/sanity/lib/fetch";
 
-export type ContactState = {
-  status: "idle" | "success" | "error";
-  message?: string;
-  /** Keyed by input name, so each field can show its own problem. */
-  errors?: Record<string, string>;
-  /**
-   * Echoed back on failure. Without this a rejected submit clears the form and
-   * the visitor retypes everything, which is how one mistake becomes a lost
-   * enquiry.
-   */
-  values?: Record<string, string>;
-};
-
-export const initialContactState: ContactState = { status: "idle" };
+/**
+ * `ContactState` and `initialContactState` live in @/lib/enquiry, not here: a
+ * `"use server"` module may export **only async functions**. Exporting a type
+ * is erased and harmless, but exporting the initial-state object made every
+ * submission fail at module evaluation with "A 'use server' file can only
+ * export async functions, found object". Keep this file to actions.
+ */
 
 /** Shown to whatever filled the form blind, so it learns nothing from the reply. */
 const DISCARDED: ContactState = {
