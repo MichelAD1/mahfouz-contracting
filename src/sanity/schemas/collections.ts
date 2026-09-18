@@ -43,8 +43,9 @@ export const service = defineType({
     defineField({
       name: "fullDescription",
       type: "array",
-      of: [{ type: "block" }],
-      description: "The service's own page.",
+      of: [{ type: "text", rows: 4 }],
+      description:
+        "One entry per paragraph, shown on the services page. Falls back to the short description when empty.",
     }),
     defineField({
       name: "features",

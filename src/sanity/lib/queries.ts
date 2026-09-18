@@ -20,6 +20,22 @@ const CTA = groq`{ label, href }`;
 /** A division, dereferenced from the service it points at. */
 const DIVISION = groq`{ _id, title, "slug": slug.current }`;
 
+/** Site-wide settings. Shared by the home query and the layout frame. */
+const SETTINGS = groq`{
+  companyName, shortName, descriptor, tagline,
+  phones[]{ label, number },
+  emails,
+  address{ lines },
+  socials[]{ platform, url },
+  nav[]{ label, href },
+  footerNote
+}`;
+
+const SERVICE = groq`{
+  _id, title, code, "slug": slug.current, shortDescription, fullDescription, features,
+  "image": image${IMAGE}
+}`;
+
 /**
  * Everything a project card needs and nothing else. Shared by the home page
  * section and the projects index so the two cannot drift, and so a listing
@@ -36,15 +52,7 @@ const PROJECT_CARD = groq`{
  * so there is no client-side fetching and no request waterfall.
  */
 export const HOME_QUERY = groq`{
-  "settings": *[_type == "siteSettings"][0]{
-    companyName, shortName, descriptor, tagline,
-    phones[]{ label, number },
-    emails,
-    address{ lines },
-    socials[]{ platform, url },
-    nav[]{ label, href },
-    footerNote
-  },
+  "settings": *[_type == "siteSettings"][0]${SETTINGS},
   "hero": *[_type == "hero"][0]{
     headingLines, lead,
     "primaryCta": primaryCta${CTA},
@@ -58,10 +66,7 @@ export const HOME_QUERY = groq`{
     "images": images[]${IMAGE},
     "metrics": metrics[]${METRIC}
   },
-  "services": *[_type == "service"]|order(order asc){
-    _id, title, code, "slug": slug.current, shortDescription, features,
-    "image": image${IMAGE}
-  },
+  "services": *[_type == "service"]|order(order asc)${SERVICE},
   "projects": *[_type == "project"]|order(featured desc, order asc)${PROJECT_CARD},
   "process": *[_type == "process"]|order(order asc){
     _id, step, title, description,
@@ -75,6 +80,39 @@ export const HOME_QUERY = groq`{
     "cta": cta${CTA},
     "background": background${IMAGE}
   }
+}`;
+
+/**
+ * Everything the shared header and footer need, and nothing a page owns.
+ *
+ * The layout renders on every route, so this is the one query that runs on all
+ * of them. Keeping it separate from HOME_QUERY means an inner page pulls the
+ * navigation and the footer without also pulling the home page's hero.
+ */
+export const SITE_FRAME_QUERY = groq`{
+  "settings": *[_type == "siteSettings"][0]${SETTINGS},
+  "services": *[_type == "service"]|order(order asc){ _id, title, "slug": slug.current }
+}`;
+
+export const SERVICES_QUERY = groq`*[_type == "service"]|order(order asc)${SERVICE}`;
+
+export const PROCESS_QUERY = groq`*[_type == "process"]|order(order asc){
+  _id, step, title, description,
+  "image": image${IMAGE}
+}`;
+
+/** The closing banner, which every page ends on. */
+export const CLOSING_CTA_QUERY = groq`*[_type == "closingCta"][0]{
+  heading, lead,
+  "cta": cta${CTA},
+  "background": background${IMAGE}
+}`;
+
+export const ABOUT_QUERY = groq`*[_type == "about"][0]{
+  sheet, statement, body,
+  "cta": cta${CTA},
+  "images": images[]${IMAGE},
+  "metrics": metrics[]${METRIC}
 }`;
 
 export const PROJECT_SLUGS_QUERY = groq`*[_type == "project" && defined(slug.current)].slug.current`;

@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { MotionProvider } from "@/components/motion/MotionProvider";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
+import { getSiteFrame } from "@/sanity/lib/fetch";
 import "./globals.css";
 
 /**
@@ -47,7 +50,9 @@ export const metadata: Metadata = {
       "Integrated electrical, mechanical, IT and automation works, engineered and maintained in-house.",
     url: siteUrl,
   },
-  alternates: { canonical: "/" },
+  // No canonical here on purpose. A canonical in the root layout is inherited
+  // by every page, so each one would declare itself a duplicate of the home
+  // page. Canonicals are set per page instead.
 };
 
 export const viewport: Viewport = {
@@ -55,9 +60,16 @@ export const viewport: Viewport = {
   colorScheme: "light",
 };
 
-export default function RootLayout({
+/**
+ * The header and footer live here rather than in each page, so a new route
+ * gets the site's chrome by existing. `<main id="main">` is here for the same
+ * reason: the skip link cannot silently stop working on a page that forgot it.
+ */
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const { settings, services } = await getSiteFrame();
+
   return (
     <html
       lang="en"
@@ -70,7 +82,11 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <MotionProvider>{children}</MotionProvider>
+        <MotionProvider>
+          <Header settings={settings} />
+          <main id="main">{children}</main>
+          <Footer settings={settings} services={services} />
+        </MotionProvider>
       </body>
     </html>
   );

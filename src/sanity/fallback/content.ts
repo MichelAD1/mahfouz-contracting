@@ -35,11 +35,11 @@ export const fallbackHome: HomePageContent = {
     // TODO(client): the live site's social links point at AxiomThemes accounts.
     socials: [],
     nav: [
-      { label: "About", href: "#about" },
-      { label: "Capabilities", href: "#capabilities" },
-      { label: "Work", href: "#work" },
-      { label: "Process", href: "#process" },
-      { label: "Contact", href: "#contact" },
+      { label: "Home", href: "/" },
+      { label: "About", href: "/about" },
+      { label: "Services", href: "/services" },
+      { label: "Projects", href: "/projects" },
+      { label: "Contact", href: "/contact" },
     ],
     footerNote: "Engineering, contracting and maintenance",
   },
@@ -47,8 +47,8 @@ export const fallbackHome: HomePageContent = {
   hero: {
     headingLines: ["Engineering", "solutions.", "Built to last."],
     lead: "Integrated electrical, mechanical, IT and automation works for commercial, industrial and institutional clients — engineered, installed and maintained in-house.",
-    primaryCta: { label: "Request a Quote", href: "#contact" },
-    secondaryCta: { label: "See Our Work", href: "#work" },
+    primaryCta: { label: "Request a Quote", href: "/contact" },
+    secondaryCta: { label: "See Our Work", href: "/projects" },
     background: {
       src: "/images/hero-skyline.webp",
       alt: "City skyline of high-rise towers seen from above at first light",
@@ -90,7 +90,7 @@ export const fallbackHome: HomePageContent = {
       "Mahfouz Contracting delivers integrated electrical, mechanical, IT and automation works for commercial, industrial and institutional clients. Design, supply, installation and commissioning are handled by our own divisions.",
       "The approach is straightforward: understand the requirement, engineer it properly, build it to standard, and support it for as long as it runs.",
     ],
-    cta: { label: "See our capabilities", href: "#capabilities" },
+    cta: { label: "See our capabilities", href: "/services" },
     // One image only. TODO(client): replace with a dedicated photograph of the
     // team on site — this file is also used by the Electrical division.
     images: [
@@ -329,7 +329,7 @@ export const fallbackHome: HomePageContent = {
   closingCta: {
     heading: "Have a project in mind?",
     lead: "Send us the scope and we will come back with an engineered answer, not a guess.",
-    cta: { label: "Request a Quote", href: "#contact" },
+    cta: { label: "Request a Quote", href: "/contact" },
     background: {
       src: "/images/hero-skyline.webp",
       alt: "City skyline of high-rise towers seen from above at first light",

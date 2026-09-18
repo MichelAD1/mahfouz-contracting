@@ -1,11 +1,10 @@
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
+import type { Metadata } from "next";
+import { LinkUnderline } from "@/components/primitives/Button";
 import { SectionShell } from "@/components/primitives/SectionShell";
 import { Hero } from "@/components/sections/Hero";
 import { About } from "@/components/sections/About";
 import { Capabilities } from "@/components/sections/Capabilities";
 import { SelectedWork } from "@/components/sections/SelectedWork";
-import { Process } from "@/components/sections/Process";
 import { Partners } from "@/components/sections/Partners";
 import { ClosingCta } from "@/components/sections/ClosingCta";
 import { getHomePage } from "@/sanity/lib/fetch";
@@ -14,44 +13,44 @@ import { getHomePage } from "@/sanity/lib/fetch";
 // step with REVALIDATE in src/sanity/lib/fetch.ts.
 export const revalidate = 300;
 
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
+
+/**
+ * The home page sells; it does not carry the whole site.
+ *
+ * About and the process detail now live on /about, and the full division
+ * write-ups on /services. What stays here is the shortest version of each that
+ * still stands on its own, with a way through to the page that goes deeper —
+ * so the two pages are not competing for the same search with the same words.
+ */
 export default async function HomePage() {
-  const { settings, hero, about, services, projects, process, partners, closingCta } =
+  const { settings, hero, about, services, projects, partners, closingCta } =
     await getHomePage();
 
   return (
     <>
-      <Header settings={settings} />
+      <Hero hero={hero} settings={settings} />
 
-      <main id="main">
-        <Hero hero={hero} settings={settings} />
+      <About about={about} condensed />
 
-        <About about={about} />
+      <SectionShell id="services" code="S.02" label="Capabilities">
+        <Capabilities services={services} />
+        <div className="mt-[clamp(2rem,3.5vw,3rem)] border-t border-rule-strong pt-6">
+          <LinkUnderline href="/services">All services</LinkUnderline>
+        </div>
+      </SectionShell>
 
-        <SectionShell id="capabilities" code="S.02" label="Capabilities">
-          <Capabilities services={services} />
-        </SectionShell>
+      <SectionShell id="work" code="S.03" label="Selected work">
+        <SelectedWork projects={projects} />
+      </SectionShell>
 
-        <SectionShell id="work" code="S.03" label="Selected work">
-          <SelectedWork projects={projects} />
-        </SectionShell>
+      <SectionShell className="bg-paper-bright" size="compact">
+        <Partners partners={partners} />
+      </SectionShell>
 
-        <SectionShell
-          id="process"
-          code="S.04"
-          label="How we work"
-          className="bg-paper-bright"
-        >
-          <Process steps={process} />
-        </SectionShell>
-
-        <SectionShell className="bg-paper-bright" size="compact">
-          <Partners partners={partners} />
-        </SectionShell>
-
-        <ClosingCta content={closingCta} />
-      </main>
-
-      <Footer settings={settings} services={services} />
+      <ClosingCta content={closingCta} />
     </>
   );
 }

@@ -124,7 +124,7 @@ export function MobileMenu({ open, onClose, nav, settings }: Props) {
               ))}
             </ul>
             <Link
-              href="#contact"
+              href="/contact"
               onClick={onClose}
               className="mt-6 flex w-full items-center justify-center bg-paper-bright px-6 py-5 display-narrow text-[0.8125rem] font-semibold uppercase tracking-[0.08em] text-ink transition-colors duration-300 hover:bg-copper hover:text-paper-bright"
             >

@@ -15,8 +15,21 @@ import type { About as AboutContent } from "@/sanity/lib/types";
  * section, and a grey placeholder overlapping a real photo looks worse than
  * either on its own.
  */
-export function About({ about }: { about: AboutContent }) {
+export function About({
+  about,
+  condensed = false,
+}: {
+  about: AboutContent;
+  /**
+   * The home page's version: the statement, one paragraph, and a way through
+   * to /about. The full body belongs to one page only, or the two compete for
+   * the same search with the same words.
+   */
+  condensed?: boolean;
+}) {
   const [image] = about.images;
+  const body = condensed ? about.body.slice(0, 1) : about.body;
+  const cta = condensed ? { label: "More about us", href: "/about" } : about.cta;
 
   return (
     <SectionShell id="about" code="S.01" label={about.sheet} divided={false}>
@@ -29,7 +42,7 @@ export function About({ about }: { about: AboutContent }) {
       <div className="mt-[clamp(2.5rem,5vw,4.5rem)] grid gap-[clamp(2.5rem,5vw,5rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,0.88fr)] lg:items-start">
         <Reveal order={0.14}>
           <div className="max-w-[62ch]">
-            {about.body.map((paragraph, index) => (
+            {body.map((paragraph, index) => (
               <p
                 key={paragraph.slice(0, 32)}
                 className={`t-lead ${index > 0 ? "mt-5 text-steel" : "text-ink/85"}`}
@@ -39,7 +52,7 @@ export function About({ about }: { about: AboutContent }) {
             ))}
 
             <div className="mt-10">
-              <LinkUnderline href={about.cta.href}>{about.cta.label}</LinkUnderline>
+              <LinkUnderline href={cta.href}>{cta.label}</LinkUnderline>
             </div>
           </div>
         </Reveal>

@@ -1,6 +1,6 @@
 # Mahfouz Contracting — remaining work to launch
 
-**Status:** Step 1 of 7 complete — awaiting go-ahead for Step 2
+**Status:** Step 2 of 7 complete — awaiting go-ahead for Step 3
 
 Supersedes the previous draft. Companion to `temp/PLAN.md`, which covers the
 original build; this file is only what is left.
@@ -10,7 +10,7 @@ original build; this file is only what is left.
 ## Steps
 
 - [x] Step 1: Sanity foundation — connect `wwicg618`, expand the project schema, finish the read layer
-- [ ] Step 2: Convert the single page into a multi-page site (nav, `/about`, `/services`, shared layout)
+- [x] Step 2: Convert the single page into a multi-page site (nav, `/about`, `/services`, shared layout)
 - [ ] Step 3: Projects — home section, `/projects` index, `/projects/[slug]` detail
 - [ ] Step 4: Contact page with a working enquiry form
 - [ ] Step 5: Partner logo bar with an auto-scrolling marquee
@@ -29,26 +29,24 @@ Both quality gates are **clean** on `main`: `npm run lint` exit 0,
 |---|---|---|
 | `/` | 200 | — |
 | `/studio` | 200, and now on an allowed CORS origin | — |
-| `/about` | **404** | Step 2 |
-| `/services` | **404** | Step 2 |
+| `/about` | 200 | done |
+| `/services` | 200 | done |
 | `/projects` | **404** — linked from "All projects" | Step 3 |
 | `/projects/<slug>` | **404** — every project tile links here | Step 3 |
 | `/contact` | **404** | Step 4 |
 | `/sitemap.xml` | **404** | Step 6 |
 | `/robots.txt` | **404** | Step 6 |
 
-Other confirmed defects:
+Defects, and where they stand:
 
-1. `alternates: { canonical: "/" }` sits in the **root layout**, so every page
-   added in Steps 2, 3 and 4 inherits a canonical pointing at the home page.
-   This is the one defect that actively breaks new pages, so it moves to the
-   front of Step 2 rather than waiting for Step 6.
-2. No Open Graph image — shared links render a blank card.
-3. The `contact` **schema exists** but is wired to nothing: no entry in
-   `queries.ts`, `types.ts` or `fetch.ts`.
-4. "Request a Quote" appears three times (Hero, Header, ClosingCta) and all
-   three resolve to `#contact`, which is `Footer.tsx:16`. The only action there
-   is a `mailto:` via `mailHref`.
+1. ~~`alternates: { canonical: "/" }` in the **root layout**, inherited by every
+   new page~~ — **fixed in Step 2.** Canonicals are set per page and verified.
+2. ~~The `contact` schema wired to nothing~~ — **fixed in Step 1.** It has a
+   type, a query and a fetcher; the page that uses them arrives in Step 4.
+3. ~~All three "Request a Quote" CTAs resolving to a footer `mailto:`~~ —
+   **repointed to `/contact` in Step 2.** That route 404s until Step 4, so the
+   CTA is not usable end to end yet. It is the next visitor-facing gap.
+4. No Open Graph image — shared links still render a blank card. Step 6.
 
 ---
 
@@ -186,29 +184,55 @@ from. Google indexes **URLs**, not sections: `/#services` is not a result, it is
 the home page. Five divisions across two countries currently compete for one
 title, one description and one `<h1>`.
 
-- [ ] Nav becomes **Home · About · Services · Projects · Contact**, in
-      `fallback/content.ts`, `Header.tsx` and `MobileMenu.tsx`
-- [ ] Move `Header`/`Footer` into `app/layout.tsx` so every page shares them
-      instead of each page re-mounting its own
-- [ ] `app/about/page.tsx` — built from the existing `About` section, expanded
-- [ ] `app/services/page.tsx` — built from the existing `Capabilities` section,
-      one block per division
-- [ ] Home keeps condensed versions of both, each linking to the full page —
-      the home page should still sell, not become a table of contents
-- [ ] Footer gains the design's three-column structure (Navigate / Services /
-      Contact)
-- [ ] **Move `alternates.canonical` out of the root layout**; set it per page
-- [ ] Keep `#about`, `#services`, `#work` anchors resolving on the home page so
-      existing inbound links do not break
+**Done.** `npm run lint` exit 0, `npx tsc --noEmit` exit 0, `npm run build`
+exit 0 with `/`, `/about` and `/services` all statically prerendered.
 
-### One thing I need from you
+- [x] Nav is **Home · About · Services · Projects · Contact**, in
+      `fallback/content.ts`, and both CTAs now point at `/contact`
+- [x] `Header`, `Footer` and `<main id="main">` moved into `app/layout.tsx`, so
+      a new route gets the site's chrome — and a working skip link — by existing
+- [x] `app/about/page.tsx`
+- [x] `app/services/page.tsx`
+- [x] Home carries the condensed About and links through; the full write-ups
+      live on the dedicated pages only
+- [x] Footer's "Divisions" column became "Services", now linking to
+      `/services#<slug>` (all five anchors verified rendering)
+- [x] **`alternates.canonical` removed from the root layout**, set per page.
+      Verified: `/` → `/`, `/about` → `/about`, `/services` → `/services`
+- [x] One `<h1>` per page, verified on all three
 
-There is no design for `/about` or `/services` — the folder only covers the two
-projects pages, and you asked me not to open the Home canvas. So I will build
-those two from the existing home sections in the established design language.
-They will be honest and consistent, but structurally plainer than the two
-designed pages. Say if you would rather design them first and have me build
-them later.
+### What moved, and why
+
+Duplicating the About and Capabilities copy across the home page and their own
+pages would have made them compete for the same search with the same words,
+which is the opposite of the reason for going multi-page. So:
+
+- **The full About body and the four-stage process now live on `/about` only.**
+  The home page keeps the statement, the first paragraph and a link across.
+- **The full division write-ups live on `/services` only.** The home page keeps
+  its accordion — it is the strongest thing in the original design and worth
+  keeping — plus an "All services" link. The accordion shows a name, a sentence
+  and four features; `/services` shows the full write-up, every feature and the
+  photograph at a size worth looking at. Same subject, genuinely different
+  depth, so both can exist.
+
+**`Process` is no longer on the home page.** That is the one visible change to a
+page you had already signed off, so flagging it rather than letting you find it.
+
+### A structural constraint worth recording
+
+Every inner page opens on a dark `PageHero`, and that is not a style choice. The
+header is transparent until you scroll past 60px and sets its own type in paper
+white; a light plate under it would leave the navigation invisible for the first
+screen. `/projects` in the design canvas already works this way, so the pattern
+was set — it just has to be kept for every new route.
+
+### Two new fetchers
+
+`getSiteFrame()` feeds the shared header and footer and is wrapped in React
+`cache()`, so the layout and a page asking for it in one render resolve a single
+query rather than two. `getClosingCta()` exists because four pages end on that
+banner and pulling the entire home page to render it would be absurd.
 
 ---
 

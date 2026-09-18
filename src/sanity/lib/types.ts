@@ -81,8 +81,22 @@ export type Service = {
   code: string;
   slug: string;
   shortDescription: string;
+  /** One entry per paragraph. Only the services page renders this. */
+  fullDescription?: string[];
   features: string[];
   image: SiteImage;
+};
+
+/** A division reduced to what the footer's list needs. */
+export type NavService = Pick<Service, "_id" | "title" | "slug">;
+
+/**
+ * What the shared header and footer run on. Fetched by the root layout, so it
+ * loads once per route rather than once per section.
+ */
+export type SiteFrame = {
+  settings: SiteSettings;
+  services: NavService[];
 };
 
 /** A label/value pair. Shared by project metadata and the contact page. */

@@ -1,13 +1,29 @@
+import { cache } from "react";
 import { client, isSanityConfigured } from "./client";
 import {
+  ABOUT_QUERY,
+  CLOSING_CTA_QUERY,
   CONTACT_QUERY,
   HOME_QUERY,
+  PROCESS_QUERY,
   PROJECTS_QUERY,
   PROJECT_QUERY,
   PROJECT_SLUGS_QUERY,
+  SERVICES_QUERY,
+  SITE_FRAME_QUERY,
 } from "./queries";
 import { fallbackContact, fallbackHome } from "@/sanity/fallback/content";
-import type { Contact, HomePageContent, Project, ProjectFull } from "./types";
+import type {
+  About,
+  ClosingCta,
+  Contact,
+  HomePageContent,
+  ProcessStep,
+  Project,
+  ProjectFull,
+  Service,
+  SiteFrame,
+} from "./types";
 
 /** Revalidation window for CMS content. */
 export const REVALIDATE = 300;
@@ -119,6 +135,79 @@ export function getProjects(): Promise<Project[]> {
     "projects",
     fallbackHome.projects,
     (result) => (Array.isArray(result) && result.length > 0 ? (result as Project[]) : null),
+  );
+}
+
+/**
+ * The header and footer, on every route.
+ *
+ * Wrapped in `cache` because the root layout and a page can both ask for it
+ * inside one render; React then resolves it once. Without that, adding a page
+ * that needs the settings would quietly double the query count on every route.
+ */
+export const getSiteFrame = cache(
+  (): Promise<SiteFrame> =>
+    fetchOrFallback(
+      "site frame",
+      SITE_FRAME_QUERY,
+      {},
+      "settings",
+      { settings: fallbackHome.settings, services: fallbackHome.services },
+      (result) => {
+        const frame = result as Partial<SiteFrame> | null;
+        if (!frame) return null;
+
+        return {
+          settings: mergeObject(fallbackHome.settings, frame.settings),
+          services: preferList(fallbackHome.services, frame.services),
+        };
+      },
+    ),
+);
+
+export function getAbout(): Promise<About> {
+  return fetchOrFallback(
+    "about",
+    ABOUT_QUERY,
+    {},
+    "about",
+    fallbackHome.about,
+    (result) => mergeObject(fallbackHome.about, result),
+  );
+}
+
+export function getClosingCta(): Promise<ClosingCta> {
+  return fetchOrFallback(
+    "closing cta",
+    CLOSING_CTA_QUERY,
+    {},
+    "closingCta",
+    fallbackHome.closingCta,
+    (result) => mergeObject(fallbackHome.closingCta, result),
+  );
+}
+
+export function getServices(): Promise<Service[]> {
+  return fetchOrFallback(
+    "services",
+    SERVICES_QUERY,
+    {},
+    "services",
+    fallbackHome.services,
+    (result) =>
+      Array.isArray(result) && result.length > 0 ? (result as Service[]) : null,
+  );
+}
+
+export function getProcess(): Promise<ProcessStep[]> {
+  return fetchOrFallback(
+    "process",
+    PROCESS_QUERY,
+    {},
+    "process",
+    fallbackHome.process,
+    (result) =>
+      Array.isArray(result) && result.length > 0 ? (result as ProcessStep[]) : null,
   );
 }
 

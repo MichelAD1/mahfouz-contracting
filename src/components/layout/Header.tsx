@@ -64,7 +64,7 @@ export function Header({ settings }: { settings: SiteSettings }) {
 
           <div className="flex items-center gap-3">
             <Link
-              href="#contact"
+              href="/contact"
               className={`hidden items-center px-6 py-3.5 display-narrow text-[0.75rem] font-semibold uppercase tracking-[0.08em] transition-colors duration-300 lg:inline-flex ${
                 solid
                   ? "bg-ink text-paper-bright hover:bg-copper"
