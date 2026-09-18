@@ -20,20 +20,8 @@ export function Hero({
 }) {
   const showPhoto = hasImage(hero.background);
 
-  /**
-   * On the hero's height, because it is not where you would look.
-   *
-   * `min-h` never binds: the headline, lead and data strip together are taller
-   * than any cap set here, so the section is sized by its content. What was
-   * actually pushing the data strip off a 1080p screen was the top padding —
-   * 13rem of it, under an 80px header. Cutting that to 8.5rem brought the whole
-   * hero, metrics included, back inside a 867px viewport.
-   *
-   * That is the difference the site showed at 80% browser zoom: the padding is
-   * clamped, so zooming out grew the viewport without growing the gap.
-   */
   return (
-    <section id="top" className="relative isolate flex min-h-[min(88svh,46rem)] flex-col justify-end overflow-hidden bg-ink">
+    <section id="top" className="relative isolate flex min-h-[min(94svh,54rem)] flex-col justify-end overflow-hidden bg-ink">
       {/* Background layer */}
       <Parallax className="absolute inset-0 -z-10" distance={78}>
         {showPhoto ? (
@@ -59,7 +47,7 @@ export function Hero({
         )}
       </Parallax>
 
-      <div className="shell pb-[clamp(2rem,3vw,3rem)] pt-[clamp(6.5rem,10vw,8.5rem)]">
+      <div className="shell pb-[clamp(2.5rem,4vw,4rem)] pt-[clamp(9rem,16vw,13rem)]">
         <h1 className="display t-hero max-w-[18ch] text-paper-bright">
           {hero.headingLines.map((line, index) => (
             <span
