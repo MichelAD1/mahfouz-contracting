@@ -26,13 +26,19 @@ export function Hero({
   const showPhoto = hasImage(hero.background);
 
   /**
-   * 88svh, not 94. Now that the strip is compact the content is shorter than
-   * this, so `min-h` is what actually sets the height — and at 94svh the
-   * sheet's footer line sat in the last 6% of the viewport, clipping on any
-   * browser whose chrome is a little taller than the one it was measured on.
+   * A full viewport, with no cap.
+   *
+   * `svh` rather than `vh` so a mobile browser's expanded address bar cannot
+   * push the sheet's footer line under the fold — `vh` measures the viewport as
+   * if that bar were hidden, which it is not on first load.
+   *
+   * The section is `justify-end`, so the content sits on the bottom edge and
+   * the extra height opens above the headline. That is why there is no cap: any
+   * ceiling shows a band of the next section on a tall screen, and the point
+   * here is that the hero holds the whole first screen.
    */
   return (
-    <section id="top" className="relative isolate flex min-h-[min(88svh,50rem)] flex-col justify-end overflow-hidden bg-ink">
+    <section id="top" className="relative isolate flex min-h-svh flex-col justify-end overflow-hidden bg-ink">
       {/* Background layer */}
       <Parallax className="absolute inset-0 -z-10" distance={78}>
         {showPhoto ? (
