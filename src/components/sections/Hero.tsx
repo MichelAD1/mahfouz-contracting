@@ -47,7 +47,17 @@ export function Hero({
         )}
       </Parallax>
 
-      <div className="shell pb-[clamp(2.5rem,4vw,4rem)] pt-[clamp(9rem,16vw,13rem)]">
+      {/*
+       * Tightened so the whole hero — headline, lead, action and the metrics
+       * below — lands inside a 1080p screen. The top padding was 13rem sitting
+       * under an 80px header, and because it is clamped the gap stayed put as
+       * the viewport grew, which is why the page looked better at 80% zoom.
+       *
+       * This is the home page only. The section rhythm elsewhere is untouched:
+       * the air around the type is doing real work on the inner pages, and
+       * "fits on one screen" only matters on the screen everybody sees.
+       */}
+      <div className="shell pb-[clamp(2rem,3vw,3rem)] pt-[clamp(6.5rem,10vw,8.5rem)]">
         <h1 className="display t-hero max-w-[18ch] text-paper-bright">
           {hero.headingLines.map((line, index) => (
             <span
@@ -66,7 +76,7 @@ export function Hero({
          * what gives the band its width — packed together at the left they read
          * as one paragraph with a button stuck to it.
          */}
-        <div className="mt-[clamp(2rem,4vw,3.25rem)] flex flex-col gap-9 lg:grid lg:grid-cols-[minmax(0,34rem)_auto] lg:items-end lg:justify-between lg:gap-x-14">
+        <div className="mt-[clamp(1.75rem,3vw,2.5rem)] flex flex-col gap-7 lg:grid lg:grid-cols-[minmax(0,34rem)_auto] lg:items-end lg:justify-between lg:gap-x-14">
           <p
             className="max-w-[54ch] t-lead animate-rise text-paper-bright/75"
             style={{ animationDelay: `${0.12 + hero.headingLines.length * 0.19}s` }}
@@ -130,7 +140,7 @@ function DataStrip({
          */}
         <dl
           className="grid grid-cols-2 lg:grid-cols-4
-            [&>div]:flex [&>div]:flex-col [&>div]:gap-2 [&>div]:py-7 [&>div]:pr-6 lg:[&>div]:py-9
+            [&>div]:flex [&>div]:flex-col [&>div]:gap-2 [&>div]:py-6 [&>div]:pr-6 lg:[&>div]:py-7
             [&>div:nth-child(n+3)]:border-t [&>div:nth-child(n+3)]:border-rule-dark
             lg:[&>div:nth-child(n+3)]:border-t-0
             [&>div:nth-child(even)]:border-l [&>div:nth-child(even)]:border-rule-dark [&>div:nth-child(even)]:pl-6

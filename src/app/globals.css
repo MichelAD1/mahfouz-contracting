@@ -148,8 +148,12 @@
 
 @utility t-hero {
   /* The lower bound is set so the longest headline line still fits on one
-     line at 390px — at 2.625rem it widowed the last word. */
-  font-size: clamp(2rem, 5.9vw, 5rem);
+     line at 390px — at 2.625rem it widowed the last word.
+
+     The cap came down from 5rem so the hero's data strip lands inside a 1080p
+     screen. Used by the home headline and nothing else, so this is a home-page
+     change despite living in the global scale. */
+  font-size: clamp(2rem, 5.2vw, 4.25rem);
 }
 
 @utility t-plate {
