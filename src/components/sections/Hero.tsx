@@ -25,8 +25,14 @@ export function Hero({
 }) {
   const showPhoto = hasImage(hero.background);
 
+  /**
+   * 88svh, not 94. Now that the strip is compact the content is shorter than
+   * this, so `min-h` is what actually sets the height — and at 94svh the
+   * sheet's footer line sat in the last 6% of the viewport, clipping on any
+   * browser whose chrome is a little taller than the one it was measured on.
+   */
   return (
-    <section id="top" className="relative isolate flex min-h-[min(94svh,54rem)] flex-col justify-end overflow-hidden bg-ink">
+    <section id="top" className="relative isolate flex min-h-[min(88svh,50rem)] flex-col justify-end overflow-hidden bg-ink">
       {/* Background layer */}
       <Parallax className="absolute inset-0 -z-10" distance={78}>
         {showPhoto ? (
@@ -146,7 +152,7 @@ function DivisionStrip({
       style={{ animationDelay: "1.05s" }}
     >
       <div className="shell">
-        <p className="pt-6 t-meta text-steel-light lg:pt-7">
+        <p className="pt-4 t-meta text-steel-light lg:pt-5">
           Five divisions, one point of responsibility
         </p>
 
@@ -155,8 +161,8 @@ function DivisionStrip({
          * column count changes at the breakpoint and only CSS knows it.
          */}
         <ul
-          className="grid grid-cols-2 pb-6 lg:grid-cols-5 lg:pb-7
-            [&>li]:py-5 [&>li]:pr-5
+          className="grid grid-cols-2 pb-4 lg:grid-cols-5 lg:pb-5
+            [&>li]:py-3.5 [&>li]:pr-5
             [&>li:nth-child(n+3)]:border-t [&>li:nth-child(n+3)]:border-rule-dark
             lg:[&>li:nth-child(n+3)]:border-t-0
             [&>li:nth-child(even)]:border-l [&>li:nth-child(even)]:border-rule-dark [&>li:nth-child(even)]:pl-5
@@ -166,11 +172,19 @@ function DivisionStrip({
             <li key={service._id}>
               <Link
                 href={`/services#${service.slug}`}
-                className="group flex flex-col gap-1.5"
+                className="group flex items-baseline gap-2.5"
               >
-                <span className="t-meta text-copper-bright">{service.code}</span>
-                <span className="display-narrow text-[clamp(1rem,1.25vw,1.1875rem)] text-paper-bright transition-colors duration-300 group-hover:text-copper-bright">
-                  {service.title}
+                <span className="t-meta shrink-0 text-copper-bright">
+                  {service.code}
+                </span>
+                {/*
+                 * The short name, so every division sits on one line. At full
+                 * length "Engineering & Design Consultancy" wraps and the row
+                 * grows by a line it does not need — which is what was pushing
+                 * the footer off a 1080p screen.
+                 */}
+                <span className="display-narrow text-[clamp(0.9375rem,1.1vw,1.0625rem)] text-paper-bright transition-colors duration-300 group-hover:text-copper-bright">
+                  {service.shortTitle ?? service.title}
                 </span>
               </Link>
             </li>
@@ -179,7 +193,7 @@ function DivisionStrip({
       </div>
 
       {/* Title block: the sheet's own footer line. */}
-      <div className="shell flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-t border-rule-dark py-4">
+      <div className="shell flex flex-wrap items-center justify-between gap-x-8 gap-y-1.5 border-t border-rule-dark py-3">
         <span className="t-meta text-steel-light">
           {settings.standards && settings.standards.length > 0
             ? `Worked to ${settings.standards.join(" · ")}`

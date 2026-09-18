@@ -82,6 +82,8 @@ export type Service = {
   /** Two-letter division code — real metadata, used instead of a decorative 01–05. */
   code: string;
   slug: string;
+  /** Short form for the hero strip, e.g. "IT & Automation". Falls back to title. */
+  shortTitle?: string;
   shortDescription: string;
   /** One entry per paragraph. Only the services page renders this. */
   fullDescription?: string[];

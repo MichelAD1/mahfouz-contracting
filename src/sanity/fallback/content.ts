@@ -161,6 +161,7 @@ export const fallbackHome: HomePageContent = {
       _id: "svc-engineering",
       code: "ED",
       title: "Engineering & Design Consultancy",
+      shortTitle: "Engineering",
       slug: "engineering-design-consultancy",
       shortDescription:
         "Coordinated MEP and IT design — load calculations, BOQs, tender documents and BIM development, issued before work starts on site.",
@@ -218,6 +219,7 @@ export const fallbackHome: HomePageContent = {
       _id: "svc-it",
       code: "IT",
       title: "Information Technology & Automation",
+      shortTitle: "IT & Automation",
       slug: "information-technology-automation-division",
       shortDescription:
         "Structured cabling, networks, security and building automation, integrated with the electrical and mechanical scope.",
@@ -237,6 +239,7 @@ export const fallbackHome: HomePageContent = {
       _id: "svc-maintenance",
       code: "MF",
       title: "Maintenance & Facility Support",
+      shortTitle: "Maintenance",
       slug: "maintenance-facility-support",
       shortDescription:
         "Preventive and corrective programs, annual contracts and compliance testing that keep installed systems performing after handover.",

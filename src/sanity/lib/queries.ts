@@ -38,7 +38,7 @@ const SETTINGS = groq`{
 }`;
 
 const SERVICE = groq`{
-  _id, title, code, "slug": slug.current, shortDescription, fullDescription, features,
+  _id, title, shortTitle, code, "slug": slug.current, shortDescription, fullDescription, features,
   "image": image${IMAGE}
 }`;
 
