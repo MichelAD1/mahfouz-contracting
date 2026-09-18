@@ -1,7 +1,13 @@
 import { client, isSanityConfigured } from "./client";
-import { HOME_QUERY } from "./queries";
-import { fallbackHome } from "@/sanity/fallback/content";
-import type { HomePageContent } from "./types";
+import {
+  CONTACT_QUERY,
+  HOME_QUERY,
+  PROJECTS_QUERY,
+  PROJECT_QUERY,
+  PROJECT_SLUGS_QUERY,
+} from "./queries";
+import { fallbackContact, fallbackHome } from "@/sanity/fallback/content";
+import type { Contact, HomePageContent, Project, ProjectFull } from "./types";
 
 /** Revalidation window for CMS content. */
 export const REVALIDATE = 300;
@@ -10,42 +16,162 @@ type PartialHome = {
   [K in keyof HomePageContent]?: HomePageContent[K] | null;
 };
 
+const isEmpty = (value: unknown): boolean =>
+  value == null ||
+  (Array.isArray(value) && value.length === 0) ||
+  (typeof value === "string" && value.trim() === "");
+
 /**
- * Merges a Sanity result over the fallback, key by key. A dataset that is only
- * partly filled in still renders a complete page, which matters while the
- * client is populating content.
+ * Merges an incoming object over a fallback, **field by field**.
+ *
+ * This is the important part of the whole module. An earlier version replaced
+ * each top-level key wholesale, which meant publishing a `hero` document
+ * without a background image deleted the hero's photograph — the fallback did
+ * not fill the gap, because the entire `hero` key had been swapped out. For a
+ * CMS the client edits unsupervised, that is a trap: saving a document should
+ * never be able to take something off the page.
+ *
+ * One level deep is deliberate. Going deeper would start merging inside images
+ * and links, where a half-populated object is worse than either whole one.
  */
+function mergeObject<T extends object>(base: T, incoming: unknown): T {
+  if (!incoming || typeof incoming !== "object" || Array.isArray(incoming)) {
+    return base;
+  }
+
+  const merged: Record<string, unknown> = { ...(base as Record<string, unknown>) };
+
+  for (const [key, value] of Object.entries(incoming as Record<string, unknown>)) {
+    if (!isEmpty(value)) merged[key] = value;
+  }
+
+  return merged as T;
+}
+
+/**
+ * Lists replace rather than merge. An array from the CMS is the complete list
+ * by definition, so a published-but-empty collection means "not entered yet",
+ * not "delete these".
+ */
+function preferList<T>(base: T[], incoming: T[] | null | undefined): T[] {
+  return incoming && incoming.length > 0 ? incoming : base;
+}
+
 function mergeWithFallback(result: PartialHome | null): HomePageContent {
   if (!result) return fallbackHome;
 
-  const isEmpty = (value: unknown) =>
-    value == null || (Array.isArray(value) && value.length === 0);
-
-  // Copying through an index signature keeps this one loop rather than nine
-  // hand-written branches; the shape is guaranteed by HomePageContent.
-  const merged: Record<string, unknown> = { ...fallbackHome };
-  const incoming = result as Record<string, unknown>;
-
-  for (const key of Object.keys(fallbackHome)) {
-    if (!isEmpty(incoming[key])) merged[key] = incoming[key];
-  }
-
-  return merged as HomePageContent;
+  return {
+    settings: mergeObject(fallbackHome.settings, result.settings),
+    hero: mergeObject(fallbackHome.hero, result.hero),
+    about: mergeObject(fallbackHome.about, result.about),
+    closingCta: mergeObject(fallbackHome.closingCta, result.closingCta),
+    services: preferList(fallbackHome.services, result.services),
+    projects: preferList(fallbackHome.projects, result.projects),
+    process: preferList(fallbackHome.process, result.process),
+    partners: preferList(fallbackHome.partners, result.partners),
+  };
 }
 
-export async function getHomePage(): Promise<HomePageContent> {
-  if (!isSanityConfigured || !client) return fallbackHome;
+/**
+ * Every fetch below follows the same contract: never throw, never return
+ * nothing, and log loudly when the CMS is the reason. A content outage should
+ * cost the site its freshness, not its pages.
+ */
+async function fetchOrFallback<T>(
+  label: string,
+  query: string,
+  params: Record<string, unknown>,
+  tag: string,
+  fallback: T,
+  accept: (result: unknown) => T | null,
+): Promise<T> {
+  if (!isSanityConfigured || !client) return fallback;
 
   try {
-    const result = await client.fetch<PartialHome>(
-      HOME_QUERY,
-      {},
-      { next: { revalidate: REVALIDATE, tags: ["home"] } },
+    const result = await client.fetch(
+      query,
+      params,
+      { next: { revalidate: REVALIDATE, tags: [tag] } },
     );
-    return mergeWithFallback(result);
+    return accept(result) ?? fallback;
   } catch (error) {
-    // A CMS outage must not take the site down.
-    console.error("[sanity] home query failed, serving fallback content", error);
-    return fallbackHome;
+    console.error(`[sanity] ${label} query failed, serving fallback content`, error);
+    return fallback;
   }
+}
+
+export function getHomePage(): Promise<HomePageContent> {
+  return fetchOrFallback(
+    "home",
+    HOME_QUERY,
+    {},
+    "home",
+    fallbackHome,
+    (result) => mergeWithFallback(result as PartialHome | null),
+  );
+}
+
+export function getProjects(): Promise<Project[]> {
+  return fetchOrFallback(
+    "projects",
+    PROJECTS_QUERY,
+    {},
+    "projects",
+    fallbackHome.projects,
+    (result) => (Array.isArray(result) && result.length > 0 ? (result as Project[]) : null),
+  );
+}
+
+export function getContact(): Promise<Contact> {
+  return fetchOrFallback(
+    "contact",
+    CONTACT_QUERY,
+    {},
+    "contact",
+    fallbackContact,
+    (result) => mergeObject(fallbackContact, result),
+  );
+}
+
+/**
+ * Slugs for `generateStaticParams`. Falls back to the slugs the fallback
+ * content carries, so the projects routes are never generated empty.
+ */
+export function getProjectSlugs(): Promise<string[]> {
+  const fromFallback = fallbackHome.projects.map((project) => project.slug);
+
+  return fetchOrFallback(
+    "project slugs",
+    PROJECT_SLUGS_QUERY,
+    {},
+    "projects",
+    fromFallback,
+    (result) => (Array.isArray(result) && result.length > 0 ? (result as string[]) : null),
+  );
+}
+
+/**
+ * Builds a detail-page project out of the fallback content. Only the card
+ * fields exist there, so the page renders a real but sparse record rather than
+ * a 404 while the dataset is still empty.
+ */
+function fallbackProject(slug: string): ProjectFull | null {
+  const project = fallbackHome.projects.find((entry) => entry.slug === slug);
+  if (!project) return null;
+
+  return {
+    ...project,
+    related: fallbackHome.projects.filter((entry) => entry.slug !== slug).slice(0, 3),
+  };
+}
+
+export function getProject(slug: string): Promise<ProjectFull | null> {
+  return fetchOrFallback(
+    `project "${slug}"`,
+    PROJECT_QUERY,
+    { slug },
+    `project:${slug}`,
+    fallbackProject(slug),
+    (result) => (result ? (result as ProjectFull) : null),
+  );
 }

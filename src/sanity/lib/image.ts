@@ -1,4 +1,4 @@
-import createImageUrlBuilder from "@sanity/image-url";
+import { createImageUrlBuilder } from "@sanity/image-url";
 import { dataset, projectId } from "./client";
 import type { SiteImage } from "./types";
 

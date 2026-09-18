@@ -99,9 +99,21 @@ export const project = defineType({
     }),
     defineField({
       name: "description",
+      title: "Body",
       type: "array",
-      of: [{ type: "block" }],
+      of: [{ type: "text", rows: 4 }],
       group: "main",
+      description:
+        "One entry per paragraph. Plain text, matching the About section, so no rich-text renderer is needed.",
+    }),
+    defineField({
+      name: "scopeOfWorks",
+      title: "Scope of works",
+      type: "array",
+      of: [{ type: "string" }],
+      group: "main",
+      description:
+        "One entry per line of work, in the order it was carried out. Numbered automatically on the project page.",
     }),
     defineField({
       name: "category",
@@ -126,11 +138,29 @@ export const project = defineType({
     }),
     defineField({ name: "client", type: "string", group: "meta" }),
     defineField({
+      name: "status",
+      type: "string",
+      group: "meta",
+      description:
+        "Where the work stands, e.g. Delivered, or Delivered and under maintenance.",
+    }),
+    defineField({
       name: "services",
       title: "Divisions involved",
       type: "array",
       group: "meta",
       of: [{ type: "reference", to: [{ type: "service" }] }],
+      description:
+        "Drives the tags on each project card and the filter on the projects index. A project with no divisions cannot be filtered to.",
+    }),
+    defineField({
+      name: "equipment",
+      title: "Equipment specified",
+      type: "array",
+      group: "meta",
+      of: [{ type: "reference", to: [{ type: "partner" }] }],
+      description:
+        "The manufacturers whose equipment was specified. These are the same partner documents as the logo strip, so a brand is described once.",
     }),
     defineField({
       name: "details",

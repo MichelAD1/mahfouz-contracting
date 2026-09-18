@@ -85,11 +85,24 @@ export type Service = {
   image: SiteImage;
 };
 
-export type ProjectDetail = {
+/** A label/value pair. Shared by project metadata and the contact page. */
+export type DetailRow = {
   label: string;
   value: string;
 };
 
+/**
+ * A division, as it appears on a project. Resolved from the `service`
+ * reference, so the tag on a card and the division's own page cannot drift
+ * apart — and so the projects filter has something stable to match on.
+ */
+export type ProjectDivision = {
+  _id: string;
+  title: string;
+  slug: string;
+};
+
+/** A project as it appears in a listing: a card, and nothing more. */
 export type Project = {
   _id: string;
   name: string;
@@ -98,10 +111,26 @@ export type Project = {
   location?: string;
   year?: string;
   client?: string;
+  status?: string;
   summary?: string;
   cover: SiteImage;
-  details?: ProjectDetail[];
+  details?: DetailRow[];
+  divisions?: ProjectDivision[];
   featured?: boolean;
+};
+
+/**
+ * A project plus the fields only its own page needs. Listings deliberately do
+ * not carry these — a projects index should not fetch five galleries and three
+ * bodies of copy to render four cards.
+ */
+export type ProjectFull = Project & {
+  description?: string[];
+  scopeOfWorks?: string[];
+  /** Manufacturers whose equipment was specified — the same documents as the logo strip. */
+  equipment?: { _id: string; name: string }[];
+  gallery?: SiteImage[];
+  related?: Project[];
 };
 
 export type ProcessStep = {
@@ -134,6 +163,21 @@ export type ClosingCta = {
   lead: string;
   cta: Cta;
   background: SiteImage;
+};
+
+export type Contact = {
+  heading: string;
+  description?: string;
+  /** Shown beside the form, e.g. Office, Hours, Response time. */
+  details?: DetailRow[];
+  /** Populates the enquiry-type field on the form. */
+  formSubjects?: string[];
+  /**
+   * Where submissions are delivered. Kept in the CMS rather than in code so
+   * the client can change their own enquiry inbox without a deploy.
+   */
+  recipientEmail?: string;
+  map?: { latitude?: number; longitude?: number; label?: string };
 };
 
 /** Everything the home page needs, in one query. */

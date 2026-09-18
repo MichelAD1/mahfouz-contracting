@@ -17,6 +17,20 @@ const METRIC = groq`{ figure, label, note, countTo, prefix, suffix }`;
 
 const CTA = groq`{ label, href }`;
 
+/** A division, dereferenced from the service it points at. */
+const DIVISION = groq`{ _id, title, "slug": slug.current }`;
+
+/**
+ * Everything a project card needs and nothing else. Shared by the home page
+ * section and the projects index so the two cannot drift, and so a listing
+ * never drags galleries and body copy across the wire to render a thumbnail.
+ */
+const PROJECT_CARD = groq`{
+  _id, name, "slug": slug.current, category, location, year, status, summary, featured,
+  "cover": cover${IMAGE},
+  "divisions": services[]->${DIVISION}
+}`;
+
 /**
  * The whole home page in a single round trip. Sections are server components
  * so there is no client-side fetching and no request waterfall.
@@ -48,11 +62,7 @@ export const HOME_QUERY = groq`{
     _id, title, code, "slug": slug.current, shortDescription, features,
     "image": image${IMAGE}
   },
-  "projects": *[_type == "project"]|order(featured desc, order asc){
-    _id, name, "slug": slug.current, category, location, year, client, summary, featured,
-    "cover": cover${IMAGE},
-    "details": details[]{ label, value }
-  },
+  "projects": *[_type == "project"]|order(featured desc, order asc)${PROJECT_CARD},
   "process": *[_type == "process"]|order(order asc){
     _id, step, title, description,
     "image": image${IMAGE}
@@ -69,13 +79,24 @@ export const HOME_QUERY = groq`{
 
 export const PROJECT_SLUGS_QUERY = groq`*[_type == "project" && defined(slug.current)].slug.current`;
 
+/** The projects index. Same shape as the home section, unfiltered and unlimited. */
+export const PROJECTS_QUERY = groq`*[_type == "project"]|order(featured desc, order asc)${PROJECT_CARD}`;
+
 export const PROJECT_QUERY = groq`*[_type == "project" && slug.current == $slug][0]{
-  _id, name, "slug": slug.current, category, location, year, client, summary, featured,
+  _id, name, "slug": slug.current, category, location, year, client, status, summary, featured,
   "cover": cover${IMAGE},
   "gallery": gallery[]${IMAGE},
   "details": details[]{ label, value },
-  "related": *[_type == "project" && slug.current != $slug]|order(featured desc, order asc)[0..2]{
-    _id, name, "slug": slug.current, category, year,
-    "cover": cover${IMAGE}
-  }
+  "divisions": services[]->${DIVISION},
+  "description": description[],
+  scopeOfWorks,
+  "equipment": equipment[]->{ _id, name },
+  "related": *[_type == "project" && slug.current != $slug]|order(featured desc, order asc)[0..2]${PROJECT_CARD}
+}`;
+
+export const CONTACT_QUERY = groq`*[_type == "contact"][0]{
+  heading, description,
+  "details": details[]{ label, value },
+  formSubjects, recipientEmail,
+  map{ latitude, longitude, label }
 }`;

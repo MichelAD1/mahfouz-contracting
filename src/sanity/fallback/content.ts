@@ -1,4 +1,4 @@
-import type { HomePageContent } from "@/sanity/lib/types";
+import type { Contact, HomePageContent } from "@/sanity/lib/types";
 
 /**
  * Fallback content — used whenever no Sanity project is configured.
@@ -336,4 +336,40 @@ export const fallbackHome: HomePageContent = {
       aspectRatio: 16 / 9,
     },
   },
+};
+
+/**
+ * The contact page, used until a `contact` document exists.
+ *
+ * The hours are the only figures here taken from the live WordPress site; the
+ * address and phone numbers are the same records as `settings` above, kept in
+ * one place there rather than repeated.
+ *
+ * TODO(client): `recipientEmail` is deliberately unset. Every email address
+ * published on the live site is a theme placeholder (info@mail.com,
+ * info@email.com, info@yoursite.com), so there is no real inbox to point at
+ * yet. Until one is confirmed the form delivers to CONTACT_RECIPIENT_EMAIL
+ * from the environment, which is a developer address for testing only.
+ */
+export const fallbackContact: Contact = {
+  heading: "Request a quote",
+  description:
+    "Send us the scope and we will come back with an engineered answer, not a guess. For tenders and prequalification we can issue project records and references on request.",
+  details: [
+    {
+      label: "Office",
+      value:
+        "Sink 14th Street, Bishop Roland J. Diggs Building, Monrovia, Montserrado County, Liberia",
+    },
+    { label: "Hours", value: "Mon-Fri 06:00-18:00, Sat 06:00-16:00, Sun closed" },
+    { label: "Enquiries", value: "Answered 24/7" },
+  ],
+  formSubjects: [
+    "Electrical",
+    "Mechanical",
+    "IT & Automation",
+    "Engineering & Design Consultancy",
+    "Maintenance & Facility Support",
+    "General enquiry",
+  ],
 };
