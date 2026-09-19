@@ -1,8 +1,12 @@
 # Mahfouz Contracting — remaining work to launch
 
-**Status:** Steps 1-6 complete, plus an unplanned design pass — Step 7 next.
-Step 6's last three items (Search Console, Business Profile, Lighthouse on the
-deployed build) need a domain or a deployment and are held, not forgotten.
+**Status:** Steps 1-7 code complete, plus an unplanned design pass. The site is
+built, seeded and rendering from the CMS.
+
+What is left is no longer code. It is the client's accounts, a domain, a
+deployment, and one walkthrough — tracked in `docs/CLIENT-SETUP.md` and in the
+three held items under Step 6 (Search Console, Business Profile, Lighthouse
+against the deployed build).
 
 Supersedes the previous draft. Companion to `temp/PLAN.md`, which covers the
 original build; this file is only what is left.
@@ -11,10 +15,11 @@ original build; this file is only what is left.
 
 ## Deliverable running alongside the steps
 
-**`docs/CLIENT-SETUP.md` — everything the client has to create themselves**,
-written as they go and finished in Step 7. Accounts, who owns them, what each
-costs, what I need from each one, and what breaks if it is skipped. Accumulating
-so far:
+**`docs/CLIENT-SETUP.md` — everything the client has to create themselves.**
+**Written, in Step 7.** Ten items, each with what it is for in plain language,
+what I need once it exists, and what breaks if it is skipped — plus a summary
+table marking which four actually block launch. The list it was accumulated
+from:
 
 | What | Why | Raised in |
 |---|---|---|
@@ -39,7 +44,8 @@ so far:
 - [x] Design pass (unplanned, requested after Step 5 — see below)
 - [x] Step 6: SEO — canonicals, sitemap, robots, OG image, structured data, redirects
       (code complete; three items wait on a domain or a deployment)
-- [ ] Step 7: Seed the dataset, then hand Sanity over to the client
+- [x] Step 7: Seed the dataset, then hand Sanity over to the client
+      (seeded and documented; the walkthrough and the account transfer need people)
 
 ---
 
@@ -711,16 +717,43 @@ answer to "when the client's project exists, we just connect it".
 Handing over an empty Studio and asking the client to type several hundred
 fields is not a handover. So:
 
-- [ ] `scripts/seed.ts` — reads `fallbackHome` and `fallbackContact`, uploads
+- [x] `scripts/seed.ts` — reads `fallbackHome` and `fallbackContact`, uploads
       everything in `public/images/` as Sanity assets, writes documents with
       deterministic `_id`s so re-running updates rather than duplicates
-- [ ] Run via `npx sanity exec scripts/seed.ts --with-user-token` — the `sanity`
-      CLI is already a dependency and already logged into the right account, so
-      this needs **no new package and no API token**
-- [ ] Seed `wwicg618` and verify the site renders from the CMS rather than the
-      fallback — the first time that path is exercised at all
-- [ ] Walk every section: change a heading in the Studio, confirm it changes on
-      the site within the 300s revalidate window
+- [x] Run via `npx sanity exec scripts/seed.ts --with-user-token` — the `sanity`
+      CLI is already a dependency and **confirmed logged in as the personal
+      account**, checked with `npx sanity debug` rather than assumed. No new
+      package and no API token
+- [x] Seed `wwicg618` and verify the site renders from the CMS rather than the
+      fallback — **25 documents, 15 images**, and every page verified
+- [x] Walk every section: change a heading in the Studio, confirm it changes on
+      the site — done through the CLI rather than the Studio UI, same write
+      path. The edit appeared in under three minutes, inside the 300s window,
+      and was reverted afterwards
+
+### Verifying this is harder than it looks, and the reason is the design
+
+The fallback renders the *same text* as the seeded CMS, because the CMS was
+seeded from the fallback. So a page that looks perfect proves nothing: it looks
+identical whether Sanity is connected, misconfigured, or down.
+
+The only honest tell is the images, which are local paths on the fallback and
+`cdn.sanity.io` URLs from the CMS:
+
+```
+curl -s http://localhost:3333/ | grep -o "cdn.sanity.io" | wc -l
+```
+
+Home 181, about 70, services 65, projects 58, a project page 32. Contact is
+legitimately 0 — that page has no photography. This is written into
+`docs/CONNECT-SANITY.md` because it is the step most likely to be skipped by
+someone who loads the page, sees the site, and assumes.
+
+One thing worth knowing: **partner logos are SVG**, and Next refuses to run SVG
+through its image optimiser. It passes them through to Sanity's CDN untouched
+instead, which works — verified 200 `image/svg+xml` — so no `dangerouslyAllowSVG`
+was needed. Sanity does not rasterise SVG either, so the `?w=320` on those URLs
+is inert rather than broken.
 
 ### Connecting the client's project later
 
@@ -736,8 +769,13 @@ env-driven, so nothing in `src/` is touched. The remaining manual steps are CORS
 origins (localhost, preview domain, production domain, **with credentials**) and
 `npx sanity schema deploy`.
 
-- [ ] Write this up as `docs/CONNECT-SANITY.md` so it is repeatable without me
-- [ ] 30–45 minute Studio walkthrough with whoever will be editing
+- [x] Write this up as `docs/CONNECT-SANITY.md` so it is repeatable without me
+      — including the transfer-instead-of-migrate route, which is preferable and
+      was not in this plan, and the two failure modes that cost the most time
+      (a CORS origin without credentials, and env vars set locally but not on
+      the host)
+- [ ] 30–45 minute Studio walkthrough with whoever will be editing — needs a
+      person, not a commit
 
 ### Accounts and ownership
 
