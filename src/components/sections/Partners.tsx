@@ -46,11 +46,12 @@ export function Partners({ partners }: { partners: Partner[] }) {
   const duration = `${Math.max(partners.length * 6, 28)}s`;
 
   return (
-    <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:gap-16">
-      <p className="max-w-[24ch] t-body shrink-0 text-steel">
-        Equipment and systems we specify, supply and install.
-      </p>
-
+    /*
+     * No caption. The strip used to run behind a line explaining what it was,
+     * which the marks say for themselves — and that line cost a quarter of the
+     * width on a laptop and a whole block above the logos on a phone.
+     */
+    <div className="flex flex-col">
       {/* The mask keeps logos from colliding with the section edge as they
           arrive and leave, so the strip reads as continuous rather than clipped. */}
       <div
