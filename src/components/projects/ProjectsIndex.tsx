@@ -54,7 +54,7 @@ export function ProjectsIndex({ projects }: { projects: Project[] }) {
                 type="button"
                 aria-pressed={isActive}
                 onClick={() => setActive(filter.slug)}
-                className={`display-narrow border px-[1.125rem] py-3 text-[0.75rem] font-semibold uppercase tracking-[0.08em] transition-colors duration-300 ${
+                className={`display-narrow border px-[1.125rem] py-3.5 text-[0.75rem] font-semibold uppercase tracking-[0.08em] transition-colors duration-300 ${
                   isActive
                     ? "border-navy bg-navy text-paper-bright"
                     : "border-rule-strong text-ink hover:border-navy hover:text-navy"

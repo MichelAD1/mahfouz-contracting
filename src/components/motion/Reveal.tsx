@@ -4,7 +4,10 @@ import {
   Children,
   cloneElement,
   isValidElement,
+  useEffect,
+  useLayoutEffect,
   useRef,
+  useState,
   useSyncExternalStore,
 } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
@@ -86,9 +89,10 @@ type SceneProps = {
  * server sends an ordinary, fully visible page, which is what the retired
  * `.js` class was protecting.
  *
- * Nothing visible moves when they land. An element already on screen measures
- * at progress 1, so it is styled to exactly where it already was; only content
- * below the fold starts from its resting state, where no one can see it.
+ * Nothing visible moves when they land, and the way that is guaranteed changed:
+ * an element on screen at first paint is opted out of the effect entirely (see
+ * `useOnScreenAtFirstPaint`). Only content below the fold starts from its
+ * resting state, where no one can see it start.
  */
 const neverChanges = () => () => {};
 
@@ -103,6 +107,40 @@ function useHydrated() {
   );
 }
 
+/** `useLayoutEffect` warns during SSR, where there is nothing to measure. */
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+/**
+ * Whether this element was already on screen when the page first painted.
+ *
+ * Anything visible on arrival must not animate. The page had claimed that an
+ * element already on screen "measures at progress 1, so it is styled to
+ * exactly where it already was" — true only of an element that has been
+ * scrolled fully past. One that is *partway* into its range measures partway,
+ * so it renders dimmed and offset at rest, with nothing having moved and
+ * nothing about to.
+ *
+ * That is what a short hero exposes: /services has a 491px hero on an 844px
+ * screen, so its first division sat at opacity 0.40 on load and stayed there
+ * until the visitor scrolled. /about did the same at 0.56.
+ *
+ * Measured in a layout effect so the correction is applied before the browser
+ * paints, rather than as a visible settle.
+ */
+function useOnScreenAtFirstPaint(ref: React.RefObject<HTMLElement | null>) {
+  const [onScreen, setOnScreen] = useState(false);
+
+  useIsomorphicLayoutEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+
+    const rect = node.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) setOnScreen(true);
+  }, [ref]);
+
+  return onScreen;
+}
+
 /**
  * The scroll range for one scene, and whether it should move at all.
  * `useScroll` is called unconditionally — hooks cannot be skipped — and its
@@ -112,6 +150,7 @@ function useScene(order: number) {
   const ref = useRef<HTMLDivElement>(null);
   const prefersReduced = useReducedMotion();
   const hydrated = useHydrated();
+  const visibleOnArrival = useOnScreenAtFirstPaint(ref);
   const arrive = Math.max(ARRIVE_FLOOR, ARRIVE - order * SEQUENCE_SPREAD);
 
   const { scrollYProgress } = useScroll({
@@ -119,7 +158,11 @@ function useScene(order: number) {
     offset: [`start ${ENTER}`, `start ${arrive}`],
   });
 
-  return { ref, progress: scrollYProgress, enabled: hydrated && !prefersReduced };
+  return {
+    ref,
+    progress: scrollYProgress,
+    enabled: hydrated && !prefersReduced && !visibleOnArrival,
+  };
 }
 
 export function Reveal({ children, className, order = 0, y = 32 }: SceneProps) {

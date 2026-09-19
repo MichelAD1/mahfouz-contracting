@@ -825,6 +825,41 @@ All three previously open questions are now settled:
   established design language, for review afterwards rather than design first.
 - **CORS is untouched** — the port move to 3333 made the change unnecessary.
 
+## Step 8 — Move the remaining copy into Sanity (next session)
+
+Deferred deliberately on 19 Sep, not forgotten. Today the CMS holds the
+*content* and the code holds the *furniture*, which means the client cannot
+reword a section heading without a developer.
+
+What is still hard-coded, audited rather than guessed:
+
+| Where | What |
+|---|---|
+| `Capabilities.tsx` | "Five divisions, one scope of responsibility" + its lead |
+| `Process.tsx` | "Four stages, from brief to ongoing support" |
+| `SelectedWork.tsx` | "Projects delivered end to end." |
+| `Hero.tsx` | "Five divisions, one point of responsibility" (strip label) |
+| `app/about`, `app/services`, `app/projects` | page hero headings and leads, "More work, on request" |
+| every route | `title` and `description` metadata |
+| `ContactForm.tsx` | field labels, helper text, button and success copy |
+| `ProjectsIndex.tsx` | "All work" filter label, empty states |
+| `opengraph-image.tsx` | the card's wording |
+
+Shape it as **one `sectionCopy` singleton with a field per section** rather
+than scattering headings across the section documents — the alternative is
+five more singletons and a Studio that reads like a filing cabinet. Page
+metadata wants a `seo` object per route; that object type already exists and is
+already on `siteSettings`, `service` and `project`, so it is wiring rather than
+schema design.
+
+Two cautions for whoever picks it up. The fallback module must keep every
+string it has now, or a CMS outage silently empties the page furniture. And
+`opengraph-image.tsx` is generated at build time, so copy moved there would not
+follow a Studio edit until the next deploy — probably a reason to leave that
+one alone.
+
+---
+
 ## Out of scope
 
 Priced separately if wanted later: a page per division (beyond the single

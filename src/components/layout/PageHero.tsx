@@ -83,7 +83,7 @@ export function PageHero({
                 {crumb.href ? (
                   <Link
                     href={crumb.href}
-                    className="t-meta text-paper-bright/70 transition-colors duration-300 hover:text-copper-bright"
+                    className="relative t-meta text-paper-bright/70 transition-colors duration-300 before:absolute before:inset-x-0 before:-inset-y-3.5 before:content-[''] hover:text-copper-bright"
                   >
                     {crumb.label}
                   </Link>
