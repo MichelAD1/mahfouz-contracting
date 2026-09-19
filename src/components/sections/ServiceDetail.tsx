@@ -1,6 +1,23 @@
-import { ImageReveal, Reveal } from "@/components/motion/Reveal";
+import { Parallax } from "@/components/motion/Parallax";
+import { Reveal } from "@/components/motion/Reveal";
 import { SiteImage } from "@/components/primitives/SiteImage";
 import type { Service } from "@/sanity/lib/types";
+
+/**
+ * Parallax travel per division.
+ *
+ * The wipe this replaced ran its whole length in roughly a quarter of a
+ * viewport of scroll, because a `Reveal` range is deliberately short — right
+ * for a paragraph settling into place, far too abrupt for a photograph at this
+ * size. Parallax is scrubbed across the image's entire pass through the
+ * viewport instead, so it reads as depth for as long as it is on screen rather
+ * than as something that happens once and stops.
+ *
+ * The distances differ so five stacked blocks do not travel as one sheet, and
+ * all stay inside the range Parallax is built for — past ~100px it stops being
+ * depth and starts being an effect.
+ */
+const DEPTH = [58, 74, 50, 86, 66] as const;
 
 /**
  * One division, in full.
@@ -78,7 +95,10 @@ export function ServiceDetail({
         </div>
 
         <div className={imageFirst ? "lg:order-1" : undefined}>
-          <ImageReveal className="relative aspect-4/5 w-full">
+          <Parallax
+            className="relative aspect-4/5 w-full bg-paper-deep"
+            distance={DEPTH[index % DEPTH.length]}
+          >
             <SiteImage
               image={service.image}
               sizes="(min-width: 1024px) 42vw, 100vw"
@@ -86,7 +106,7 @@ export function ServiceDetail({
               fallback="plate"
               fallbackSeed={index + 1}
             />
-          </ImageReveal>
+          </Parallax>
         </div>
       </div>
     </article>
