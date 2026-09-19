@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { getSiteFrame } from "@/sanity/lib/fetch";
 import { siteUrl } from "@/lib/site";
+import { buildBusinessJsonLd, serializeJsonLd } from "@/lib/structured-data";
 import "./globals.css";
 
 /**
@@ -69,12 +70,22 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const { settings, services } = await getSiteFrame();
 
+  /**
+   * Built from the same settings the header and footer render, so the company
+   * Google is told about and the company on the page cannot drift apart.
+   */
+  const businessJsonLd = serializeJsonLd(buildBusinessJsonLd({ settings, services }));
+
   return (
     <html
       lang="en"
       className={`${archivo.variable} ${plexSans.variable} ${plexMono.variable}`}
     >
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: businessJsonLd }}
+        />
         <a
           href="#main"
           className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-4 focus-visible:z-100 focus-visible:bg-ink focus-visible:px-5 focus-visible:py-3 focus-visible:t-meta focus-visible:text-paper-bright"
