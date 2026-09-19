@@ -4,6 +4,7 @@ import { MotionProvider } from "@/components/motion/MotionProvider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { getSiteFrame } from "@/sanity/lib/fetch";
+import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 /**
@@ -31,8 +32,6 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
   variable: "--font-plex-mono",
 });
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mahfouzcontracting.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
