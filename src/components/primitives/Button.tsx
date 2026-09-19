@@ -129,10 +129,17 @@ export function LinkUnderline({
       ? "text-paper-bright hover:text-copper-bright"
       : "text-ink hover:text-copper";
 
+  /*
+   * The touch target is widened with a pseudo-element rather than padding.
+   * These links sit at the foot of a block with their rule 8px under the text,
+   * and vertical padding would push the following content around to buy space
+   * a thumb needs. This leaves every pixel where it is and takes the target
+   * from 22px to 46.
+   */
   return (
     <Link
       href={href}
-      className={`group inline-flex items-center gap-3 pb-2 display-narrow text-[0.8125rem] font-semibold uppercase tracking-[0.08em] transition-colors duration-300 ${ink} ${className}`}
+      className={`group relative inline-flex items-center gap-3 pb-2 display-narrow text-[0.8125rem] font-semibold uppercase tracking-[0.08em] transition-colors duration-300 before:absolute before:inset-x-0 before:-inset-y-3 before:content-[''] ${ink} ${className}`}
     >
       <span className="relative">
         {children}

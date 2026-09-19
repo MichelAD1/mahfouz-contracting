@@ -168,7 +168,7 @@ function DivisionStrip({
          */}
         <ul
           className="grid grid-cols-2 pb-4 lg:grid-cols-5 lg:pb-5
-            [&>li]:py-3.5 [&>li]:pr-5
+            [&>li]:pr-5
             [&>li:nth-child(n+3)]:border-t [&>li:nth-child(n+3)]:border-rule-dark
             lg:[&>li:nth-child(n+3)]:border-t-0
             [&>li:nth-child(even)]:border-l [&>li:nth-child(even)]:border-rule-dark [&>li:nth-child(even)]:pl-5
@@ -176,9 +176,15 @@ function DivisionStrip({
         >
           {services.map((service) => (
             <li key={service._id}>
+              {/*
+               * The vertical padding belongs to the link, not to the `li`.
+               * On the `li` it made a 44px row containing a 16px tap target,
+               * which on a phone is a row that looks pressable everywhere and
+               * only is in the middle. Same rendered height either way.
+               */}
               <Link
                 href={`/services#${service.slug}`}
-                className="group flex items-baseline gap-2.5"
+                className="group flex items-baseline gap-2.5 py-3.5"
               >
                 <span className="t-meta shrink-0 text-copper-bright">
                   {service.code}

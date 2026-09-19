@@ -41,7 +41,7 @@ export function Header({ settings }: { settings: SiteSettings }) {
         <div className="shell flex h-20 items-center justify-between gap-6">
           <Link
             href="/"
-            className={`flex items-baseline gap-2.5 transition-colors duration-500 ${ink}`}
+            className={`flex items-baseline gap-2.5 py-3 transition-colors duration-500 ${ink}`}
           >
             <span className="display text-xl leading-none" translate="no">
               {settings.shortName}

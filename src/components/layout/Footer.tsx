@@ -17,7 +17,7 @@ export function Footer({
       <div className="shell pt-[clamp(3rem,6vw,5.5rem)] pb-8">
         <div className="grid gap-x-[clamp(1.5rem,4vw,4rem)] gap-y-12 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
           <div>
-            <Link href="/" className="flex items-baseline gap-2.5">
+            <Link href="/" className="flex items-baseline gap-2.5 py-2 lg:py-0">
               <span className="display text-2xl leading-none" translate="no">
                 {settings.shortName}
               </span>
@@ -32,12 +32,12 @@ export function Footer({
 
           <nav aria-label="Footer">
             <h2 className="t-meta text-steel">Navigate</h2>
-            <ul className="mt-5 flex flex-col gap-2.5">
+            <ul className="mt-5 flex flex-col gap-0 lg:gap-2.5">
               {settings.nav.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-[0.9375rem] text-paper-bright/85 transition-colors duration-300 hover:text-copper-bright"
+                    className="block py-3.5 text-[0.9375rem] text-paper-bright/85 transition-colors duration-300 hover:text-copper-bright lg:py-0"
                   >
                     {item.label}
                   </Link>
@@ -48,12 +48,12 @@ export function Footer({
 
           <div>
             <h2 className="t-meta text-steel">Services</h2>
-            <ul className="mt-5 flex flex-col gap-2.5">
+            <ul className="mt-5 flex flex-col gap-0 lg:gap-2.5">
               {services.map((service) => (
                 <li key={service._id}>
                   <Link
                     href={`/services#${service.slug}`}
-                    className="text-[0.9375rem] text-paper-bright/85 transition-colors duration-300 hover:text-copper-bright"
+                    className="block py-3.5 text-[0.9375rem] text-paper-bright/85 transition-colors duration-300 hover:text-copper-bright lg:py-0"
                   >
                     {service.title}
                   </Link>
@@ -64,7 +64,7 @@ export function Footer({
 
           <div>
             <h2 className="t-meta text-steel">Contact</h2>
-            <address className="mt-5 flex flex-col gap-2.5 not-italic">
+            <address className="mt-5 flex flex-col gap-0 not-italic lg:gap-2.5">
               <p className="text-[0.9375rem] leading-relaxed text-paper-bright/75">
                 {settings.address.lines.map((line) => (
                   <span key={line} className="block">
@@ -76,7 +76,7 @@ export function Footer({
                 <a
                   key={phone.number}
                   href={telHref(phone.number)}
-                  className="text-[0.9375rem] text-paper-bright transition-colors duration-300 hover:text-copper-bright"
+                  className="block py-3 text-[0.9375rem] text-paper-bright transition-colors duration-300 hover:text-copper-bright lg:py-0"
                 >
                   <span className="t-meta mr-2 text-steel">{phone.label}</span>
                   {phone.number}
@@ -86,7 +86,7 @@ export function Footer({
                 <a
                   key={email}
                   href={mailHref(email)}
-                  className="text-[0.9375rem] text-paper-bright transition-colors duration-300 hover:text-copper-bright"
+                  className="block py-3 text-[0.9375rem] text-paper-bright transition-colors duration-300 hover:text-copper-bright lg:py-0"
                 >
                   {email}
                 </a>

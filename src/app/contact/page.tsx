@@ -55,7 +55,7 @@ export default async function ContactPage() {
                   <p className="t-meta text-steel">{phone.label}</p>
                   <a
                     href={telHref(phone.number)}
-                    className="mt-2 block text-[0.9375rem] text-ink transition-colors duration-300 hover:text-copper"
+                    className="mt-2 block py-2.5 text-[0.9375rem] text-ink transition-colors duration-300 hover:text-copper lg:py-0"
                   >
                     {phone.number}
                   </a>
@@ -67,7 +67,7 @@ export default async function ContactPage() {
                   <p className="t-meta text-steel">Email</p>
                   <a
                     href={mailHref(email)}
-                    className="mt-2 block text-[0.9375rem] text-ink transition-colors duration-300 hover:text-copper"
+                    className="mt-2 block py-2.5 text-[0.9375rem] text-ink transition-colors duration-300 hover:text-copper lg:py-0"
                   >
                     {email}
                   </a>
