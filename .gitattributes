@@ -1,0 +1,6 @@
+# Font binaries must never be line-ending converted: autocrlf on a TTF
+# corrupts it, and the OG image would fail to build with no obvious cause.
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary

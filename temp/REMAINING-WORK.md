@@ -1,6 +1,8 @@
 # Mahfouz Contracting — remaining work to launch
 
-**Status:** Steps 1-5 complete, plus an unplanned design pass — Step 6 next
+**Status:** Steps 1-6 complete, plus an unplanned design pass — Step 7 next.
+Step 6's last three items (Search Console, Business Profile, Lighthouse on the
+deployed build) need a domain or a deployment and are held, not forgotten.
 
 Supersedes the previous draft. Companion to `temp/PLAN.md`, which covers the
 original build; this file is only what is left.
@@ -24,6 +26,8 @@ so far:
 | **Google Business Profile** | For a contractor with a physical address this outranks most on-page work | Step 6 |
 | **Written confirmation on partner logos** | Six marks are currently third-party stopgaps; official assets wanted, permission required either way | Step 5 |
 | **A real enquiry inbox address** | Every email on the live site is a theme placeholder | Step 4 |
+| **A logo file** (SVG, plus a square PNG) | The wordmark is set in type, so there is no logo asset. Schema.org `logo` and the Business Profile both want a real one, and inventing it would be worse than omitting it | Step 6 |
+| **A privacy policy** | The old site published one and this one has no page to send it to. A form collecting a name, an email and a message wants one; `/privacy-policy/` currently redirects to the home page | Step 6 |
 
 ## Steps
 
@@ -33,7 +37,8 @@ so far:
 - [x] Step 4: Contact page with a working enquiry form
 - [x] Step 5: Partner logo bar with an auto-scrolling marquee
 - [x] Design pass (unplanned, requested after Step 5 — see below)
-- [ ] Step 6: SEO — canonicals, sitemap, robots, OG image, structured data, redirects
+- [x] Step 6: SEO — canonicals, sitemap, robots, OG image, structured data, redirects
+      (code complete; three items wait on a domain or a deployment)
 - [ ] Step 7: Seed the dataset, then hand Sanity over to the client
 
 ---
@@ -115,8 +120,11 @@ Both quality gates are **clean** on `main`: `npm run lint` exit 0,
 | `/projects` | 200 | done |
 | `/projects/<slug>` | 200, unknown slugs 404 | done |
 | `/contact` | 200, form working | done |
-| `/sitemap.xml` | **404** | Step 6 |
-| `/robots.txt` | **404** | Step 6 |
+| `/sitemap.xml` | 200 | Step 6 |
+| `/robots.txt` | 200 | Step 6 |
+| `/opengraph-image` | 200, a 1200×630 PNG | Step 6 |
+| 26 old WordPress URLs | 200 after their redirect | Step 6 |
+| 15 theme-demo URLs | **410 Gone**, on purpose | Step 6 |
 
 Defects, and where they stand:
 
@@ -127,7 +135,9 @@ Defects, and where they stand:
 3. ~~All three "Request a Quote" CTAs resolving to a footer `mailto:`~~ —
    **fixed.** Repointed to `/contact` in Step 2, and Step 4 made that route a
    working form. The site's primary call to action now works end to end.
-4. No Open Graph image — shared links still render a blank card. Step 6.
+4. ~~No Open Graph image — shared links still render a blank card~~ — **fixed
+   in Step 6.** Drawn rather than photographed, in the site's own drawing-sheet
+   language, and verified as a 1200×630 PNG rather than assumed.
 
 ---
 
@@ -514,11 +524,17 @@ later is one field in the Studio and no code change.
 No `enquiry` document in Sanity — decided. That leaves email as a single point
 of failure, so the failure path has to do real work:
 
-- [ ] If the send throws, say so plainly and render the phone numbers and direct
-      email inline, so the visitor has an immediate way through
-- [ ] Log the full submission server-side on failure, so a lost enquiry is at
-      least recoverable from the host's logs
-- [ ] Never show a success state for a send that did not succeed
+- [x] If the send throws, say so plainly and render the phone numbers and direct
+      email inline, so the visitor has an immediate way through — `Problem` in
+      `ContactForm.tsx`
+- [x] Log the full submission server-side on failure, so a lost enquiry is at
+      least recoverable from the host's logs — both the non-2xx and the thrown
+      paths in `lib/mail.ts` log the whole enquiry
+- [x] Never show a success state for a send that did not succeed — including
+      the development no-op, which says what actually happened
+
+These three were built in Step 4 and left unticked here by mistake. Ticked
+after re-reading the code on 19 Sep, not after doing the work again.
 
 **Still blocked on:** the client's real address. Every email published on the
 live WordPress site is a theme placeholder (`info@mail.com`, `info@email.com`,
@@ -605,51 +621,85 @@ not blocking on it.
 
 ---
 
-## Step 6 — SEO
+## Step 6 — SEO — code complete 19 Sep 2026
 
 Step 2 does the structural heavy lifting. This step makes it legible to Google.
 
-- [ ] `app/opengraph-image.tsx` — 1200×630
-- [ ] `app/sitemap.ts` — home, about, services, projects index, every project
-      slug, contact
-- [ ] `app/robots.ts` — allow all, point at the sitemap, **disallow `/studio`**
-- [ ] JSON-LD in the root layout, from the now-confirmed real data:
-      `GeneralContractor` (a `LocalBusiness` subtype), legal name, the Monrovia
-      address, both phones, `openingHours` Mo-Fr 06:00-18:00 / Sa 06:00-16:00,
-      `areaServed` Liberia and Lebanon, `hasOfferCatalog` of the five divisions,
-      `sameAs` once real socials exist
-- [ ] `generateMetadata` on every page — unique title and description
-- [ ] One `<h1>` per page, no skipped heading levels
-- [ ] Redirects from the WordPress URLs — below
+- [x] `app/opengraph-image.tsx` — 1200×630, verified as a real PNG at that size
+- [x] `app/sitemap.ts` — home, services, projects index, about, contact
+- [x] `app/robots.ts` — allow all, point at the sitemap, **disallow `/studio`**
+- [x] JSON-LD in the root layout: `GeneralContractor`, the Monrovia address,
+      both phones as `contactPoint`, `openingHours` Mo-Fr 06:00-18:00 / Sa
+      06:00-16:00, `areaServed` Liberia and Lebanon, `hasOfferCatalog` of the
+      five divisions. `sameAs` is omitted until real socials exist rather than
+      emitted empty
+- [x] `generateMetadata` on every page — unique title and description. Already
+      true from Steps 2 and 3; verified rather than changed
+- [x] One `<h1>` per page, no skipped heading levels — verified against the
+      rendered HTML of all six route types, not the source
+- [x] Redirects from the WordPress URLs — below
+- [x] The `NEXT_PUBLIC_SITE_URL` trap, closed in code — below
 - [ ] Google Search Console: verify by DNS TXT (can be done before cutover),
       submit the sitemap
 - [ ] Google Business Profile — for a contractor with a physical address this
       outranks most on-page work
 - [ ] Lighthouse against the deployed build, not locally
 
-### Redirects — the old site leaves 26 indexed URLs behind
+The last three need a domain or a deployment and cannot be done from here.
 
-They all 404 at cutover unless handled, throwing away whatever authority the
-domain has:
+### Two couplings this step created, both deliberate
 
-- `/contact-us/` → `/contact`
-- `/our-services/` → `/services`
-- `/about/` → `/about`
-- `/projects/`, `/projects-2/`, `/projects-3/` → `/projects`
-- `/our-clients/`, `/faq/`, `/blogs/` and the five blog posts → `/`
-- The theme-demo junk (`/typography/`, `/shortcodes/`, `/blog-masonry-4-columns/`,
-  `/cart/`, `/checkout/`, `/service-plus/`, `/newsletter-popup/`, …) → `410 Gone`,
-  so Google drops them instead of following them
+1. **`PROJECT_DETAILS_INDEXABLE` in `lib/site.ts`.** The plan said the sitemap
+   would carry every project slug. It does not, because Step 3 put `noindex` on
+   those pages, and submitting a noindexed URL is a Search Console error
+   against the whole sitemap rather than a note about one page. One constant
+   now drives both the page's `robots` metadata and its presence in the
+   sitemap, so the two cannot disagree. Flip it when the records are real.
+2. **The address and hours are constants in `lib/structured-data.ts`**, not CMS
+   reads, while name, phones, email and socials still come from Sanity.
+   `settings.address.lines` is display text and the Hours row is free text;
+   `PostalAddress` and `openingHoursSpecification` have to parse. Guessing
+   which line is the locality would break silently. **Changing the hours or the
+   address means changing both the Studio and that file.**
 
-Multi-page makes three of these redirects land on genuinely equivalent pages
-rather than a home-page anchor, which is worth more than it sounds.
+### Redirects — verified against the old site, not from memory
 
-### The `NEXT_PUBLIC_SITE_URL` trap
+`wp-sitemap.xml` is still live, so the inventory is real: 26 pages, 38
+portfolio entries, 5 service pages, 5 blog posts, 3 team members, 1 category
+archive. Every one resolves now, checked end to end:
 
-It is currently `http://localhost:3333` in `.env.local`. If that ships to
-production, every canonical and every OG URL points at localhost and this entire
-step is silently worthless. It must be the real domain in the deployment
-environment, and I will verify it against the deployed HTML rather than assume.
+- `/contact-us/` → `/contact`, `/our-services/` → `/services`
+- `/services/<division>/` → `/services#<division>` — each of the five lands on
+  its own section rather than the top of the page
+- `/projects-2/`, `/projects-3/`, and all 38 `/portfolio/<slug>/` → `/projects`
+- `/team/<slug>/` → `/about`
+- `/our-clients/`, `/faq/`, `/blogs/`, `/category/<slug>/`, the five blog posts
+  and `/privacy-policy/` → `/`
+- The theme demo — `/typography/`, `/shortcodes/`, `/cart/`, `/checkout/`,
+  `/service-plus/`, `/newsletter-popup/` and the eight blog-layout variants —
+  answers **410 Gone** via `src/proxy.ts`, so Google drops them instead of
+  reclassifying home-page redirects as soft 404s
+
+Two notes worth keeping. Trailing-slash URLs take two hops (`/contact-us/` →
+`/contact-us` → `/contact`): Next normalises before custom redirects are
+consulted, so listing both forms would add rules that can never match. And 410
+is the only status `redirects` cannot express, which is the entire reason the
+project now has a proxy — its matcher is exhaustive and exact, so no live route
+pays for it.
+
+**`/portfolio/<slug>` goes to the index, not to a matching detail page.** Four
+of those slugs do match real records, but those pages are `noindex` while their
+content is placeholder, so inherited authority would land somewhere excluded
+from search. Worth revisiting once the records are verified.
+
+### The `NEXT_PUBLIC_SITE_URL` trap — closed
+
+It is still `http://localhost:3333` in `.env.local`, which is correct there.
+What changed is that shipping it is no longer silent: `lib/site.ts` treats a
+localhost origin in a production build as a misconfiguration, falls back to the
+real domain, and logs it. It still has to be set properly in the deployment
+environment — the guard is a net, not a substitute — and it still gets verified
+against the deployed HTML.
 
 ---
 
