@@ -250,29 +250,22 @@
   }
 }
 
-@keyframes wipe-up {
-  from {
-    clip-path: inset(100% 0 0 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
+/* The page-load entrance, lengthened with the scroll reveals so the two read as
+   one system. This is the hero and the inner-page plates: the only motion on
+   the site that is timed rather than scrubbed, because above the fold there is
+   no scroll to scrub against.
 
+   `animate-wipe-up` sat beside it with no caller anywhere in src/ - the scroll
+   wipe in ImageReveal replaced it and the utility, its keyframes and its
+   reduced-motion branch were left behind. Removed. */
 @utility animate-rise {
-  animation: rise 1.35s var(--ease-reveal) both;
-}
-
-@utility animate-wipe-up {
-  animation: wipe-up 1.6s var(--ease-reveal) both;
+  animation: rise 1.6s var(--ease-reveal) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-rise,
-  .animate-wipe-up {
+  .animate-rise {
     animation: none;
     opacity: 1;
-    clip-path: none;
     transform: none;
   }
 }

@@ -36,12 +36,20 @@ import type { ReactElement, ReactNode } from "react";
  */
 
 /**
- * Viewport fraction at which a scene starts moving — its top edge a tenth of
- * the way in, rather than the instant it clears the bottom edge. A tall block
- * that starts on the boundary has already finished by the time enough of it is
- * on screen to be worth watching.
+ * Viewport fraction at which a scene starts moving.
+ *
+ * Past 1, so a scene begins travelling while it is still below the fold and is
+ * already a seventh of the way through by the time any of it can be seen.
+ *
+ * It was 0.9, a tenth of a viewport above the bottom edge, which put the whole
+ * reveal inside 0.26 of a viewport of scroll — 234px on a 900px screen for a
+ * block to go from 0.34 opacity and 32px low to settled. That is why it read as
+ * a snap rather than an arrival: the distance was right and the run-up was not.
+ *
+ * ARRIVE below is untouched, so nothing finishes any later on screen than the
+ * measurement that set it. The journey to it is 62% longer.
  */
-const ENTER = 0.9;
+const ENTER = 1.06;
 /**
  * Viewport fraction at which a scene has fully arrived.
  *
@@ -52,6 +60,22 @@ const ENTER = 0.9;
  * travelling well after it was fully readable. 0.64 sits between them.
  */
 const ARRIVE = 0.64;
+/**
+ * The same, for a photograph, and further out still.
+ *
+ * A wipe is far more conspicuous than a fade, and a fully clipped image is a
+ * hole in the page rather than something merely quiet — which is exactly what
+ * the old value produced. At ENTER an image reached the bottom edge of the
+ * viewport with its clip-path still at `inset(100%)`, so the first thing a
+ * visitor saw of it was nothing, and then all of it inside a quarter of a
+ * viewport of scroll.
+ *
+ * A fifth of a viewport below the fold means a photograph is already about 40%
+ * uncovered by the time any of it is visible, and the rest of the wipe is spread
+ * over 0.56 of a viewport rather than 0.26.
+ */
+const ENTER_IMAGE = 1.2;
+
 /** How far up the viewport each step of a sequence pushes its arrival point. */
 const SEQUENCE_SPREAD = 0.28;
 /** A long sequence must not push arrival past here, or it never completes. */
@@ -146,7 +170,7 @@ function useOnScreenAtFirstPaint(ref: React.RefObject<HTMLElement | null>) {
  * `useScroll` is called unconditionally — hooks cannot be skipped — and its
  * output is simply ignored when motion is not wanted.
  */
-function useScene(order: number) {
+function useScene(order: number, enter: number = ENTER) {
   const ref = useRef<HTMLDivElement>(null);
   const prefersReduced = useReducedMotion();
   const hydrated = useHydrated();
@@ -155,7 +179,7 @@ function useScene(order: number) {
 
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: [`start ${ENTER}`, `start ${arrive}`],
+    offset: [`start ${enter}`, `start ${arrive}`],
   });
 
   return {
@@ -168,9 +192,16 @@ function useScene(order: number) {
 export function Reveal({ children, className, order = 0, y = 32 }: SceneProps) {
   const { ref, progress, enabled } = useScene(order);
 
-  // Opacity lands ahead of the travel, so the element is readable while it is
-  // still settling rather than arriving all at once.
-  const opacity = useTransform(progress, [0, 0.7], [REST_OPACITY, 1]);
+  /**
+   * Opacity lands ahead of the travel, so the element is readable while it is
+   * still settling rather than arriving all at once.
+   *
+   * 0.8 rather than 0.7 because ENTER moved. The number is a fraction of the
+   * range, and the range is longer now, so holding it at 0.7 would have brought
+   * full opacity to a higher point on the screen than the measurement that set
+   * it. This keeps the finish where it was and lengthens the approach.
+   */
+  const opacity = useTransform(progress, [0, 0.8], [REST_OPACITY, 1]);
   const translate = useTransform(progress, [0, 1], [y, 0]);
 
   return (
@@ -228,15 +259,15 @@ export function StaggerItem({ children, className, y = 32, order = 0 }: ScenePro
  * covers again on the way back up. Used on the two large images only; on every
  * image it would be a gimmick.
  *
- * This one arrives earlier than a `Reveal` does — a half-wiped photograph is
- * more conspicuous than a half-faded paragraph.
+ * It runs on its own, longer range — see ENTER_IMAGE. A photograph that starts
+ * its wipe on the fold is invisible at the fold, and then arrives all at once.
  */
 export function ImageReveal({
   children,
   className,
   order = 0,
 }: Omit<SceneProps, "y">) {
-  const { ref, progress, enabled } = useScene(order);
+  const { ref, progress, enabled } = useScene(order, ENTER_IMAGE);
 
   const inset = useTransform(progress, [0, 0.85], [100, 0]);
   const clipPath = useTransform(inset, (value) => `inset(${value}% 0 0 0)`);
