@@ -1,6 +1,6 @@
 # Mahfouz Contracting — remaining work to launch
 
-**Status:** Steps 1-10 code complete, plus an unplanned design pass. The site is
+**Status:** Steps 1-11 code complete, plus an unplanned design pass. The site is
 built, seeded and rendering from the CMS, and every word on it is now editable
 in the Studio.
 
@@ -51,6 +51,7 @@ from:
 - [x] Step 8: Move the remaining copy and the per-route metadata into Sanity
 - [x] Step 9: Write the privacy policy, and close the three design questions
 - [x] Step 10: Slow the scroll reveals, and rebuild the contact page
+- [x] Step 11: Fix the sections landing dim after a client-side navigation
 
 ---
 
@@ -998,10 +999,13 @@ process cards are the one place two vertical motions land on the same element
 — the card rises on its `Reveal` while the photograph inside travels on its
 own — and at 46-94 the two compounded into a rush rather than depth.
 
-`animate-rise` goes 1.35s — 1.6s so the timed motion above the fold and the
-scrubbed motion below it still read as one system. `animate-wipe-up` had no
-caller anywhere in `src/`; the scroll wipe replaced it and left the utility, its
-keyframes and its reduced-motion branch behind. Removed.
+`animate-rise` went 1.35s — 1.6s and then **back to 1.35s**. The theory was
+that timed motion above the fold and scrubbed motion below it should read as one
+system; the answer on review was that the heroes were never the complaint and
+are the first thing anyone waits through. The reveals below the fold keep the
+longer run-up. `animate-wipe-up` had no caller anywhere in `src/`; the scroll
+wipe replaced it and left the utility, its keyframes and its reduced-motion
+branch behind. Removed, and it stays removed.
 
 **Verified from `framer-motion`'s source, not assumed:** `resolveEdge`
 multiplies a numeric edge by the container length with no clamp, so an offset
@@ -1054,6 +1058,76 @@ removing the whole `.next` directory. Budget for that after any reseed.
 (form, panel, checklist) but headless Chrome here clips the right edge of every
 page, including ones this branch never touched, so the capture proves nothing
 either way.
+
+---
+
+## Step 11 — The soft-navigation dimming — done 20 Sep 2026
+
+Reported on `/services`: the first block under the hero is right on a hard load,
+but navigate away and back and it sits dimmed and stays there. **Two faults, both
+only reachable by a client-side navigation**, which is why every check up to here
+had missed them.
+
+### The guard was measuring at the wrong moment
+
+An element inside the first screenful must not be held at rest opacity — there
+is no scroll above it to drive a reveal. The test for that was *"is it on screen
+when the page first paints"*.
+
+On a soft nav the new page mounts while the **old** scroll position is still in
+force, and the router does not jump to the top, it **animates** there. Traced over
+CDP, arriving at `/services` from a home page at 2000px:
+
+| t | scrollY | article top | on screen |
+|---|---|---|---|
+| 130ms | 1983 | -1492 | no |
+| 330ms | 1200 | -709 | **yes** |
+| 870ms | 0 | 491 | yes |
+
+The measurement at mount saw it far below the fold and left the effect enabled.
+Re-measuring for a few frames was the obvious fix and was still a race — it
+would have had to outlast the whole 870ms animation.
+
+**Adding the scroll offset back removes the race instead of racing it.**
+`rect.top + scrollY` is the element's position in the *document*, which does not
+change while the page scrolls, so the answer is identical at every point during
+that animation, on a hard load, and on a restored back navigation. No timers, no
+listeners, nothing to settle. The hook is `useInFirstScreen`.
+
+### Fixing that exposed the second fault, which was worse
+
+Motion drives these through MotionValues **straight onto the node**, and
+`style={undefined}` does not put back what it wrote — it only stops updating
+it. So the moment the guard correctly opted an element out, that element froze at
+whatever the last frame had written: `0.34` and `translateY(32px)`, permanently.
+Worse than the bug being fixed, because at least that one came back when you
+scrolled.
+
+The disabled branch states the finished position now (`SETTLED`, `UNCOVERED`)
+rather than hoping the enabled one never ran. **Anything that disables a Motion
+style has to say what the element should look like instead.**
+
+### A transform conflict, unpicked on the way
+
+The about block's overhang was a `lg:translate-y-8` on the same element as a
+`Reveal`. A Reveal owns the transform of what it wraps — Motion writes one
+inline — so the class was overwritten whenever the scene had any progress at
+all. Moved to the `dl` inside it. One element, one owner of its transform.
+
+### Verified, 20 Sep 2026
+
+Over CDP at a 900px viewport, all three ways in — hard load, soft nav from a
+home page scrolled to 2000, and browser Back — zero dimmed elements on screen
+in each. Reveals still work: scrolling `/about`, a below-fold block climbs
+0.34 — 0.39 — 1 as it comes up, so this opts out the first screenful and
+nothing else. The about title block was screenshotted — the overhang still
+hangs. Gates clean (exit codes checked, not just output), `npm run build` exit 0.
+
+**Worth keeping:** driving a real client-side navigation needs a browser. Node 22
+has a global `WebSocket`, so CDP can be driven with no dependencies at all —
+launch the Playwright chromium with `--remote-debugging-port`, connect to the page
+target, and `Runtime.evaluate`. That is how both faults were found and how the fix
+was proved; neither is visible in the markup or on a hard load.
 
 ---
 
