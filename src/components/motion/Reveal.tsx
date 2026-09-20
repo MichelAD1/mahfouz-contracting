@@ -114,9 +114,9 @@ type SceneProps = {
  * `.js` class was protecting.
  *
  * Nothing visible moves when they land, and the way that is guaranteed changed:
- * an element on screen at first paint is opted out of the effect entirely (see
- * `useOnScreenAtFirstPaint`). Only content below the fold starts from its
- * resting state, where no one can see it start.
+ * an element inside the first screenful of the document is opted out of the
+ * effect entirely (see `useInFirstScreen`). Only content below the fold starts
+ * from its resting state, where no one can see it start.
  */
 const neverChanges = () => () => {};
 
@@ -135,34 +135,52 @@ function useHydrated() {
 const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 /**
- * Whether this element was already on screen when the page first painted.
+ * Whether this element sits inside the first screenful of the document.
  *
- * Anything visible on arrival must not animate. The page had claimed that an
- * element already on screen "measures at progress 1, so it is styled to
- * exactly where it already was" — true only of an element that has been
- * scrolled fully past. One that is *partway* into its range measures partway,
- * so it renders dimmed and offset at rest, with nothing having moved and
- * nothing about to.
+ * Anything there is visible before a visitor has scrolled at all, so there is
+ * no scroll above it to drive a reveal, and holding it at rest opacity leaves
+ * it dimmed with nothing having moved and nothing about to. The page had
+ * claimed that an element already on screen "measures at progress 1, so it is
+ * styled to exactly where it already was" — true only of an element scrolled
+ * fully past. One that is *partway* into its range measures partway.
  *
  * That is what a short hero exposes: /services has a 491px hero on an 844px
- * screen, so its first division sat at opacity 0.40 on load and stayed there
- * until the visitor scrolled. /about did the same at 0.56.
+ * screen, so its first division sat at opacity 0.40 on load and stayed there.
+ * /about did the same at 0.56.
  *
- * Measured in a layout effect so the correction is applied before the browser
- * paints, rather than as a visible settle.
+ * **The test is deliberately not "is it on screen".** That was the first
+ * version and it failed on a client-side navigation, because the new page
+ * mounts while the old scroll position is still in force and the router then
+ * *animates* to the top rather than jumping: traced over CDP, arriving at
+ * /services from a home page at 2000px, the scroll eased down over 870ms and
+ * the first division did not enter the viewport until 330ms in. A measurement
+ * at mount therefore saw it far below the fold, kept its effect enabled, and
+ * left it at the top of the page already part-way through its range with no
+ * scroll left to finish it — heading at 0.80, body at 0.34, staying there.
+ * Re-measuring for a few frames did not help either; nothing short of waiting
+ * out the whole animation would have.
+ *
+ * Adding the scroll offset back removes the race instead of racing it.
+ * `rect.top + scrollY` is the element's position in the *document*, which does
+ * not change while the page scrolls, so the answer is the same at any moment
+ * during that 870ms and on a hard load and on a restored back-navigation. No
+ * timers, no listeners, no settling to wait for.
+ *
+ * Its own `y` transform is inside the measurement, which is 32px against a
+ * threshold of a whole viewport — far too coarse to care.
  */
-function useOnScreenAtFirstPaint(ref: React.RefObject<HTMLElement | null>) {
-  const [onScreen, setOnScreen] = useState(false);
+function useInFirstScreen(ref: React.RefObject<HTMLElement | null>) {
+  const [inFirstScreen, setInFirstScreen] = useState(false);
 
   useIsomorphicLayoutEffect(() => {
     const node = ref.current;
     if (!node) return;
 
-    const rect = node.getBoundingClientRect();
-    if (rect.top < window.innerHeight && rect.bottom > 0) setOnScreen(true);
+    const documentTop = node.getBoundingClientRect().top + window.scrollY;
+    if (documentTop < window.innerHeight) setInFirstScreen(true);
   }, [ref]);
 
-  return onScreen;
+  return inFirstScreen;
 }
 
 /**
@@ -174,7 +192,7 @@ function useScene(order: number, enter: number = ENTER) {
   const ref = useRef<HTMLDivElement>(null);
   const prefersReduced = useReducedMotion();
   const hydrated = useHydrated();
-  const visibleOnArrival = useOnScreenAtFirstPaint(ref);
+  const visibleOnArrival = useInFirstScreen(ref);
   const arrive = Math.max(ARRIVE_FLOOR, ARRIVE - order * SEQUENCE_SPREAD);
 
   const { scrollYProgress } = useScroll({
@@ -188,6 +206,25 @@ function useScene(order: number, enter: number = ENTER) {
     enabled: hydrated && !prefersReduced && !visibleOnArrival,
   };
 }
+
+/**
+ * What a scene looks like when the effect does not apply to it.
+ *
+ * Written out rather than left to `style={undefined}`, which is what this did
+ * and which does not work. Motion drives these through MotionValues straight
+ * onto the node; dropping the prop stops it *updating* them and leaves the
+ * last values it wrote sitting there. On a client-side navigation that is a
+ * section frozen at rest opacity for good - worse than the bug it replaced,
+ * because at least that one came back when you scrolled.
+ *
+ * So the disabled branch states the finished position instead of hoping the
+ * enabled one never ran. It is also what the server renders, which is the
+ * ordinary, fully visible page this module goes to some trouble to ship.
+ */
+const SETTLED = { opacity: 1, y: 0 } as const;
+
+/** The same, for the wipe: fully uncovered. */
+const UNCOVERED = { clipPath: "inset(0 0 0 0)" } as const;
 
 export function Reveal({ children, className, order = 0, y = 32 }: SceneProps) {
   const { ref, progress, enabled } = useScene(order);
@@ -208,7 +245,7 @@ export function Reveal({ children, className, order = 0, y = 32 }: SceneProps) {
     <motion.div
       ref={ref}
       className={className}
-      style={enabled ? { opacity, y: translate } : undefined}
+      style={enabled ? { opacity, y: translate } : SETTLED}
     >
       {children}
     </motion.div>
@@ -273,7 +310,11 @@ export function ImageReveal({
   const clipPath = useTransform(inset, (value) => `inset(${value}% 0 0 0)`);
 
   return (
-    <motion.div ref={ref} className={className} style={enabled ? { clipPath } : undefined}>
+    <motion.div
+      ref={ref}
+      className={className}
+      style={enabled ? { clipPath } : UNCOVERED}
+    >
       {children}
     </motion.div>
   );

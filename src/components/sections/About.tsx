@@ -67,10 +67,17 @@ export function About({
             />
           </ImageReveal>
 
+          {/*
+           * The overhang is on the `dl`, not on the Reveal. A Reveal owns the
+           * transform of the element it wraps — Motion writes one inline — so a
+           * `translate-y` class on the same node is overwritten the moment the
+           * scene has any progress at all. One element, one owner of its
+           * transform.
+           */}
           {about.details.length > 0 ? (
             <Reveal
               order={0.42}
-              className="lg:absolute lg:bottom-0 lg:left-0 lg:w-[16.5rem] lg:translate-y-8"
+              className="lg:absolute lg:bottom-0 lg:left-0 lg:w-[16.5rem]"
             >
               {/*
                * A drawing title block rather than a counter, so the label
@@ -78,7 +85,7 @@ export function About({
                * the order a definition list is specified in, which the
                * counted version inverted to put the figure on top.
                */}
-              <dl className="bg-ink p-6 lg:p-7">
+              <dl className="bg-ink p-6 lg:translate-y-8 lg:p-7">
                 {about.details.map((detail, index) => (
                   <div
                     key={detail.label}
