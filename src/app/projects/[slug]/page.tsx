@@ -121,16 +121,24 @@ function ProjectFacts({ project }: { project: ProjectFull }) {
     <section className="bg-ink text-paper-bright">
       <div className="shell">
         {/*
-         * Hairlines come from a 1px grid gap showing the container through,
-         * not from per-cell borders. With the column count changing across
-         * three breakpoints, any `:last-child` rule would leave a stray edge
-         * on one of them.
+         * Hairlines come from a 1px gap showing the container through, not from
+         * per-cell borders. With the cells wrapping, any `:last-child` rule
+         * would leave a stray edge on one row or another.
+         *
+         * The cells **grow to fill the row**, which is the point rather than a
+         * detail. This was a four-column grid, so a record carrying three facts
+         * — which is what every project carries today, the rest being
+         * deliberately unset until the client confirms them — left the
+         * fourth column showing the container's rule colour: a blank cell in a
+         * bar of labelled ones, which reads as a field somebody forgot to fill
+         * rather than as a field that does not apply. Filling the row means
+         * there is no empty cell to misread, at any count from one to six.
          */}
-        <dl className="grid gap-px border-t border-rule-dark bg-rule-dark sm:grid-cols-2 lg:grid-cols-4">
+        <dl className="flex flex-wrap gap-px border-t border-rule-dark bg-rule-dark">
           {facts.map((fact) => (
             <div
               key={fact.label}
-              className="bg-ink py-[clamp(1.5rem,3vw,2.25rem)] sm:px-7 sm:first:pl-0"
+              className="grow basis-[12rem] bg-ink py-[clamp(1.5rem,3vw,2.25rem)] sm:px-7 sm:first:pl-0"
             >
               <dt className="t-meta text-steel-light">{fact.label}</dt>
               <dd className="mt-2.5 display-narrow text-[1.0625rem] text-paper-bright">
@@ -188,9 +196,20 @@ function Overview({ project }: { project: ProjectFull }) {
                 {scope.map((item, index) => (
                   <li
                     key={item}
-                    className="grid grid-cols-[auto_1fr] gap-5 border-b border-rule py-[1.125rem]"
+                    /*
+                     * `items-baseline`, so the numeral sits on the same line as
+                     * the text rather than near it. The two spans are different
+                     * sizes with different line-heights — 12px on the display
+                     * face at 0.94, 16px on the body face at 1.625 — and the
+                     * default `stretch` lines up their boxes, which leaves the
+                     * smaller box's baseline floating above the larger one's.
+                     * It was being corrected with a hand-tuned `leading-[1.6]`
+                     * on the numeral, which moves the box and so gets close
+                     * without ever being right.
+                     */
+                    className="grid grid-cols-[auto_1fr] items-baseline gap-5 border-b border-rule py-[1.125rem]"
                   >
-                    <span className="display text-[0.75rem] leading-[1.6] text-navy">
+                    <span className="display text-[0.75rem] text-navy">
                       {pad2(index + 1)}
                     </span>
                     <span className="text-[1rem] leading-relaxed text-ink/85">
