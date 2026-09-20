@@ -32,7 +32,7 @@ export const service = defineType({
       title: "Short name",
       type: "string",
       description:
-        "Used on project tags and the projects filter, where the full title is too long — e.g. Maintenance for Maintenance & Facility Support. Falls back to the title.",
+        "Used on project tags and the projects filter, where the full title is too long - e.g. Maintenance for Maintenance & Facility Support. Falls back to the title.",
     }),
     defineField({
       name: "slug",
@@ -306,7 +306,7 @@ export const testimonial = defineType({
       name: "project",
       type: "reference",
       to: [{ type: "project" }],
-      description: "Optional — links the quote to the work it refers to.",
+      description: "Optional - links the quote to the work it refers to.",
     }),
     orderField,
   ],
