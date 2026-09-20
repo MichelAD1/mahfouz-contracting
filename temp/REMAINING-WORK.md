@@ -1,12 +1,14 @@
 # Mahfouz Contracting — remaining work to launch
 
-**Status:** Steps 1-7 code complete, plus an unplanned design pass. The site is
-built, seeded and rendering from the CMS.
+**Status:** Steps 1-9 code complete, plus an unplanned design pass. The site is
+built, seeded and rendering from the CMS, and every word on it is now editable
+in the Studio.
 
 What is left is no longer code. It is the client's accounts, a domain, a
 deployment, and one walkthrough — tracked in `docs/CLIENT-SETUP.md` and in the
 three held items under Step 6 (Search Console, Business Profile, Lighthouse
-against the deployed build).
+against the deployed build). One item moved from my list to theirs on 20 Sep:
+the privacy policy is written and live, and needs the client to read it.
 
 Supersedes the previous draft. Companion to `temp/PLAN.md`, which covers the
 original build; this file is only what is left.
@@ -46,6 +48,8 @@ from:
       (code complete; three items wait on a domain or a deployment)
 - [x] Step 7: Seed the dataset, then hand Sanity over to the client
       (seeded and documented; the walkthrough and the account transfer need people)
+- [x] Step 8: Move the remaining copy and the per-route metadata into Sanity
+- [x] Step 9: Write the privacy policy, and close the three design questions
 
 ---
 
@@ -87,19 +91,33 @@ real differentiator, scannable in a second, and a route into the site rather
 than a statistic. The standards moved to the sheet's footer line as credentials,
 and gained a `standards` field on `siteSettings` so they are editable.
 
-`hero.metrics` is still in the schema but no longer rendered. **If this stays,
-strip the field** so an editor is not filling in something nothing displays.
+`hero.metrics` is gone — from the schema, the query, the fallback module and
+the dataset. So is `about.metrics`, for the reason below. With both readers
+removed the `metric` object type and the `Counter` that animated it had no
+user left either, so they went with them. See Step 9.
 
-### Open design questions, carried forward
+### The three design questions, answered 20 Sep
 
-1. **`IT  IT & Automation`** in the division strip — the code and the short name
-   both read "IT" side by side. One word to change, either way.
-2. **The About section still has "5 Divisions / 2 Countries"** as metrics — the
-   same counting pattern, and the same weak numbers, as the band just replaced.
-3. **Site-wide type scale.** The hero now fits one screen; the inner pages were
-   deliberately left at their current rhythm. Matching 80% browser zoom across
-   the whole site would mean scaling sections down too, which changes its
-   character rather than its density.
+All three were put to the client and decided; the work is in Step 9.
+
+1. **`IT  IT & Automation`** in the division strip. Fixed at the **code**, not
+   the name: `IT` became `IA`, the initial of each half of "Information
+   Technology & Automation". It keeps the two-letter pattern the other four
+   follow and leaves the short name alone, which matters because that name is
+   also the tag on every project card and the label in the /projects filter.
+   Shortening it to "Automation" would have been one character cheaper and
+   would have dropped the half of the division most people name it by.
+2. **The About section's "5 Divisions / 2 Countries".** The block stays; the
+   counters go. It is a drawing title block of label/value rows now —
+   "Operating in — Liberia, Lebanon" and "In-house divisions — Engineering,
+   electrical, mechanical, IT, maintenance". Exactly the transformation the
+   hero band got, for exactly the same reason: naming five divisions is the
+   company's differentiator, counting them is not.
+3. **Site-wide type scale. Left alone, deliberately.** The hero was tightened
+   to fit one screen, which was a fix for a specific fault, not a decision
+   about scale. Scaling the inner pages to match would change the site's
+   character rather than its density, and would put every page back in review
+   to buy nothing. Closed rather than carried forward again.
 
 ### Tooling worth reusing
 
@@ -126,6 +144,7 @@ Both quality gates are **clean** on `main`: `npm run lint` exit 0,
 | `/projects` | 200 | done |
 | `/projects/<slug>` | 200, unknown slugs 404 | done |
 | `/contact` | 200, form working | done |
+| `/privacy-policy` | 200, and no longer a redirect to the home page | Step 9 |
 | `/sitemap.xml` | 200 | Step 6 |
 | `/robots.txt` | 200 | Step 6 |
 | `/opengraph-image` | 200, a 1200×630 PNG | Step 6 |
@@ -825,38 +844,114 @@ All three previously open questions are now settled:
   established design language, for review afterwards rather than design first.
 - **CORS is untouched** — the port move to 3333 made the change unnecessary.
 
-## Step 8 — Move the remaining copy into Sanity (next session)
+## Step 8 — The copy moved into Sanity — done 20 Sep 2026
 
-Deferred deliberately on 19 Sep, not forgotten. Today the CMS holds the
-*content* and the code holds the *furniture*, which means the client cannot
-reword a section heading without a developer.
+Deferred on 19 Sep, done now. Until this, the CMS held the content and the code
+held the furniture: the client could rewrite what a section said but not what it
+was called, and could not touch a single page title or description — which is
+the copy that decides whether anyone arrives at all.
 
-What is still hard-coded, audited rather than guessed:
+One new singleton, **Page copy**, with four tabs:
 
-| Where | What |
+| Tab | What it holds |
 |---|---|
-| `Capabilities.tsx` | "Five divisions, one scope of responsibility" + its lead |
-| `Process.tsx` | "Four stages, from brief to ongoing support" |
-| `SelectedWork.tsx` | "Projects delivered end to end." |
-| `Hero.tsx` | "Five divisions, one point of responsibility" (strip label) |
-| `app/about`, `app/services`, `app/projects` | page hero headings and leads, "More work, on request" |
-| every route | `title` and `description` metadata |
-| `ContactForm.tsx` | field labels, helper text, button and success copy |
-| `ProjectsIndex.tsx` | "All work" filter label, empty states |
-| `opengraph-image.tsx` | the card's wording |
+| Home page | the division strip label, and the Capabilities and Selected work sections |
+| Inner pages | the About, Services and Projects hero headings and leads, the process heading, "More work, on request", the empty-filter state and the "All work" filter label |
+| Contact page | every label on the enquiry form, both button states, the line after a successful send, and the "Reach us directly" column |
+| Search & sharing | an `seo` object per route |
 
-Shape it as **one `sectionCopy` singleton with a field per section** rather
-than scattering headings across the section documents — the alternative is
-five more singletons and a Studio that reads like a filing cabinet. Page
-metadata wants a `seo` object per route; that object type already exists and is
-already on `siteSettings`, `service` and `project`, so it is wiring rather than
-schema design.
+One document rather than a heading field added to each section's own record.
+Rewriting the site is one job, and five more singletons would make the studio
+read like a filing cabinet.
 
-Two cautions for whoever picks it up. The fallback module must keep every
-string it has now, or a CMS outage silently empties the page furniture. And
-`opengraph-image.tsx` is generated at build time, so copy moved there would not
-follow a Studio edit until the next deploy — probably a reason to leave that
-one alone.
+### Three things worth knowing
+
+**The merge needed a second level.** `mergeObject` stops one level deep on
+purpose — below that are images and links, where half of one and half of
+another is worse than either whole. But a section here is a nested object of
+four strings, so merged at the top level an editor who rewrote a heading and
+left the lead empty would publish `{ heading }` and take the lead off the page.
+That is the identical trap, one level down. `mergeCopy` closes it, and is used
+only by documents that are copy all the way down.
+
+**Declaring `openGraph` on a page silently deletes the share card.** Next
+shallow-merges metadata, so a page's `openGraph` replaces the layout's resolved
+one outright — file-convention image included. Caught on the running site: all
+four inner pages went to zero `og:image` tags while every other tag stayed
+correct. That is the shape of failure that ships, because everything visible
+looks right. `pageMetadata` names the card explicitly now, and a share image
+set per page in the studio replaces it for that page alone.
+
+**`homeSeo` does two jobs** — the home page's own metadata, and the default
+every other route inherits. So the home page still declares nothing but its
+canonical: a title set there would run through the template and print the
+company name twice. `siteSettings.seo` went the way of `hero.metrics` — in the
+schema, never read, now gone, with one field doing the job.
+
+### Deliberately still in code
+
+- **What a visitor is told when a send fails.** Some of it reports a fault
+  rather than addressing a person, including the development-mode line that
+  says the email was composed but never sent.
+- **The Open Graph card's own wording.** It is drawn at build time, so copy
+  moved there would not follow a studio edit until the next deploy.
+- **The footer's column headings** (Navigate, Services, Contact) and the
+  "Privacy" link label. Interface furniture, consistent with each other.
+
+---
+
+## Step 9 — The privacy policy, and the design questions — done 20 Sep 2026
+
+**The privacy policy is written and live at `/privacy-policy`.** That is the
+address the old WordPress site published, and it was in the redirect table
+pointing at the home page for want of anywhere better to send it. It is out of
+that table now, so whatever authority the old URL carries lands on the page it
+was always about. The trailing-slash form still normalises to it in one hop.
+
+It is a **draft and has not been read by a lawyer**, which is said plainly in
+the fallback module and in `docs/CLIENT-SETUP.md`, where item 10 has moved from
+"supply the text" to "read this and tell me what is wrong". It lives in the CMS,
+so a replacement from the client's own lawyer needs no developer.
+
+It describes what this site actually does rather than covering everything a
+policy can cover. Boilerplate about cookie categories and profiling would have
+been faster and would have been a claim nobody checked. It asserts four
+specific things, all true of the code as it stands:
+
+- the enquiry form collects only the fields visible on it
+- a submission is emailed and never written to a database
+- the site sets no cookies of its own
+- the typefaces are served from this origin, not from Google
+
+**Adding analytics, a chat widget or a stored enquiry log breaks one of them,
+and has to change that text in the same commit.** The condition is recorded in
+the fallback module beside the policy so it is read by whoever breaks it.
+
+Two departures from the rest of the site, both deliberate. It is the only page
+that does not end on the closing banner — asking someone reading a privacy
+policy whether they have a project in mind reads as a company that was not
+listening. And the margin column carries the revision date, which is genuine
+sheet metadata rather than the decorative label that column is not allowed to
+hold.
+
+The three design questions are answered above. `hero.metrics`, `about.metrics`,
+the `metric` object type and the `Counter` component are all gone.
+
+### Verified, 20 Sep 2026
+
+Gates clean on the branch: `npm run lint` exit 0, `npx tsc --noEmit` exit 0.
+
+The dataset was reseeded: **27 documents**, 15 images deduped on hash rather
+than re-added. `svc-it.code` reads `IA`, `about.details` carries the two named
+rows, `hero.metrics` is null, and the two new documents exist. Checked by GROQ
+against the dataset, not inferred from the page.
+
+Every route 200, and the `cdn.sanity.io` count per page matches the figures
+`docs/CONNECT-SANITY.md` records for a connected CMS — home 181, about 70,
+services 65, projects 58, a project page 32, contact 0. Zero
+"serving fallback content" warnings in the server log, which is the only proof
+that every query was actually answered rather than quietly falling back. The
+share card is a real 1200x630 PNG on all five pages again.
 
 ---
 
