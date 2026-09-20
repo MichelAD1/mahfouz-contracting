@@ -250,16 +250,21 @@
   }
 }
 
-/* The page-load entrance, lengthened with the scroll reveals so the two read as
-   one system. This is the hero and the inner-page plates: the only motion on
-   the site that is timed rather than scrubbed, because above the fold there is
-   no scroll to scrub against.
+/* The page-load entrance: the hero and the inner-page plates, the only motion
+   on the site that is timed rather than scrubbed, because above the fold there
+   is no scroll to scrub against.
+
+   1.35s, unchanged. It went to 1.6s alongside the scroll reveals on the theory
+   that timed and scrubbed motion should read as one system, and that was the
+   wrong theory: the heroes were never the complaint, and they are the first
+   thing anyone waits through. The reveals below the fold are slower; this is
+   not.
 
    `animate-wipe-up` sat beside it with no caller anywhere in src/ - the scroll
    wipe in ImageReveal replaced it and the utility, its keyframes and its
    reduced-motion branch were left behind. Removed. */
 @utility animate-rise {
-  animation: rise 1.6s var(--ease-reveal) both;
+  animation: rise 1.35s var(--ease-reveal) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
