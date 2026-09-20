@@ -322,6 +322,12 @@ export const sectionCopy = defineType({
       group: "pages",
     }),
     defineField({
+      name: "notFound",
+      title: "404 page",
+      type: "sectionIntro",
+      group: "pages",
+    }),
+    defineField({
       name: "projectsAllFilter",
       title: "Projects — unfiltered label",
       type: "string",

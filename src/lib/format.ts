@@ -8,6 +8,17 @@ export function mailHref(email: string): string {
 }
 
 /**
+ * Two digits, so counts and index columns keep a fixed width.
+ *
+ * Lived in ProjectCard until the 404 wanted it. A page whose whole job is to
+ * have gone wrong should not be dragging a project card, `next/image` and the
+ * Sanity image helpers into its bundle for three lines of padding.
+ */
+export function pad2(value: number): string {
+  return String(Math.max(value, 0)).padStart(2, "0");
+}
+
+/**
  * Decimal degrees as a drawing would print them.
  *
  * Used in place of an embedded map. A mapping provider's iframe would load

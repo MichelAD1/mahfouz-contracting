@@ -163,6 +163,7 @@ export const SECTION_COPY_QUERY = groq`*[_type == "sectionCopy"][0]{
   "projectsHero": projectsHero${SECTION_INTRO},
   "projectsMore": projectsMore${SECTION_INTRO},
   "projectsEmpty": projectsEmpty${SECTION_INTRO},
+  "notFound": notFound${SECTION_INTRO},
   projectsAllFilter,
   enquiryForm{
     nameLabel, companyLabel, emailLabel, phoneLabel,

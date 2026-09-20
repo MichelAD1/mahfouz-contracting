@@ -270,6 +270,8 @@ export type SectionCopy = {
   projectsHero: SectionIntro;
   projectsMore: SectionIntro;
   projectsEmpty: SectionIntro;
+  /** The 404. `label` is the margin label over the list of routes. */
+  notFound: SectionIntro;
   projectsAllFilter: string;
   enquiryForm: EnquiryFormCopy;
   contactDirect: ContactDirectCopy;

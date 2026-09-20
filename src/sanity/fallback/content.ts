@@ -74,11 +74,20 @@ export const fallbackHome: HomePageContent = {
     },
     // TODO(client): the live site's social links point at AxiomThemes accounts.
     socials: [],
+    /**
+     * Projects and About are swapped from the obvious order. The work comes
+     * before the write-up: a contractor is judged on what they have built,
+     * and About is the page people read last, if at all.
+     *
+     * This list is the one source. The header, the footer and the 404's
+     * index all read it, so the order is changed here and in the studio,
+     * and nowhere else.
+     */
     nav: [
       { label: "Home", href: "/" },
-      { label: "About", href: "/about" },
-      { label: "Services", href: "/services" },
       { label: "Projects", href: "/projects" },
+      { label: "Services", href: "/services" },
+      { label: "About", href: "/about" },
       { label: "Contact", href: "/contact" },
     ],
     /**
@@ -584,6 +593,12 @@ export const fallbackSectionCopy: SectionCopy = {
   projectsEmpty: {
     heading: "No projects listed under this division yet.",
     lead: "Records for this division can be issued on request.",
+  },
+
+  notFound: {
+    label: "Where to go",
+    heading: "That page is not in the set.",
+    lead: "The address you followed does not exist, or what used to be there has moved. Everything the site does have is listed below.",
   },
 
   projectsAllFilter: "All work",

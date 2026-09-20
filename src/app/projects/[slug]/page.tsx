@@ -5,7 +5,8 @@ import { PageHero } from "@/components/layout/PageHero";
 import { LinkUnderline } from "@/components/primitives/Button";
 import { SiteImage } from "@/components/primitives/SiteImage";
 import { ImageReveal, Reveal } from "@/components/motion/Reveal";
-import { pad2, projectMeta } from "@/components/projects/ProjectCard";
+import { projectMeta } from "@/components/projects/ProjectCard";
+import { pad2 } from "@/lib/format";
 import { ClosingCta } from "@/components/sections/ClosingCta";
 import {
   getClosingCta,

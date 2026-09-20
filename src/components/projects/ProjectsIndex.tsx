@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ProjectCard, pad2 } from "@/components/projects/ProjectCard";
+import { ProjectCard } from "@/components/projects/ProjectCard";
+import { pad2 } from "@/lib/format";
 import type { Project, SectionIntro } from "@/sanity/lib/types";
 
 const ALL = "all";

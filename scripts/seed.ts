@@ -161,6 +161,7 @@ async function buildDocuments(): Promise<SanityDoc[]> {
       projectsHero: intro(fallbackSectionCopy.projectsHero),
       projectsMore: intro(fallbackSectionCopy.projectsMore),
       projectsEmpty: intro(fallbackSectionCopy.projectsEmpty),
+      notFound: intro(fallbackSectionCopy.notFound),
       projectsAllFilter: fallbackSectionCopy.projectsAllFilter,
       enquiryForm: { _type: "enquiryForm", ...fallbackSectionCopy.enquiryForm },
       contactDirect: { _type: "contactDirect", ...fallbackSectionCopy.contactDirect },
