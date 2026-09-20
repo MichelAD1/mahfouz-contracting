@@ -5,6 +5,7 @@ import {
   CLOSING_CTA_QUERY,
   CONTACT_QUERY,
   HOME_QUERY,
+  PRIVACY_POLICY_QUERY,
   PROCESS_QUERY,
   PROJECTS_QUERY,
   PROJECT_QUERY,
@@ -16,6 +17,7 @@ import {
 import {
   fallbackContact,
   fallbackHome,
+  fallbackPrivacyPolicy,
   fallbackProjectDetails,
   fallbackSectionCopy,
 } from "@/sanity/fallback/content";
@@ -24,6 +26,7 @@ import type {
   ClosingCta,
   Contact,
   HomePageContent,
+  PrivacyPolicy,
   ProcessStep,
   Project,
   ProjectFull,
@@ -271,6 +274,21 @@ export function getProcess(): Promise<ProcessStep[]> {
     fallbackHome.process,
     (result) =>
       Array.isArray(result) && result.length > 0 ? (result as ProcessStep[]) : null,
+  );
+}
+
+/**
+ * The privacy policy. Merged rather than replaced for the usual reason: a
+ * half-saved policy that silently drops a section is worse than a stale one.
+ */
+export function getPrivacyPolicy(): Promise<PrivacyPolicy> {
+  return fetchOrFallback(
+    "privacy policy",
+    PRIVACY_POLICY_QUERY,
+    {},
+    "privacyPolicy",
+    fallbackPrivacyPolicy,
+    (result) => mergeCopy(fallbackPrivacyPolicy, result),
   );
 }
 

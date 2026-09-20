@@ -26,6 +26,7 @@ import { getCliClient } from "sanity/cli";
 import {
   fallbackContact,
   fallbackHome,
+  fallbackPrivacyPolicy,
   fallbackProjectDetails,
   fallbackSectionCopy,
 } from "../src/sanity/fallback/content";
@@ -232,6 +233,24 @@ async function buildDocuments(): Promise<SanityDoc[]> {
         "detail",
       ),
       formSubjects: fallbackContact.formSubjects,
+    }),
+  );
+
+  documents.push(
+    clean({
+      _id: "privacyPolicy",
+      _type: "privacyPolicy",
+      heading: fallbackPrivacyPolicy.heading,
+      updated: fallbackPrivacyPolicy.updated,
+      intro: fallbackPrivacyPolicy.intro,
+      sections: keyed(
+        fallbackPrivacyPolicy.sections.map((section) => ({
+          _type: "policySection",
+          ...section,
+        })),
+        "section",
+      ),
+      seo: seoBlock(fallbackPrivacyPolicy.seo),
     }),
   );
 

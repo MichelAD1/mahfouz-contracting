@@ -176,3 +176,9 @@ export const SECTION_COPY_QUERY = groq`*[_type == "sectionCopy"][0]{
   "projectsSeo": projectsSeo${SEO},
   "contactSeo": contactSeo${SEO}
 }`;
+
+export const PRIVACY_POLICY_QUERY = groq`*[_type == "privacyPolicy"][0]{
+  heading, updated, intro,
+  sections[]{ heading, body },
+  "seo": seo${SEO}
+}`;

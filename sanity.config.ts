@@ -56,6 +56,12 @@ const structure: StructureResolver = (S) =>
         .title("Contact")
         .id("contact")
         .child(S.document().schemaType("contact").documentId("contact")),
+      S.listItem()
+        .title("Privacy policy")
+        .id("privacyPolicy")
+        .child(
+          S.document().schemaType("privacyPolicy").documentId("privacyPolicy"),
+        ),
     ]);
 
 export default defineConfig({

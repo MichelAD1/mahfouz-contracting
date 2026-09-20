@@ -275,3 +275,23 @@ export type SectionCopy = {
   projectsSeo: Seo;
   contactSeo: Seo;
 };
+
+export type PolicySection = {
+  heading: string;
+  body: string[];
+};
+
+/**
+ * The privacy policy. `seo` sits on the document rather than in the page copy
+ * because this is the one route whose metadata belongs with its own text -
+ * the same place a replacement policy would arrive.
+ */
+export type PrivacyPolicy = {
+  heading: string;
+  /** ISO date, rendered in the sheet margin. */
+  updated?: string;
+  /** One entry per paragraph; the first becomes the lead under the heading. */
+  intro: string[];
+  sections: PolicySection[];
+  seo: Seo;
+};

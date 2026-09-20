@@ -172,18 +172,34 @@ deliberate and works. The Google listing looks emptier than your competitors'.
 
 ---
 
-## 10. A privacy policy
+## 10. A privacy policy — drafted, needs your review
 
-**What to do.** Supply the text, or ask me to draft something standard for you
-to review.
+**What to do.** Read the policy at `/privacy-policy` on the new site and tell
+me what is wrong with it, or replace it with your own.
 
-**Why.** Your current site published one, and the new site has no page to
-replace it with — that address currently redirects to the home page. The
-contact form collects a name, an email address and a message, which is the
-normal trigger for needing one.
+**What I need.** Either "that is fine", or a corrected version. Once the site
+is live you can edit it yourself in the Studio, so a later change needs no
+developer.
 
-**If skipped.** A gap that matters little in practice and looks careless to
-anyone who checks. Cheap to close.
+**Why this is not finished.** I have written the draft, and it is a real page
+on the new site — your old address `/privacy-policy` now answers with it
+instead of redirecting to the home page. **It has not been read by a lawyer.**
+
+It was written to describe what this website actually does rather than to
+cover everything a policy can cover, because a policy describing cookies and
+tracking that do not exist here is a claim nobody checked. It currently asserts
+four things, all true of the site as built:
+
+- the enquiry form collects only the fields visible on it
+- a submission is emailed to you and never written to a database
+- the site sets no cookies of its own
+- the typefaces are served from your own domain, not from Google
+
+Adding analytics, a chat widget, or anything that stores enquiries breaks one
+of them, and the policy has to change at the same time.
+
+**If skipped.** The page stands as written. Better than the nothing that was
+there, worse than a policy somebody with authority has read.
 
 ---
 
@@ -200,4 +216,4 @@ anyone who checks. Cheap to close.
 | 7 | Google Business Profile | You | No — **start early**, it is slow |
 | 8 | Partner logo permission | You | No, but before launch |
 | 9 | Logo file | You | No |
-| 10 | Privacy policy | You (or me, for review) | No |
+| 10 | Privacy policy | **Drafted** — you review it | No |

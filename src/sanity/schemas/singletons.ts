@@ -347,6 +347,47 @@ export const sectionCopy = defineType({
   preview: { prepare: () => ({ title: "Page copy" }) },
 });
 
+/**
+ * The privacy policy, in the CMS rather than in the page.
+ *
+ * It is rarely edited and it is the one thing on this site most likely to be
+ * replaced wholesale by somebody else's lawyer. That is exactly the case for
+ * making it editable: the replacement should not need a developer.
+ */
+export const privacyPolicy = defineType({
+  name: "privacyPolicy",
+  title: "Privacy policy",
+  type: "document",
+  fields: [
+    defineField({
+      name: "heading",
+      type: "string",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "updated",
+      title: "Last updated",
+      type: "date",
+      description:
+        "Shown in the sheet margin. Change it whenever the wording below changes.",
+    }),
+    defineField({
+      name: "intro",
+      type: "array",
+      of: [{ type: "text", rows: 4 }],
+      description:
+        "One entry per paragraph. The first is used as the lead under the page heading.",
+    }),
+    defineField({
+      name: "sections",
+      type: "array",
+      of: [{ type: "policySection" }],
+    }),
+    defineField({ name: "seo", type: "seo" }),
+  ],
+  preview: { prepare: () => ({ title: "Privacy policy" }) },
+});
+
 export const singletons = [
   siteSettings,
   sectionCopy,
@@ -354,6 +395,7 @@ export const singletons = [
   about,
   closingCta,
   contact,
+  privacyPolicy,
 ];
 
 /** Types that should exist exactly once, used to shape the studio's structure. */

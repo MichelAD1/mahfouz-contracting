@@ -167,6 +167,26 @@ export const contactDirect = defineType({
   ],
 });
 
+export const policySection = defineType({
+  name: "policySection",
+  title: "Section",
+  type: "object",
+  fields: [
+    defineField({
+      name: "heading",
+      type: "string",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "body",
+      type: "array",
+      of: [{ type: "text", rows: 4 }],
+      description: "One entry per paragraph.",
+    }),
+  ],
+  preview: { select: { title: "heading" } },
+});
+
 export const objects = [
   imageWithAlt,
   cta,
@@ -175,4 +195,5 @@ export const objects = [
   sectionIntro,
   enquiryForm,
   contactDirect,
+  policySection,
 ];
