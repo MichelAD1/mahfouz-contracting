@@ -44,7 +44,7 @@ export const siteSettings = defineType({
       of: [{ type: "string" }],
       group: "identity",
       description:
-        "e.g. IEC, NEC, BS, NFPA. Shown as the line under the home page hero — credentials for the people who evaluate contractors.",
+        "e.g. IEC, NEC, BS, NFPA. Shown as the line under the home page hero - credentials for the people who evaluate contractors.",
     }),
     defineField({
       name: "phones",
@@ -113,7 +113,7 @@ export const siteSettings = defineType({
 
 export const hero = defineType({
   name: "hero",
-  title: "Home — hero",
+  title: "Home - hero",
   type: "document",
   fields: [
     defineField({
@@ -122,7 +122,7 @@ export const hero = defineType({
       type: "array",
       of: [{ type: "string" }],
       description:
-        "One entry per line. Line breaks are deliberate at this size — do not rely on wrapping.",
+        "One entry per line. Line breaks are deliberate at this size - do not rely on wrapping.",
       validation: (rule) => rule.required().min(1),
     }),
     defineField({ name: "lead", type: "text", rows: 3 }),
@@ -134,12 +134,12 @@ export const hero = defineType({
       type: "imageWithAlt",
     }),
   ],
-  preview: { prepare: () => ({ title: "Home — hero" }) },
+  preview: { prepare: () => ({ title: "Home - hero" }) },
 });
 
 export const about = defineType({
   name: "about",
-  title: "Home — about",
+  title: "Home - about",
   type: "document",
   fields: [
     defineField({
@@ -177,12 +177,12 @@ export const about = defineType({
       validation: (rule) => rule.max(3),
     }),
   ],
-  preview: { prepare: () => ({ title: "Home — about" }) },
+  preview: { prepare: () => ({ title: "Home - about" }) },
 });
 
 export const closingCta = defineType({
   name: "closingCta",
-  title: "Home — closing banner",
+  title: "Home - closing banner",
   type: "document",
   fields: [
     defineField({
@@ -194,7 +194,7 @@ export const closingCta = defineType({
     defineField({ name: "cta", type: "cta" }),
     defineField({ name: "background", type: "imageWithAlt" }),
   ],
-  preview: { prepare: () => ({ title: "Home — closing banner" }) },
+  preview: { prepare: () => ({ title: "Home - closing banner" }) },
 });
 
 export const contact = defineType({
@@ -213,7 +213,7 @@ export const contact = defineType({
       type: "array",
       of: [{ type: "detailRow" }],
       description:
-        "Extra rows in the block beside the form, e.g. Hours, Response time. The address, the phones and the email are not entered here — they come from Site settings, so they are kept in one place and cannot disagree.",
+        "Extra rows in the block beside the form, e.g. Hours, Response time. The address, the phones and the email are not entered here - they come from Site settings, so they are kept in one place and cannot disagree.",
     }),
     defineField({
       name: "enquiryChecklist",
@@ -287,37 +287,37 @@ export const sectionCopy = defineType({
     }),
     defineField({
       name: "aboutHero",
-      title: "About — page hero",
+      title: "About - page hero",
       type: "sectionIntro",
       group: "pages",
     }),
     defineField({
       name: "aboutProcess",
-      title: "About — how we work",
+      title: "About - how we work",
       type: "sectionIntro",
       group: "pages",
     }),
     defineField({
       name: "servicesHero",
-      title: "Services — page hero",
+      title: "Services - page hero",
       type: "sectionIntro",
       group: "pages",
     }),
     defineField({
       name: "projectsHero",
-      title: "Projects — page hero",
+      title: "Projects - page hero",
       type: "sectionIntro",
       group: "pages",
     }),
     defineField({
       name: "projectsMore",
-      title: "Projects — more work",
+      title: "Projects - more work",
       type: "sectionIntro",
       group: "pages",
     }),
     defineField({
       name: "projectsEmpty",
-      title: "Projects — nothing under this filter",
+      title: "Projects - nothing under this filter",
       type: "sectionIntro",
       group: "pages",
     }),
@@ -327,11 +327,11 @@ export const sectionCopy = defineType({
       type: "sectionIntro",
       group: "pages",
       description:
-        "Only the heading and the lead are shown. The 404 has no margin label and no link of its own — the navigation above it is the way out.",
+        "Only the heading and the lead are shown. The 404 has no margin label and no link of its own - the navigation above it is the way out.",
     }),
     defineField({
       name: "projectsAllFilter",
-      title: "Projects — unfiltered label",
+      title: "Projects - unfiltered label",
       type: "string",
       group: "pages",
       description: "The first filter button, which shows every project.",
