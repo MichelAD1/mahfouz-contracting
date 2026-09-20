@@ -18,7 +18,7 @@ export function projectMeta(project: Project): string | null {
   if (divisions.length > 0) parts.push(divisions.join(" · "));
   if (project.location) parts.push(project.location);
 
-  return parts.length > 0 ? parts.join(" — ") : null;
+  return parts.length > 0 ? parts.join(" - ") : null;
 }
 
 /** A card's position in the grid, numbered from 01 rather than 00. */

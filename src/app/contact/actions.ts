@@ -23,7 +23,7 @@ import { getContact, getSiteFrame } from "@/sanity/lib/fetch";
 /** Shown to whatever filled the form blind, so it learns nothing from the reply. */
 const DISCARDED: ContactState = {
   status: "success",
-  message: "Thank you — we will be in touch.",
+  message: "Thank you - we will be in touch.",
 };
 
 /**
@@ -86,7 +86,7 @@ export async function submitEnquiry(
     // recoverable from the host's logs even though the email did not arrive.
     return {
       status: "error",
-      message: `We could not send that just now (${result.reason}). Please call or email us directly — the details are beside this form.`,
+      message: `We could not send that just now (${result.reason}). Please call or email us directly - the details are beside this form.`,
       values,
     };
   }
@@ -100,12 +100,12 @@ export async function submitEnquiry(
     return {
       status: "success",
       message:
-        "Validated and composed, but NOT SENT — no RESEND_API_KEY is configured, so the enquiry was written to the server console instead. Set the key in .env.local to send for real.",
+        "Validated and composed, but NOT SENT - no RESEND_API_KEY is configured, so the enquiry was written to the server console instead. Set the key in .env.local to send for real.",
     };
   }
 
   return {
     status: "success",
-    message: `Thank you — your enquiry is with us and we will come back to you. If it is urgent, call ${settings.phones[0]?.number ?? "us"}.`,
+    message: `Thank you - your enquiry is with us and we will come back to you. If it is urgent, call ${settings.phones[0]?.number ?? "us"}.`,
   };
 }

@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 export const alt =
-  "Mahfouz Contracting — engineering, contracting and maintenance. Five in-house divisions operating in Liberia and Lebanon.";
+  "Mahfouz Contracting - engineering, contracting and maintenance. Five in-house divisions operating in Liberia and Lebanon.";
 
 export const size = { width: 1200, height: 630 };
 

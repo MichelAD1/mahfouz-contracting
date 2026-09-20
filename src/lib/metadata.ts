@@ -8,7 +8,7 @@ import type { Seo } from "@/sanity/lib/types";
  * to every page title, and the Open Graph title below, which has to build the
  * same string by hand because a template is not applied to it.
  */
-export const TITLE_SEPARATOR = " — ";
+export const TITLE_SEPARATOR = " - ";
 
 export function titleTemplate(siteName: string): string {
   return `%s${TITLE_SEPARATOR}${siteName}`;

@@ -24,7 +24,7 @@ const GONE_BODY = `<!doctype html>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
-    <title>Page removed — Mahfouz Contracting</title>
+    <title>Page removed - Mahfouz Contracting</title>
   </head>
   <body style="font-family: system-ui, sans-serif; background: #eae8e3; color: #0a1628; margin: 0; display: grid; place-items: center; min-height: 100vh;">
     <main style="max-width: 32rem; padding: 2rem;">
