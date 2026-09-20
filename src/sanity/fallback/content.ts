@@ -217,7 +217,15 @@ export const fallbackHome: HomePageContent = {
     },
     {
       _id: "svc-it",
-      code: "IT",
+      /**
+       * IA, not IT. The hero's division strip sets the code beside the short
+       * name, so an "IT" code next to "IT & Automation" printed the same two
+       * letters twice in one row. IA takes the initial of each half of the
+       * full title, keeps the two-letter pattern the other four follow, and
+       * leaves the tag on every project card reading "IT & Automation" —
+       * which is what the design canvas specifies and what a client searches.
+       */
+      code: "IA",
       title: "Information Technology & Automation",
       shortTitle: "IT & Automation",
       slug: "information-technology-automation-division",
