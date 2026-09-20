@@ -99,33 +99,6 @@ export const fallbackHome: HomePageContent = {
       alt: "City skyline of high-rise towers seen from above at first light",
       aspectRatio: 16 / 9,
     },
-    // Every figure here is checkable against the company's own material.
-    metrics: [
-      {
-        figure: "5",
-        countTo: 5,
-        label: "In-house divisions",
-        note: "Engineering, electrical, mechanical, IT, maintenance",
-      },
-      {
-        figure: "2",
-        countTo: 2,
-        label: "Countries served",
-        note: "Liberia and Lebanon",
-      },
-      {
-        figure: "6",
-        countTo: 6,
-        label: "Standards worked to",
-        note: "IEC, NEC, BS, NFPA, ASHRAE, SMACNA",
-      },
-      {
-        figure: "1",
-        countTo: 1,
-        label: "Point of responsibility",
-        note: "Design through commissioning and support",
-      },
-    ],
   },
 
   about: {
@@ -145,9 +118,18 @@ export const fallbackHome: HomePageContent = {
         aspectRatio: 1024 / 1536,
       },
     ],
-    metrics: [
-      { figure: "5", countTo: 5, label: "Divisions" },
-      { figure: "2", countTo: 2, label: "Countries" },
+    /**
+     * The title block over the photograph. It read "5 Divisions" and "2
+     * Countries" — the same counting pattern, and the same weak figures,
+     * as the hero band that was replaced before it. Named, the two rows
+     * say what the numbers only implied.
+     */
+    details: [
+      { label: "Operating in", value: "Liberia · Lebanon" },
+      {
+        label: "In-house divisions",
+        value: "Engineering, electrical, mechanical, IT, maintenance",
+      },
     ],
   },
 

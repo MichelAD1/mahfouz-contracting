@@ -1,7 +1,6 @@
 import { LinkUnderline } from "@/components/primitives/Button";
 import { SectionShell } from "@/components/primitives/SectionShell";
 import { SiteImage } from "@/components/primitives/SiteImage";
-import { Counter } from "@/components/motion/Counter";
 import { ImageReveal, Reveal } from "@/components/motion/Reveal";
 import type { About as AboutContent } from "@/sanity/lib/types";
 
@@ -68,27 +67,29 @@ export function About({
             />
           </ImageReveal>
 
-          {about.metrics.length > 0 ? (
+          {about.details.length > 0 ? (
             <Reveal
               order={0.42}
               className="lg:absolute lg:bottom-0 lg:left-0 lg:w-[16.5rem] lg:translate-y-8"
             >
+              {/*
+               * A drawing title block rather than a counter, so the label
+               * leads and the thing it labels sits under it. That is also
+               * the order a definition list is specified in, which the
+               * counted version inverted to put the figure on top.
+               */}
               <dl className="bg-ink p-6 lg:p-7">
-                {about.metrics.map((metric, index) => (
+                {about.details.map((detail, index) => (
                   <div
-                    key={metric.label}
+                    key={detail.label}
                     className={
                       index > 0 ? "mt-4 border-t border-rule-dark pt-4" : undefined
                     }
                   >
-                    <dd className="t-figure text-[clamp(2rem,3vw,2.5rem)] text-paper-bright">
-                      {typeof metric.countTo === "number" ? (
-                        <Counter to={metric.countTo} display={metric.figure} />
-                      ) : (
-                        metric.figure
-                      )}
+                    <dt className="t-meta text-steel-light">{detail.label}</dt>
+                    <dd className="mt-2 text-[0.9375rem] leading-relaxed text-paper-bright">
+                      {detail.value}
                     </dd>
-                    <dt className="mt-1.5 t-meta text-steel-light">{metric.label}</dt>
                   </div>
                 ))}
               </dl>

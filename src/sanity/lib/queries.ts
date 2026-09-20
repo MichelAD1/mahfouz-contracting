@@ -13,8 +13,6 @@ const IMAGE = groq`{
   slotHint
 }`;
 
-const METRIC = groq`{ figure, label, note, countTo, prefix, suffix }`;
-
 const CTA = groq`{ label, href }`;
 
 /**
@@ -63,14 +61,13 @@ export const HOME_QUERY = groq`{
     headingLines, lead,
     "primaryCta": primaryCta${CTA},
     "secondaryCta": secondaryCta${CTA},
-    "background": background${IMAGE},
-    "metrics": metrics[]${METRIC}
+    "background": background${IMAGE}
   },
   "about": *[_type == "about"][0]{
     sheet, statement, body,
     "cta": cta${CTA},
     "images": images[]${IMAGE},
-    "metrics": metrics[]${METRIC}
+    "details": details[]{ label, value }
   },
   "services": *[_type == "service"]|order(order asc)${SERVICE},
   "projects": *[_type == "project"]|order(featured desc, order asc)${PROJECT_CARD},
@@ -118,7 +115,7 @@ export const ABOUT_QUERY = groq`*[_type == "about"][0]{
   sheet, statement, body,
   "cta": cta${CTA},
   "images": images[]${IMAGE},
-  "metrics": metrics[]${METRIC}
+  "details": details[]{ label, value }
 }`;
 
 export const PROJECT_SLUGS_QUERY = groq`*[_type == "project" && defined(slug.current)].slug.current`;

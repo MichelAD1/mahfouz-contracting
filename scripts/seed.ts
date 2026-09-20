@@ -132,10 +132,6 @@ async function buildDocuments(): Promise<SanityDoc[]> {
       primaryCta: { _type: "cta", ...hero.primaryCta },
       secondaryCta: { _type: "cta", ...hero.secondaryCta },
       background: await image(hero.background),
-      metrics: keyed(
-        hero.metrics.map((metric) => ({ _type: "metric", ...metric })),
-        "metric",
-      ),
     }),
   );
 
@@ -153,9 +149,9 @@ async function buildDocuments(): Promise<SanityDoc[]> {
         aboutImages.filter((entry): entry is Record<string, unknown> => Boolean(entry)),
         "image",
       ),
-      metrics: keyed(
-        about.metrics.map((metric) => ({ _type: "metric", ...metric })),
-        "metric",
+      details: keyed(
+        about.details.map((row) => ({ _type: "detailRow", ...row })),
+        "detail",
       ),
     }),
   );

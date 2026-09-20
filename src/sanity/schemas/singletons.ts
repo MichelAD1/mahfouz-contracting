@@ -134,15 +134,6 @@ export const hero = defineType({
       title: "Background image",
       type: "imageWithAlt",
     }),
-    defineField({
-      name: "metrics",
-      title: "Data strip",
-      type: "array",
-      of: [{ type: "metric" }],
-      description:
-        "Four works best. Use figures that can be checked — this strip is the page's proof.",
-      validation: (rule) => rule.max(4),
-    }),
   ],
   preview: { prepare: () => ({ title: "Home — hero" }) },
 });
@@ -178,9 +169,12 @@ export const about = defineType({
       validation: (rule) => rule.max(2),
     }),
     defineField({
-      name: "metrics",
+      name: "details",
+      title: "Title block",
       type: "array",
-      of: [{ type: "metric" }],
+      of: [{ type: "detailRow" }],
+      description:
+        "The labelled block set over the photograph, e.g. Operating in · Liberia, Lebanon. Name things rather than count them. Two rows read best; three is the ceiling.",
       validation: (rule) => rule.max(3),
     }),
   ],

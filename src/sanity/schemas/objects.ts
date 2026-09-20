@@ -28,45 +28,6 @@ export const imageWithAlt = defineType({
   ],
 });
 
-export const metric = defineType({
-  name: "metric",
-  title: "Metric",
-  type: "object",
-  fields: [
-    defineField({
-      name: "figure",
-      title: "Figure",
-      type: "string",
-      description: "What is displayed, e.g. 5 or 24/7.",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "label",
-      title: "Label",
-      type: "string",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "note",
-      title: "Note",
-      type: "string",
-      description: "Optional supporting line beneath the label.",
-    }),
-    defineField({
-      name: "countTo",
-      title: "Count up to",
-      type: "number",
-      description:
-        "Set for numeric figures to animate a counter. Leave empty for figures like 24/7.",
-    }),
-    defineField({ name: "prefix", type: "string" }),
-    defineField({ name: "suffix", type: "string" }),
-  ],
-  preview: {
-    select: { title: "figure", subtitle: "label" },
-  },
-});
-
 export const cta = defineType({
   name: "cta",
   title: "Call to action",
@@ -133,4 +94,4 @@ export const seo = defineType({
   ],
 });
 
-export const objects = [imageWithAlt, metric, cta, detailRow, seo];
+export const objects = [imageWithAlt, cta, detailRow, seo];

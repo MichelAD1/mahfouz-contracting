@@ -23,16 +23,6 @@ export type SiteImage = {
   slotHint?: string;
 };
 
-export type Metric = {
-  figure: string;
-  label: string;
-  note?: string;
-  /** Drives the animated counter. Omit for non-numeric figures. */
-  countTo?: number;
-  prefix?: string;
-  suffix?: string;
-};
-
 export type Cta = {
   label: string;
   href: string;
@@ -64,7 +54,6 @@ export type Hero = {
   primaryCta: Cta;
   secondaryCta: Cta;
   background: SiteImage;
-  metrics: Metric[];
 };
 
 export type About = {
@@ -73,7 +62,13 @@ export type About = {
   body: string[];
   cta: Cta;
   images: SiteImage[];
-  metrics: Metric[];
+  /**
+   * The title block over the photograph. Label/value rows rather than
+   * counters: this carried "5 Divisions" and "2 Countries", which is the
+   * pattern the hero band was cut for. Named, the same space says which
+   * divisions and which countries.
+   */
+  details: DetailRow[];
 };
 
 export type Service = {
