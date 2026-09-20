@@ -1,6 +1,6 @@
 # Mahfouz Contracting — remaining work to launch
 
-**Status:** Steps 1-9 code complete, plus an unplanned design pass. The site is
+**Status:** Steps 1-10 code complete, plus an unplanned design pass. The site is
 built, seeded and rendering from the CMS, and every word on it is now editable
 in the Studio.
 
@@ -50,6 +50,7 @@ from:
       (seeded and documented; the walkthrough and the account transfer need people)
 - [x] Step 8: Move the remaining copy and the per-route metadata into Sanity
 - [x] Step 9: Write the privacy policy, and close the three design questions
+- [x] Step 10: Slow the scroll reveals, and rebuild the contact page
 
 ---
 
@@ -952,6 +953,107 @@ services 65, projects 58, a project page 32, contact 0. Zero
 "serving fallback content" warnings in the server log, which is the only proof
 that every query was actually answered rather than quietly falling back. The
 share card is a real 1200x630 PNG on all five pages again.
+
+---
+
+## Step 10 — Motion and the contact page — done 20 Sep 2026
+
+Three notes from review, before the branch merges.
+
+### "The sections animate too fast"
+
+They are scrubbed by scroll position, not played on a timer, so this is never a
+duration — it is the window. `ENTER 0.9` to `ARRIVE 0.64` is **0.26 of a
+viewport**: 234px on a 900px screen for a block to go from 0.34 opacity and 32px
+low to settled. The travel was right; the run-up was not.
+
+`ENTER` is **1.06** now, past 1, so a scene starts below the fold and is a
+seventh of the way through before any of it can be seen. `ARRIVE` is untouched
+— it was measured twice (0.74 too early, 0.52 too late) and nothing should
+finish later on screen than that says.
+
+| | before | after |
+|---|---|---|
+| range | 0.26 vh (234px) | 0.42 vh (378px) |
+| visible part of it | 182px | 324px |
+| opacity on entering | 0.34 | 0.46 |
+
+The opacity stop moved 0.7 — 0.8 with it. It is a fraction of the range, and
+the range got longer, so leaving it would have pulled full opacity to a higher
+point on the screen than the measurement that set it.
+
+### "Images appear suddenly from the bottom"
+
+Worse than it sounded, and a real fault rather than a preference. On `ENTER` a
+photograph reached the bottom edge of the viewport with its clip-path still at
+`inset(100%)` — so the first thing anyone saw of it was **nothing**, and then
+all of it inside a quarter of a viewport of scroll.
+
+`ImageReveal` has its own `ENTER_IMAGE` of **1.2**. A photograph is about 40%
+uncovered by the time it is visible at all, and the rest of the wipe runs over
+0.56 of a viewport instead of 0.26.
+
+The `Process` and `ServiceDetail` parallax depths came down about 28%. The
+process cards are the one place two vertical motions land on the same element
+— the card rises on its `Reveal` while the photograph inside travels on its
+own — and at 46-94 the two compounded into a rush rather than depth.
+
+`animate-rise` goes 1.35s — 1.6s so the timed motion above the fold and the
+scrubbed motion below it still read as one system. `animate-wipe-up` had no
+caller anywhere in `src/`; the scroll wipe replaced it and left the utility, its
+keyframes and its reduced-motion branch behind. Removed.
+
+**Verified from `framer-motion`'s source, not assumed:** `resolveEdge`
+multiplies a numeric edge by the container length with no clamp, so an offset
+past 1 resolves below the fold exactly as intended.
+
+### "The contact page is bland"
+
+It was a form on paper with a column of small text beside it under a hairline.
+Nothing on the page carried any weight, so the form had nothing to sit against.
+
+- **The contact column is a title block** — an ink panel of ruled, labelled
+  fields. The third of them on the site after the footer and the about section,
+  and deliberately the same object rather than a new idea for one page. It takes
+  any number of rows, so two phones or five need nothing to know how many.
+- **The section gained its margin label, "Enquiry".** Every other section sits
+  in the sheet grid with its name in the left column; this one was a bare shell,
+  which is a quiet part of why it read as a different site.
+- **"What to send"** — four things that make a quote possible to price without a
+  phone call. New copy, marked `TODO(client)`, and a field on the contact
+  document so it is theirs to change or clear.
+- **`contact.map` finally renders.** In the schema since Step 1 with no reader
+  — the same class of thing as `hero.metrics` and `animate-wipe-up`. It stays
+  unset, so nothing shows until the client supplies coordinates, which print as
+  sheet metadata under the address.
+
+**No embedded map, deliberately.** An iframe from a mapping provider would load
+third-party script on the one page a visitor types their name, email and phone
+number into, and would make a liar of `/privacy-policy`, which this same branch
+publishes saying the site does no such thing. Coordinates find a building and
+cost nobody anything.
+
+Fixed on the way past: the Office row is gone from `contact.details`. It
+duplicated `settings.address`, and the page filtered it back out by matching the
+literal string `"Office"`, so renaming that row in the studio printed the
+address twice. One source, no filter, and the `TODO` from Step 8 goes with it.
+
+### Verified, 20 Sep 2026
+
+Gates clean, `npm run build` exit 0. Contact checked in a real browser at 1440
+rather than from the markup: six ruled rows, no duplicate address, four
+checklist items, the panel top aligned with the form's rule. Every route still
+200, 404 still 404, per-page `cdn.sanity.io` counts unchanged, no
+"serving fallback content" warnings.
+
+Reseeded again for the contact changes. **Worth knowing:** the stale render
+survived deleting `.next/cache/fetch-cache` and a server restart — it took
+removing the whole `.next` directory. Budget for that after any reseed.
+
+**Not pixel-verified: phone width.** The stacking order is right in the markup
+(form, panel, checklist) but headless Chrome here clips the right edge of every
+page, including ones this branch never touched, so the capture proves nothing
+either way.
 
 ---
 
