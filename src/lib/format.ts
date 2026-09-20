@@ -10,9 +10,9 @@ export function mailHref(email: string): string {
 /**
  * Two digits, so counts and index columns keep a fixed width.
  *
- * Lived in ProjectCard until the 404 wanted it. A page whose whole job is to
- * have gone wrong should not be dragging a project card, `next/image` and the
- * Sanity image helpers into its bundle for three lines of padding.
+ * Lived in ProjectCard, which meant importing a card — and with it
+ * `next/image` and the Sanity image helpers — to pad a number. Three of the
+ * four callers only ever wanted the padding.
  */
 export function pad2(value: number): string {
   return String(Math.max(value, 0)).padStart(2, "0");

@@ -596,9 +596,8 @@ export const fallbackSectionCopy: SectionCopy = {
   },
 
   notFound: {
-    label: "Where to go",
     heading: "That page is not in the set.",
-    lead: "The address you followed does not exist, or what used to be there has moved. Everything the site does have is listed below.",
+    lead: "The address you followed does not exist, or what used to be there has moved. Everywhere the site does go is in the navigation above.",
   },
 
   projectsAllFilter: "All work",

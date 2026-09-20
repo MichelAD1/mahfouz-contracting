@@ -10,94 +10,70 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { motion, useInView, useReducedMotion } from "motion/react";
 import type { ReactElement, ReactNode } from "react";
+import { EASE_REVEAL } from "./ease";
 
 /**
- * Scroll-linked reveals.
+ * Section entrances.
  *
- * These are tied to scroll *position*, not to a one-shot trigger: an element
- * arrives as you scroll down to it and retreats as you scroll back up, and if
- * you stop halfway it sits halfway. Nothing is ever latched, so there is no
- * state to get stuck and no "already revealed" flag to reason about.
+ * These are the **hero's animation, played lower down the page**: the same
+ * curve, the same 1.35s, the same 2.5rem of travel, started when the section
+ * arrives instead of when the document does. A section rises from below and
+ * settles, once, and is then simply part of the page.
  *
- * The earlier version was an IntersectionObserver that added `.is-revealed`
- * once and unobserved the node. That could only ever play forwards.
+ * They used to be scrubbed by scroll position — tied to where the page was
+ * rather than played on arrival, so a section sat at whatever progress your
+ * scroll implied and ran backwards as you scrolled up. That is a defensible
+ * effect. It is not the one the hero has, which is the one this site is
+ * supposed to have.
  *
- * Two properties are load-bearing:
+ * Two properties are load-bearing, and both survive the change:
  *
- *   - Arrival completes while the element is still low in the viewport, well
- *     before it reaches a comfortable reading position. Anything you can read
- *     is at full opacity, and the last block on the page still finishes even
- *     though the document runs out of scroll underneath it.
- *   - The server renders no hidden state. Without JavaScript, or before
- *     hydration, the page is simply visible — the `.js` class trick the old CSS
- *     needed is gone with it.
+ *   - The server renders no hidden state. `initial={false}` makes Motion set
+ *     the settled values on mount without animating, so the HTML is an
+ *     ordinary, fully visible page — before hydration, and for good if
+ *     JavaScript never arrives.
+ *   - Nothing visible moves when the effect switches on. Anything inside the
+ *     first screenful is opted out entirely (see `useInFirstScreen`), and
+ *     everything else is only ever hidden while it is below the fold, where
+ *     the hiding cannot be seen.
  */
 
 /**
- * Viewport fraction at which a scene starts moving.
- *
- * Past 1, so a scene begins travelling while it is still below the fold and is
- * already a seventh of the way through by the time any of it can be seen.
- *
- * It was 0.9, a tenth of a viewport above the bottom edge, which put the whole
- * reveal inside 0.26 of a viewport of scroll — 234px on a 900px screen for a
- * block to go from 0.34 opacity and 32px low to settled. That is why it read as
- * a snap rather than an arrival: the distance was right and the run-up was not.
- *
- * ARRIVE below is untouched, so nothing finishes any later on screen than the
- * measurement that set it. The journey to it is 62% longer.
+ * Travel, in px. 2.5rem, which is what `@keyframes rise` uses for the hero.
+ * These are meant to be the same movement, so it is the same number.
  */
-const ENTER = 1.06;
-/**
- * Viewport fraction at which a scene has fully arrived.
- *
- * Measured, not guessed: at 0.74 the first Process card reached full opacity
- * with its top 725px down a 900px viewport — a 175px sliver, 26% of the card,
- * so it had finished before there was anything to watch. 0.52 fixed that but
- * went too far the other way: on a tall viewport the block was still visibly
- * travelling well after it was fully readable. 0.64 sits between them.
- */
-const ARRIVE = 0.64;
-/**
- * The same, for a photograph, and further out still.
- *
- * A wipe is far more conspicuous than a fade, and a fully clipped image is a
- * hole in the page rather than something merely quiet — which is exactly what
- * the old value produced. At ENTER an image reached the bottom edge of the
- * viewport with its clip-path still at `inset(100%)`, so the first thing a
- * visitor saw of it was nothing, and then all of it inside a quarter of a
- * viewport of scroll.
- *
- * A fifth of a viewport below the fold means a photograph is already about 40%
- * uncovered by the time any of it is visible, and the rest of the wipe is spread
- * over 0.56 of a viewport rather than 0.26.
- */
-const ENTER_IMAGE = 1.2;
+const RISE = 40;
 
-/** How far up the viewport each step of a sequence pushes its arrival point. */
-const SEQUENCE_SPREAD = 0.28;
-/** A long sequence must not push arrival past here, or it never completes. */
-const ARRIVE_FLOOR = 0.3;
+/** Seconds. `animate-rise` again: one system, one duration. */
+const DURATION = 1.35;
+
 /**
- * Opacity before arrival.
+ * How much of a section must be on screen before it starts.
  *
- * Raised from 0.15 after seeing the site at 80% browser zoom, where a taller
- * viewport leaves the next section peeking above the fold for much longer. At
- * 0.15 that section sat there visibly half-finished, which reads as a bug
- * rather than as anticipation. At 0.34 an un-arrived block is legible and
- * merely quiet, so being caught mid-travel costs nothing.
+ * `some` fires as the top edge appears, and the negative bottom margin holds
+ * it back until the section is properly inside the viewport rather than
+ * technically touching it. A fraction of the element would make a tall block
+ * wait far too long, because the fraction is of the block and not of the
+ * screen.
+ *
+ * 64px, and in pixels rather than a percentage, because the cost of getting it
+ * wrong is asymmetric: too small and a section plays while it is a sliver and
+ * nobody sees it, too large and a section that is *fully* on screen sits blank
+ * because its top is still under the line. At 12% of the viewport that was
+ * 108px, and a short block landing at the bottom edge stayed invisible with
+ * nothing left to trigger it but more scrolling.
  */
-const REST_OPACITY = 0.34;
+const VIEWPORT = { once: true, amount: "some", margin: "0px 0px -64px 0px" } as const;
 
 type SceneProps = {
   children: ReactNode;
   className?: string;
   /**
-   * Position in a sequence. Unlike a delay in seconds, this shifts *where in
-   * the scroll* the element arrives, so the sequence reads the same however
-   * fast you scroll — and runs backwards when you scroll up.
+   * Position in a sequence, in **seconds of delay**. The hero staggers its
+   * lines by 0.19s; a list here is usually 0.14s, which is the same family of
+   * interval rather than a coincidence.
    */
   order?: number;
   /** Travel distance in px. Enough to read as movement, not as a slide. */
@@ -105,19 +81,24 @@ type SceneProps = {
 };
 
 /**
- * Motion renders its values into the markup, and on the server scroll progress
- * is necessarily zero — so styling these scenes unconditionally would ship
- * `opacity: 0.15`, `translateY(32px)` and a closed clip-path to anyone without
- * JavaScript, leaving the page permanently dimmed and the About photograph
- * invisible. The styles are therefore withheld until after hydration: the
- * server sends an ordinary, fully visible page, which is what the retired
- * `.js` class was protecting.
+ * What a scene looks like when the effect does not apply to it.
  *
- * Nothing visible moves when they land, and the way that is guaranteed changed:
- * an element inside the first screenful of the document is opted out of the
- * effect entirely (see `useInFirstScreen`). Only content below the fold starts
- * from its resting state, where no one can see it start.
+ * Written out rather than left to `style={undefined}`. Motion drives these
+ * through MotionValues straight onto the node; dropping the prop stops it
+ * *updating* them and leaves the last values it wrote sitting there, which
+ * once froze whole sections at rest opacity permanently.
  */
+const SETTLED = { opacity: 1, y: 0 } as const;
+
+/** The same, for the wipe: fully uncovered. */
+const UNCOVERED = { clipPath: "inset(0% 0 0 0)" } as const;
+
+/**
+ * Held with a zero-length transition, so a section below the fold is put into
+ * its starting state outright rather than animating into it.
+ */
+const INSTANT = { duration: 0 } as const;
+
 const neverChanges = () => () => {};
 
 function useHydrated() {
@@ -137,36 +118,29 @@ const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : us
 /**
  * Whether this element sits inside the first screenful of the document.
  *
- * Anything there is visible before a visitor has scrolled at all, so there is
- * no scroll above it to drive a reveal, and holding it at rest opacity leaves
- * it dimmed with nothing having moved and nothing about to. The page had
- * claimed that an element already on screen "measures at progress 1, so it is
- * styled to exactly where it already was" — true only of an element scrolled
- * fully past. One that is *partway* into its range measures partway.
+ * Anything there is on screen before a visitor has scrolled at all, and that
+ * part of the page is the hero's entrance to make. Animating it again on
+ * arrival would mean hiding content that has already been painted, which is a
+ * flicker rather than an entrance.
  *
- * That is what a short hero exposes: /services has a 491px hero on an 844px
- * screen, so its first division sat at opacity 0.40 on load and stayed there.
- * /about did the same at 0.56.
- *
- * **The test is deliberately not "is it on screen".** That was the first
- * version and it failed on a client-side navigation, because the new page
- * mounts while the old scroll position is still in force and the router then
- * *animates* to the top rather than jumping: traced over CDP, arriving at
+ * **The test is deliberately not "is it on screen".** That was an earlier
+ * version and it failed on a client-side navigation: the new page mounts while
+ * the old scroll position is still in force, and at the time the router
+ * animated to the top rather than jumping. Traced over CDP, arriving at
  * /services from a home page at 2000px, the scroll eased down over 870ms and
  * the first division did not enter the viewport until 330ms in. A measurement
- * at mount therefore saw it far below the fold, kept its effect enabled, and
- * left it at the top of the page already part-way through its range with no
- * scroll left to finish it — heading at 0.80, body at 0.34, staying there.
- * Re-measuring for a few frames did not help either; nothing short of waiting
- * out the whole animation would have.
+ * at mount therefore saw it far below the fold. Re-measuring for a few frames
+ * did not help either; nothing short of waiting out the animation would have.
  *
  * Adding the scroll offset back removes the race instead of racing it.
  * `rect.top + scrollY` is the element's position in the *document*, which does
  * not change while the page scrolls, so the answer is the same at any moment
- * during that 870ms and on a hard load and on a restored back-navigation. No
- * timers, no listeners, no settling to wait for.
+ * during such an animation, on a hard load, and on a restored back navigation.
+ * No timers, no listeners, nothing to settle. Route scrolling is instant now,
+ * which closes that particular window, but the measurement stays
+ * scroll-independent: it costs nothing, and a stylesheet cannot reopen it.
  *
- * Its own `y` transform is inside the measurement, which is 32px against a
+ * Its own transform is inside the measurement, which is 40px against a
  * threshold of a whole viewport — far too coarse to care.
  */
 function useInFirstScreen(ref: React.RefObject<HTMLElement | null>) {
@@ -184,68 +158,37 @@ function useInFirstScreen(ref: React.RefObject<HTMLElement | null>) {
 }
 
 /**
- * The scroll range for one scene, and whether it should move at all.
- * `useScroll` is called unconditionally — hooks cannot be skipped — and its
- * output is simply ignored when motion is not wanted.
+ * One scene: whether it animates at all, and whether it has arrived.
+ *
+ * `useInView` is called unconditionally — hooks cannot be skipped — and its
+ * answer is ignored when the scene is not animating.
  */
-function useScene(order: number, enter: number = ENTER) {
+function useScene() {
   const ref = useRef<HTMLDivElement>(null);
   const prefersReduced = useReducedMotion();
   const hydrated = useHydrated();
-  const visibleOnArrival = useInFirstScreen(ref);
-  const arrive = Math.max(ARRIVE_FLOOR, ARRIVE - order * SEQUENCE_SPREAD);
+  const inFirstScreen = useInFirstScreen(ref);
+  const inView = useInView(ref, VIEWPORT);
 
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: [`start ${enter}`, `start ${arrive}`],
-  });
+  const enabled = hydrated && !prefersReduced && !inFirstScreen;
 
-  return {
-    ref,
-    progress: scrollYProgress,
-    enabled: hydrated && !prefersReduced && !visibleOnArrival,
-  };
+  return { ref, enabled, arrived: !enabled || inView };
 }
 
-/**
- * What a scene looks like when the effect does not apply to it.
- *
- * Written out rather than left to `style={undefined}`, which is what this did
- * and which does not work. Motion drives these through MotionValues straight
- * onto the node; dropping the prop stops it *updating* them and leaves the
- * last values it wrote sitting there. On a client-side navigation that is a
- * section frozen at rest opacity for good - worse than the bug it replaced,
- * because at least that one came back when you scrolled.
- *
- * So the disabled branch states the finished position instead of hoping the
- * enabled one never ran. It is also what the server renders, which is the
- * ordinary, fully visible page this module goes to some trouble to ship.
- */
-const SETTLED = { opacity: 1, y: 0 } as const;
-
-/** The same, for the wipe: fully uncovered. */
-const UNCOVERED = { clipPath: "inset(0 0 0 0)" } as const;
-
-export function Reveal({ children, className, order = 0, y = 32 }: SceneProps) {
-  const { ref, progress, enabled } = useScene(order);
-
-  /**
-   * Opacity lands ahead of the travel, so the element is readable while it is
-   * still settling rather than arriving all at once.
-   *
-   * 0.8 rather than 0.7 because ENTER moved. The number is a fraction of the
-   * range, and the range is longer now, so holding it at 0.7 would have brought
-   * full opacity to a higher point on the screen than the measurement that set
-   * it. This keeps the finish where it was and lengthens the approach.
-   */
-  const opacity = useTransform(progress, [0, 0.8], [REST_OPACITY, 1]);
-  const translate = useTransform(progress, [0, 1], [y, 0]);
+export function Reveal({ children, className, order = 0, y = RISE }: SceneProps) {
+  const { ref, enabled, arrived } = useScene();
 
   return (
     <motion.div
       ref={ref}
       className={className}
-      style={enabled ? { opacity, y: translate } : SETTLED}
+      initial={false}
+      animate={arrived ? SETTLED : { opacity: 0, y }}
+      transition={
+        arrived && enabled
+          ? { duration: DURATION, ease: EASE_REVEAL, delay: order }
+          : INSTANT
+      }
     >
       {children}
     </motion.div>
@@ -283,7 +226,7 @@ export function Stagger({
   );
 }
 
-export function StaggerItem({ children, className, y = 32, order = 0 }: SceneProps) {
+export function StaggerItem({ children, className, y = RISE, order = 0 }: SceneProps) {
   return (
     <Reveal className={className} y={y} order={order}>
       {children}
@@ -292,28 +235,28 @@ export function StaggerItem({ children, className, y = 32, order = 0 }: ScenePro
 }
 
 /**
- * A wipe that uncovers an image from its lower edge, scrubbed by scroll so it
- * covers again on the way back up. Used on the two large images only; on every
- * image it would be a gimmick.
- *
- * It runs on its own, longer range — see ENTER_IMAGE. A photograph that starts
- * its wipe on the fold is invisible at the fold, and then arrives all at once.
+ * A wipe that uncovers an image from its lower edge — the same arrival as a
+ * `Reveal`, in the form a photograph can take. Used on the large images only;
+ * on every image it would be a gimmick.
  */
 export function ImageReveal({
   children,
   className,
   order = 0,
 }: Omit<SceneProps, "y">) {
-  const { ref, progress, enabled } = useScene(order, ENTER_IMAGE);
-
-  const inset = useTransform(progress, [0, 0.85], [100, 0]);
-  const clipPath = useTransform(inset, (value) => `inset(${value}% 0 0 0)`);
+  const { ref, enabled, arrived } = useScene();
 
   return (
     <motion.div
       ref={ref}
       className={className}
-      style={enabled ? { clipPath } : UNCOVERED}
+      initial={false}
+      animate={arrived ? UNCOVERED : { clipPath: "inset(100% 0 0 0)" }}
+      transition={
+        arrived && enabled
+          ? { duration: DURATION, ease: EASE_REVEAL, delay: order }
+          : INSTANT
+      }
     >
       {children}
     </motion.div>

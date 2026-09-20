@@ -22,7 +22,7 @@ const styles: Record<Tone, Record<Variant, string>> = {
 };
 
 /** Drawn, not typed — a literal arrow character in the label is a copy smell. */
-export function Arrow() {
+function Arrow() {
   return (
     <svg
       aria-hidden="true"

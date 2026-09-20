@@ -326,6 +326,8 @@ export const sectionCopy = defineType({
       title: "404 page",
       type: "sectionIntro",
       group: "pages",
+      description:
+        "Only the heading and the lead are shown. The 404 has no margin label and no link of its own — the navigation above it is the way out.",
     }),
     defineField({
       name: "projectsAllFilter",
