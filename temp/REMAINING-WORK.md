@@ -1,6 +1,6 @@
 # Mahfouz Contracting — remaining work to launch
 
-**Status:** Steps 1-11 code complete, plus an unplanned design pass. The site is
+**Status:** Steps 1-12 code complete, plus an unplanned design pass. The site is
 built, seeded and rendering from the CMS, and every word on it is now editable
 in the Studio.
 
@@ -52,6 +52,7 @@ from:
 - [x] Step 9: Write the privacy policy, and close the three design questions
 - [x] Step 10: Slow the scroll reveals, and rebuild the contact page
 - [x] Step 11: Fix the sections landing dim after a client-side navigation
+- [x] Step 12: Design the 404, swap Projects and About, make scrolling instant
 
 ---
 
@@ -1128,6 +1129,62 @@ has a global `WebSocket`, so CDP can be driven with no dependencies at all —
 launch the Playwright chromium with `--remote-debugging-port`, connect to the page
 target, and `Runtime.evaluate`. That is how both faults were found and how the fix
 was proved; neither is visible in the markup or on a hard load.
+
+---
+
+## Step 12 — A 404, the nav order, and instant scrolling — done 20 Sep 2026
+
+### The 404
+
+`src/app/not-found.tsx`. A **root** not-found catches every unmatched URL in the
+app, not only a `notFound()` thrown from a segment, so this is where a stale link
+from the old WordPress site lands when it is not one of the 26 that redirect.
+
+It renders inside the root layout, so the header, the footer and the skip link
+come with it. **No metadata is exported** — `not-found` does not accept any, and
+Next injects `noindex` on a 404 itself. Checked against
+`node_modules/next/dist/docs` rather than remembered, per `AGENTS.md`.
+
+The status code sits in the hero's `index` slot, the same place a project detail
+page puts its number: on a sheet a code sits beside the title, and 404 is a code
+rather than a count. The way out is a ruled index of `settings.nav`, so **a route
+added to the site appears there by existing** rather than by being remembered.
+Copy lives in Page copy with the rest.
+
+### Projects and About swapped
+
+The work comes before the write-up. One edit, in `settings.nav`, which the header,
+the footer and the 404's index all read.
+
+### Scrolling is instant
+
+`scroll-behavior: smooth` sat on `html` unconditionally, and **the router
+inherits it**: changing page while scrolled down did not jump to the top, it
+animated there — traced at 870ms from 2000px, on every navigation. It is also
+what made Step 11's bug so hard to see.
+
+`html:has(:target)` was tried first, to keep the glide for in-page anchors and let
+route changes jump. **Measured both halves: it does nothing.** The style
+recalculation lands after the browser has already performed the fragment scroll,
+so the anchor jumps regardless. A rule that only looks like it works is worse than
+no rule, so it is gone, and the reduced-motion override under it went too — it
+now has nothing to turn off. Anchors jump, which is the browser default.
+
+### Two things moved
+
+`pad2` from `ProjectCard` to `lib/format`. A page whose whole job is to have gone
+wrong should not drag a project card, `next/image` and the Sanity image helpers
+into its bundle for three lines of padding. And `Arrow` is exported from `Button`
+so the 404's rows reuse it — the module's own rule is that a literal arrow
+character in a label is a copy smell.
+
+### Verified, 20 Sep 2026
+
+Over CDP: a soft nav from 2000px goes **2000 — 0 with no intermediate frames**,
+against 40+ easing frames before. `/no-such-page` returns a real 404 with the
+page; both navs read Home / Projects / Services / About / Contact; the 404 was
+screenshotted. Gates clean on **exit codes**, `npm run build` exit 0. Dataset
+reseeded for the nav order and the 404 copy.
 
 ---
 
