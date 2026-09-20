@@ -1,6 +1,6 @@
 # Mahfouz Contracting — remaining work to launch
 
-**Status:** Steps 1-12 code complete, plus an unplanned design pass. The site is
+**Status:** Steps 1-13 code complete, plus an unplanned design pass. The site is
 built, seeded and rendering from the CMS, and every word on it is now editable
 in the Studio.
 
@@ -53,6 +53,7 @@ from:
 - [x] Step 10: Slow the scroll reveals, and rebuild the contact page
 - [x] Step 11: Fix the sections landing dim after a client-side navigation
 - [x] Step 12: Design the 404, swap Projects and About, make scrolling instant
+- [x] Step 13: Play the hero's entrance on the sections; cut the 404's route index
 
 ---
 
@@ -1185,6 +1186,72 @@ against 40+ easing frames before. `/no-such-page` returns a real 404 with the
 page; both navs read Home / Projects / Services / About / Contact; the 404 was
 screenshotted. Gates clean on **exit codes**, `npm run build` exit 0. Dataset
 reseeded for the nav order and the 404 copy.
+
+---
+
+## Step 13 — The hero's entrance, on the sections — done 20 Sep 2026
+
+### The sections play the hero's animation now
+
+They were **scrubbed by scroll position**: tied to where the page was rather than
+played on arrival, so a section sat at whatever progress your scroll implied and
+ran backwards as you scrolled up. A defensible effect, and not the one the hero
+has — which is the one this site is supposed to have.
+
+| | scrubbed (was) | played (now) |
+|---|---|---|
+| driver | scroll position | arrival in the viewport, once |
+| from | opacity 0.34, 32px | opacity 0, 40px |
+| curve | scroll-linked | `EASE_REVEAL`, 1.35s |
+| `order` | shifts the arrival point in scroll | **seconds of delay** |
+
+`EASE_REVEAL` is declared in `ease.ts` beside `--ease-reveal` in the stylesheet,
+because the hero animates in CSS and the sections animate in JS. They have to be
+the same cubic or they read as two different sites scrolling past each other.
+The existing 0.14 and 0.15 stagger gaps are already the same family of interval
+as the hero's 0.19, so no caller changed.
+
+Both load-bearing properties survive. `initial={false}` keeps the server's markup
+an ordinary, fully visible page, and content is only ever hidden while it is below
+the fold. The first-screen guard stays: that part of the page is the hero's
+entrance to make, and animating it again would mean hiding something already
+painted, which is a flicker rather than an entrance.
+
+### The trigger margin is 64px, and that is a correction
+
+At 12% of the viewport it was 108px, and a short block landing near the bottom
+edge sat **fully on screen and completely blank**, with nothing left to trigger it
+but more scrolling. Pixels, not a percentage, because the cost is asymmetric: too
+small and a section plays while it is a sliver, too large and a visible section
+stays blank. Caught by auditing three pages at four scroll positions for anything
+still faded after the animation should have finished.
+
+### The 404 loses its route index
+
+Every route is already one click away in the header above it and the footer below,
+so a third copy of the same five links was furniture rather than help. The lead
+went with it — it said "listed below" and there is no longer anything below it
+— and the hero grew to `tall` to carry the page on its own. `notFound` no longer
+carries a margin label and the field description says so, since `sectionIntro`
+offers one that nothing on this page renders.
+
+`Arrow` goes back to being `Button`'s own business; the 404's rows were its only
+caller outside the module. `pad2` stays in `lib/format`, which was the right home
+independently — three of its four callers only ever wanted padding, not a card.
+
+### Verified, 20 Sep 2026
+
+**The first attempt at verifying was wrong in an instructive way.** Tracking an
+unidentified element showed the transform animating while opacity stayed at 0,
+which looked like a bug and was a bad probe. Tagging a specific card and tracing
+that node shows what actually happens: 450ms of stagger delay, then opacity 0 to 1
+and translateY 40px to 0 across **74 distinct frames**, ending at opacity 1 and
+`transform: none`.
+
+The test that distinguishes played from scrubbed is to **scroll once and then hold
+still**: a played animation keeps going, a scrubbed one freezes. It keeps going.
+
+Gates clean on exit codes, `npm run build` exit 0, dataset reseeded.
 
 ---
 
