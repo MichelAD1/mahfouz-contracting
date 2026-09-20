@@ -2,25 +2,34 @@ import type { Metadata } from "next";
 import { PageHero } from "@/components/layout/PageHero";
 import { ServiceDetail } from "@/components/sections/ServiceDetail";
 import { ClosingCta } from "@/components/sections/ClosingCta";
-import { getClosingCta, getServices } from "@/sanity/lib/fetch";
+import {
+  getClosingCta,
+  getSectionCopy,
+  getServices,
+  getSiteFrame,
+} from "@/sanity/lib/fetch";
+import { pageMetadata } from "@/lib/metadata";
 
 export const revalidate = 300;
 
-export const metadata: Metadata = {
-  title: "Services",
-  description:
-    "Five in-house divisions: electrical, mechanical, IT and automation, engineering and design consultancy, and maintenance and facility support.",
-  alternates: { canonical: "/services" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const [copy, { settings }] = await Promise.all([
+    getSectionCopy(),
+    getSiteFrame(),
+  ]);
+
+  return pageMetadata(copy.servicesSeo, "/services", settings.companyName);
+}
 
 /**
  * Every division in full, each with its own anchor so the footer and the home
  * page can link straight to one.
  */
 export default async function ServicesPage() {
-  const [services, closingCta] = await Promise.all([
+  const [services, closingCta, copy] = await Promise.all([
     getServices(),
     getClosingCta(),
+    getSectionCopy(),
   ]);
 
   return (
@@ -28,8 +37,8 @@ export default async function ServicesPage() {
       <PageHero
         crumbs={[{ label: "Home", href: "/" }, { label: "Services" }]}
         seed={2}
-        heading="Five divisions, one scope of responsibility."
-        lead="Each division works in-house and to a single project program, so design, supply, installation and commissioning meet where they are supposed to."
+        heading={copy.servicesHero.heading}
+        lead={copy.servicesHero.lead}
       />
 
       <div className="shell pb-[clamp(2rem,5vw,4rem)]">

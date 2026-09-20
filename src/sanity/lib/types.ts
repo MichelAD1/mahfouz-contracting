@@ -204,3 +204,74 @@ export type HomePageContent = {
   partners: Partner[];
   closingCta: ClosingCta;
 };
+
+/** Search-and-sharing wording for one route. */
+export type Seo = {
+  title?: string;
+  description?: string;
+  image?: SiteImage;
+};
+
+/**
+ * A section's furniture: the label in the sheet margin, the heading, the lead
+ * under it, and the wording on the link out of it. No section uses all four.
+ */
+export type SectionIntro = {
+  label?: string;
+  heading: string;
+  lead?: string;
+  linkLabel?: string;
+};
+
+export type EnquiryFormCopy = {
+  nameLabel: string;
+  companyLabel: string;
+  emailLabel: string;
+  phoneLabel: string;
+  subjectLabel: string;
+  subjectPlaceholder: string;
+  messageLabel: string;
+  submitLabel: string;
+  submittingLabel: string;
+  successLead: string;
+};
+
+/** The column beside the enquiry form. */
+export type ContactDirectCopy = {
+  heading: string;
+  officeLabel: string;
+  emailLabel: string;
+};
+
+/**
+ * The copy that used to be typed into components.
+ *
+ * Until this existed the CMS held the content and the code held the furniture,
+ * which meant the client could change what a section said but not what it was
+ * called. Both are content; only one of them was editable.
+ *
+ * What is deliberately still in code: the wording of a failed send (some of it
+ * reports a fault rather than addressing a visitor), and the Open Graph card,
+ * which is drawn at build time and so would not follow a studio edit until the
+ * next deploy.
+ */
+export type SectionCopy = {
+  divisionStrip: string;
+  capabilities: SectionIntro;
+  selectedWork: SectionIntro;
+  aboutHero: SectionIntro;
+  aboutProcess: SectionIntro;
+  servicesHero: SectionIntro;
+  projectsHero: SectionIntro;
+  projectsMore: SectionIntro;
+  projectsEmpty: SectionIntro;
+  projectsAllFilter: string;
+  enquiryForm: EnquiryFormCopy;
+  contactDirect: ContactDirectCopy;
+  /** Also the site-wide default, inherited by any page without its own. */
+  homeSeo: Seo;
+  aboutSeo: Seo;
+  servicesSeo: Seo;
+  projectsSeo: Seo;
+  contactSeo: Seo;
+};

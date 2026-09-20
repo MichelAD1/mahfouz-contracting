@@ -17,6 +17,10 @@ const structure: StructureResolver = (S) =>
         .title("Site settings")
         .id("siteSettings")
         .child(S.document().schemaType("siteSettings").documentId("siteSettings")),
+      S.listItem()
+        .title("Page copy")
+        .id("sectionCopy")
+        .child(S.document().schemaType("sectionCopy").documentId("sectionCopy")),
       S.divider(),
       S.listItem()
         .title("Home page")

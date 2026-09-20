@@ -2,16 +2,19 @@ import type { Metadata } from "next";
 import { PageHero } from "@/components/layout/PageHero";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { mailHref, telHref } from "@/lib/format";
-import { getContact, getSiteFrame } from "@/sanity/lib/fetch";
+import { getContact, getSectionCopy, getSiteFrame } from "@/sanity/lib/fetch";
+import { pageMetadata } from "@/lib/metadata";
 
 export const revalidate = 300;
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description:
-    "Request a quote from Mahfouz Contracting. Send us the scope and we will come back with an engineered answer. Offices in Monrovia, Liberia.",
-  alternates: { canonical: "/contact" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const [copy, { settings }] = await Promise.all([
+    getSectionCopy(),
+    getSiteFrame(),
+  ]);
+
+  return pageMetadata(copy.contactSeo, "/contact", settings.companyName);
+}
 
 /**
  * The address, both phones and the hours sit beside the form rather than under
@@ -20,7 +23,11 @@ export const metadata: Metadata = {
  * job. That is the whole reason this route exists.
  */
 export default async function ContactPage() {
-  const [contact, { settings }] = await Promise.all([getContact(), getSiteFrame()]);
+  const [contact, { settings }, copy] = await Promise.all([
+    getContact(),
+    getSiteFrame(),
+    getSectionCopy(),
+  ]);
 
   return (
     <>
@@ -33,14 +40,20 @@ export default async function ContactPage() {
 
       <section className="shell py-[clamp(3rem,7vw,6rem)]">
         <div className="grid gap-[clamp(2.5rem,6vw,5.5rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,0.75fr)] lg:items-start">
-          <ContactForm subjects={contact.formSubjects ?? []} settings={settings} />
+          <ContactForm
+            subjects={contact.formSubjects ?? []}
+            settings={settings}
+            copy={copy.enquiryForm}
+          />
 
           <aside className="border-t-2 border-ink pt-8">
-            <h2 className="t-meta text-steel">Reach us directly</h2>
+            <h2 className="t-meta text-steel">{copy.contactDirect.heading}</h2>
 
             <address className="mt-6 flex flex-col gap-5 not-italic">
               <div>
-                <p className="t-meta text-steel">Office</p>
+                <p className="t-meta text-steel">
+                  {copy.contactDirect.officeLabel}
+                </p>
                 <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink/85">
                   {settings.address.lines.map((line) => (
                     <span key={line} className="block">
@@ -64,7 +77,9 @@ export default async function ContactPage() {
 
               {settings.emails.map((email) => (
                 <div key={email}>
-                  <p className="t-meta text-steel">Email</p>
+                  <p className="t-meta text-steel">
+                    {copy.contactDirect.emailLabel}
+                  </p>
                   <a
                     href={mailHref(email)}
                     className="mt-2 block py-2.5 text-[0.9375rem] text-ink transition-colors duration-300 hover:text-copper lg:py-0"
@@ -78,6 +93,8 @@ export default async function ContactPage() {
             {contact.details && contact.details.length > 0 ? (
               <dl className="mt-9 border-t border-rule pt-7">
                 {contact.details
+                  // TODO: matched on the literal label, so renaming the
+                  // Office row in the studio makes the address print twice.
                   .filter((detail) => detail.label !== "Office")
                   .map((detail) => (
                     <div key={detail.label} className="not-first:mt-5">

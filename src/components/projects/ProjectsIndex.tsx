@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ProjectCard, pad2 } from "@/components/projects/ProjectCard";
-import type { Project } from "@/sanity/lib/types";
+import type { Project, SectionIntro } from "@/sanity/lib/types";
 
 const ALL = "all";
 
@@ -17,7 +17,17 @@ const ALL = "all";
  * The filter list is derived from the projects rather than hard-coded, so a
  * division the client stops working in stops appearing on its own.
  */
-export function ProjectsIndex({ projects }: { projects: Project[] }) {
+export function ProjectsIndex({
+  projects,
+  allLabel,
+  empty,
+}: {
+  projects: Project[];
+  /** The first filter button, which clears the division filter. */
+  allLabel: string;
+  /** Shown when the chosen division has nothing under it. */
+  empty: SectionIntro;
+}) {
   const [active, setActive] = useState(ALL);
 
   const divisions = useMemo(() => {
@@ -40,7 +50,7 @@ export function ProjectsIndex({ projects }: { projects: Project[] }) {
     [projects, active],
   );
 
-  const filters = [{ slug: ALL, title: "All work" }, ...divisions];
+  const filters = [{ slug: ALL, title: allLabel }, ...divisions];
 
   return (
     <div className="shell py-[clamp(2.5rem,5vw,4.5rem)]">
@@ -80,11 +90,11 @@ export function ProjectsIndex({ projects }: { projects: Project[] }) {
       ) : (
         <div className="mt-[clamp(2rem,4vw,3.5rem)] border-t-2 border-ink pt-8">
           <p className="display-sentence t-h3 max-w-[24ch] text-ink">
-            No projects listed under this division yet.
+            {empty.heading}
           </p>
-          <p className="mt-3 max-w-[44ch] t-body text-steel">
-            Records for this division can be issued on request.
-          </p>
+          {empty.lead ? (
+            <p className="mt-3 max-w-[44ch] t-body text-steel">{empty.lead}</p>
+          ) : null}
         </div>
       )}
     </div>

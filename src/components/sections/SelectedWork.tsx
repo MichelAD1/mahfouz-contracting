@@ -1,7 +1,7 @@
 import { LinkUnderline } from "@/components/primitives/Button";
 import { Stagger, StaggerItem } from "@/components/motion/Reveal";
 import { ProjectCard } from "@/components/projects/ProjectCard";
-import type { Project } from "@/sanity/lib/types";
+import type { Project, SectionIntro } from "@/sanity/lib/types";
 
 /**
  * Four projects on one row, each image a different shape.
@@ -19,16 +19,24 @@ const CARD_RATIOS = [
   "aspect-square",
 ] as const;
 
-export function SelectedWork({ projects }: { projects: Project[] }) {
+export function SelectedWork({
+  projects,
+  copy,
+}: {
+  projects: Project[];
+  copy: SectionIntro;
+}) {
   if (projects.length === 0) return null;
 
   return (
     <div>
       <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-6">
         <h2 className="display-sentence t-h2 max-w-[14ch] text-ink">
-          Projects delivered end to end.
+          {copy.heading}
         </h2>
-        <LinkUnderline href="/projects">All projects</LinkUnderline>
+        {copy.linkLabel ? (
+          <LinkUnderline href="/projects">{copy.linkLabel}</LinkUnderline>
+        ) : null}
       </div>
 
       <Stagger

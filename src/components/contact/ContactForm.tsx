@@ -4,7 +4,7 @@ import { useActionState, useEffect, useId, useRef } from "react";
 import { submitEnquiry } from "@/app/contact/actions";
 import { initialContactState, type ContactState } from "@/lib/enquiry";
 import { mailHref, telHref } from "@/lib/format";
-import type { SiteSettings } from "@/sanity/lib/types";
+import type { EnquiryFormCopy, SiteSettings } from "@/sanity/lib/types";
 
 const FIELD =
   "w-full border border-rule-strong bg-paper-bright px-4 py-3.5 text-[0.9375rem] text-ink transition-colors duration-300 placeholder:text-steel-light focus-visible:border-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copper";
@@ -14,9 +14,11 @@ const LABEL = "t-meta text-steel";
 export function ContactForm({
   subjects,
   settings,
+  copy,
 }: {
   subjects: string[];
   settings: SiteSettings;
+  copy: EnquiryFormCopy;
 }) {
   const [state, formAction, pending] = useActionState(
     submitEnquiry,
@@ -41,8 +43,7 @@ export function ContactForm({
           {state.message}
         </p>
         <p className="mt-4 max-w-[46ch] t-body text-steel">
-          We read every enquiry ourselves — you will get an answer from an
-          engineer, not an autoresponder.
+          {copy.successLead}
         </p>
       </div>
     );
@@ -76,7 +77,7 @@ export function ContactForm({
         <Field
           id={`${baseId}-name`}
           name="name"
-          label="Name"
+          label={copy.nameLabel}
           required
           autoComplete="name"
           state={state}
@@ -84,14 +85,14 @@ export function ContactForm({
         <Field
           id={`${baseId}-company`}
           name="company"
-          label="Company"
+          label={copy.companyLabel}
           autoComplete="organization"
           state={state}
         />
         <Field
           id={`${baseId}-email`}
           name="email"
-          label="Email"
+          label={copy.emailLabel}
           type="email"
           required
           autoComplete="email"
@@ -100,7 +101,7 @@ export function ContactForm({
         <Field
           id={`${baseId}-phone`}
           name="phone"
-          label="Phone"
+          label={copy.phoneLabel}
           type="tel"
           autoComplete="tel"
           state={state}
@@ -109,7 +110,7 @@ export function ContactForm({
         {subjects.length > 0 ? (
           <div className="sm:col-span-2">
             <label htmlFor={`${baseId}-subject`} className={LABEL}>
-              Enquiry type
+              {copy.subjectLabel}
             </label>
             <select
               id={`${baseId}-subject`}
@@ -117,7 +118,7 @@ export function ContactForm({
               defaultValue={state.values?.subject ?? ""}
               className={`mt-2.5 ${FIELD}`}
             >
-              <option value="">Select one</option>
+              <option value="">{copy.subjectPlaceholder}</option>
               {subjects.map((subject) => (
                 <option key={subject} value={subject}>
                   {subject}
@@ -131,7 +132,7 @@ export function ContactForm({
           <Field
             id={`${baseId}-message`}
             name="message"
-            label="Scope"
+            label={copy.messageLabel}
             required
             multiline
             state={state}
@@ -144,7 +145,7 @@ export function ContactForm({
         disabled={pending}
         className="mt-9 inline-flex items-center bg-ink px-8 py-4 display-narrow text-[0.75rem] font-semibold uppercase tracking-[0.08em] text-paper-bright transition-colors duration-300 hover:bg-copper disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {pending ? "Sending…" : "Send enquiry"}
+        {pending ? copy.submittingLabel : copy.submitLabel}
       </button>
     </form>
   );

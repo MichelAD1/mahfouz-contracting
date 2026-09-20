@@ -15,6 +15,10 @@ const IMAGE = groq`{
 
 const CTA = groq`{ label, href }`;
 
+const SEO = groq`{ title, description, "image": image${IMAGE} }`;
+
+const SECTION_INTRO = groq`{ label, heading, lead, linkLabel }`;
+
 /**
  * A division, dereferenced from the service it points at.
  *
@@ -140,4 +144,35 @@ export const CONTACT_QUERY = groq`*[_type == "contact"][0]{
   "details": details[]{ label, value },
   formSubjects, recipientEmail,
   map{ latitude, longitude, label }
+}`;
+
+/**
+ * The page copy, in one document.
+ *
+ * Read by `generateMetadata` and by the page body on the same render, which is
+ * why its fetcher is wrapped in React `cache` - otherwise every route would
+ * run this twice.
+ */
+export const SECTION_COPY_QUERY = groq`*[_type == "sectionCopy"][0]{
+  divisionStrip,
+  "capabilities": capabilities${SECTION_INTRO},
+  "selectedWork": selectedWork${SECTION_INTRO},
+  "aboutHero": aboutHero${SECTION_INTRO},
+  "aboutProcess": aboutProcess${SECTION_INTRO},
+  "servicesHero": servicesHero${SECTION_INTRO},
+  "projectsHero": projectsHero${SECTION_INTRO},
+  "projectsMore": projectsMore${SECTION_INTRO},
+  "projectsEmpty": projectsEmpty${SECTION_INTRO},
+  projectsAllFilter,
+  enquiryForm{
+    nameLabel, companyLabel, emailLabel, phoneLabel,
+    subjectLabel, subjectPlaceholder, messageLabel,
+    submitLabel, submittingLabel, successLead
+  },
+  contactDirect{ heading, officeLabel, emailLabel },
+  "homeSeo": homeSeo${SEO},
+  "aboutSeo": aboutSeo${SEO},
+  "servicesSeo": servicesSeo${SEO},
+  "projectsSeo": projectsSeo${SEO},
+  "contactSeo": contactSeo${SEO}
 }`;

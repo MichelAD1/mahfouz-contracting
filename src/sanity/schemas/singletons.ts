@@ -107,7 +107,6 @@ export const siteSettings = defineType({
       type: "string",
       group: "navigation",
     }),
-    defineField({ name: "seo", type: "seo", group: "identity" }),
   ],
   preview: { prepare: () => ({ title: "Site settings" }) },
 });
@@ -240,7 +239,122 @@ export const contact = defineType({
   preview: { prepare: () => ({ title: "Contact" }) },
 });
 
-export const singletons = [siteSettings, hero, about, closingCta, contact];
+/**
+ * Everything that used to be typed into a component.
+ *
+ * One document rather than a heading field scattered across each section's own
+ * record: an editor changing the wording of the site is doing one job, and
+ * five more singletons would make the studio read like a filing cabinet.
+ */
+export const sectionCopy = defineType({
+  name: "sectionCopy",
+  title: "Page copy",
+  type: "document",
+  groups: [
+    { name: "home", title: "Home page", default: true },
+    { name: "pages", title: "Inner pages" },
+    { name: "contact", title: "Contact page" },
+    { name: "search", title: "Search & sharing" },
+  ],
+  fields: [
+    defineField({
+      name: "divisionStrip",
+      title: "Division strip label",
+      type: "string",
+      group: "home",
+      description: "The line above the five divisions under the home hero.",
+    }),
+    defineField({
+      name: "capabilities",
+      title: "Capabilities section",
+      type: "sectionIntro",
+      group: "home",
+    }),
+    defineField({
+      name: "selectedWork",
+      title: "Selected work section",
+      type: "sectionIntro",
+      group: "home",
+    }),
+    defineField({
+      name: "aboutHero",
+      title: "About — page hero",
+      type: "sectionIntro",
+      group: "pages",
+    }),
+    defineField({
+      name: "aboutProcess",
+      title: "About — how we work",
+      type: "sectionIntro",
+      group: "pages",
+    }),
+    defineField({
+      name: "servicesHero",
+      title: "Services — page hero",
+      type: "sectionIntro",
+      group: "pages",
+    }),
+    defineField({
+      name: "projectsHero",
+      title: "Projects — page hero",
+      type: "sectionIntro",
+      group: "pages",
+    }),
+    defineField({
+      name: "projectsMore",
+      title: "Projects — more work",
+      type: "sectionIntro",
+      group: "pages",
+    }),
+    defineField({
+      name: "projectsEmpty",
+      title: "Projects — nothing under this filter",
+      type: "sectionIntro",
+      group: "pages",
+    }),
+    defineField({
+      name: "projectsAllFilter",
+      title: "Projects — unfiltered label",
+      type: "string",
+      group: "pages",
+      description: "The first filter button, which shows every project.",
+    }),
+    defineField({ name: "enquiryForm", type: "enquiryForm", group: "contact" }),
+    defineField({ name: "contactDirect", type: "contactDirect", group: "contact" }),
+    defineField({
+      name: "homeSeo",
+      title: "Home page, and the site-wide default",
+      type: "seo",
+      group: "search",
+      description:
+        "Used for the home page, and wherever a page below has not set its own.",
+    }),
+    defineField({ name: "aboutSeo", title: "About", type: "seo", group: "search" }),
+    defineField({
+      name: "servicesSeo",
+      title: "Services",
+      type: "seo",
+      group: "search",
+    }),
+    defineField({
+      name: "projectsSeo",
+      title: "Projects",
+      type: "seo",
+      group: "search",
+    }),
+    defineField({ name: "contactSeo", title: "Contact", type: "seo", group: "search" }),
+  ],
+  preview: { prepare: () => ({ title: "Page copy" }) },
+});
+
+export const singletons = [
+  siteSettings,
+  sectionCopy,
+  hero,
+  about,
+  closingCta,
+  contact,
+];
 
 /** Types that should exist exactly once, used to shape the studio's structure. */
 export const singletonTypes: string[] = singletons.map((s) => s.name);

@@ -3,6 +3,7 @@ import type {
   HomePageContent,
   ProjectDivision,
   ProjectFull,
+  SectionCopy,
 } from "@/sanity/lib/types";
 
 /**
@@ -515,4 +516,117 @@ export const fallbackContact: Contact = {
     "Maintenance & Facility Support",
     "General enquiry",
   ],
+};
+
+/**
+ * The site's own wording, outside the sections it labels.
+ *
+ * Every string here was typed into a component until Step 8. It has to keep
+ * all of them: the merge in `getSectionCopy` fills each field the CMS leaves
+ * empty from this module, so a string dropped here is a heading that
+ * disappears the day the CMS has an outage.
+ */
+export const fallbackSectionCopy: SectionCopy = {
+  divisionStrip: "Five divisions, one point of responsibility",
+
+  capabilities: {
+    label: "Capabilities",
+    heading: "Five divisions, one scope of responsibility",
+    lead: "Each division works in-house and to a single project program, so the scopes meet where they are supposed to.",
+    linkLabel: "All services",
+  },
+
+  selectedWork: {
+    label: "Selected work",
+    heading: "Projects delivered end to end.",
+    linkLabel: "All projects",
+  },
+
+  aboutHero: {
+    heading: "Engineering, contracting and maintenance, in-house.",
+    lead: "Five divisions under one roof, working to a single project program, so design, supply, installation and commissioning meet where they are supposed to.",
+  },
+
+  aboutProcess: {
+    label: "How we work",
+    heading: "Four stages, from brief to ongoing support",
+  },
+
+  servicesHero: {
+    heading: "Five divisions, one scope of responsibility.",
+    lead: "Each division works in-house and to a single project program, so design, supply, installation and commissioning meet where they are supposed to.",
+  },
+
+  projectsHero: {
+    heading: "Selected projects",
+    lead: "Electrical, mechanical, IT and automation works delivered from design through commissioning, with maintenance carried on afterwards.",
+  },
+
+  projectsMore: {
+    heading: "More work, on request",
+    lead: "Further project records and references can be issued for tender or prequalification.",
+    linkLabel: "Request references",
+  },
+
+  projectsEmpty: {
+    heading: "No projects listed under this division yet.",
+    lead: "Records for this division can be issued on request.",
+  },
+
+  projectsAllFilter: "All work",
+
+  enquiryForm: {
+    nameLabel: "Name",
+    companyLabel: "Company",
+    emailLabel: "Email",
+    phoneLabel: "Phone",
+    subjectLabel: "Enquiry type",
+    subjectPlaceholder: "Select one",
+    messageLabel: "Scope",
+    submitLabel: "Send enquiry",
+    submittingLabel: "Sending…",
+    successLead:
+      "We read every enquiry ourselves — you will get an answer from an engineer, not an autoresponder.",
+  },
+
+  contactDirect: {
+    heading: "Reach us directly",
+    officeLabel: "Office",
+    emailLabel: "Email",
+  },
+
+  /**
+   * The home entry is also the site-wide default: the root layout uses it for
+   * the title every other page's template wraps, and for the description any
+   * page that has not set its own inherits.
+   */
+  homeSeo: {
+    title: "Mahfouz Contracting — Engineering, contracting and maintenance",
+    description:
+      "Integrated electrical, mechanical, IT and automation works for commercial, industrial and institutional clients. Engineered, installed and maintained in-house.",
+  },
+
+  aboutSeo: {
+    title: "About",
+    description:
+      "Mahfouz Contracting delivers integrated electrical, mechanical, IT and automation works in-house, from design through commissioning and on into maintenance.",
+  },
+
+  servicesSeo: {
+    title: "Services",
+    description:
+      "Five in-house divisions: electrical, mechanical, IT and automation, engineering and design consultancy, and maintenance and facility support.",
+  },
+
+  projectsSeo: {
+    title: "Projects",
+    description:
+      "Electrical, mechanical, IT and automation works delivered from design through commissioning, with maintenance carried on afterwards.",
+  },
+
+  contactSeo: {
+    title: "Contact",
+    description:
+      "Request a quote from Mahfouz Contracting. Send us the scope and we will come back with an engineered answer. Offices in Monrovia, Liberia.",
+  },
 };

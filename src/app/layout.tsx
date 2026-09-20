@@ -3,8 +3,9 @@ import { Archivo, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { MotionProvider } from "@/components/motion/MotionProvider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { getSiteFrame } from "@/sanity/lib/fetch";
+import { getSectionCopy, getSiteFrame } from "@/sanity/lib/fetch";
 import { siteUrl } from "@/lib/site";
+import { titleTemplate } from "@/lib/metadata";
 import { buildBusinessJsonLd, serializeJsonLd } from "@/lib/structured-data";
 import "./globals.css";
 
@@ -34,26 +35,40 @@ const plexMono = IBM_Plex_Mono({
   variable: "--font-plex-mono",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    default: "Mahfouz Contracting — Engineering, contracting and maintenance",
-    template: "%s — Mahfouz Contracting",
-  },
-  description:
-    "Integrated electrical, mechanical, IT and automation works for commercial, industrial and institutional clients. Engineered, installed and maintained in-house.",
-  openGraph: {
-    type: "website",
-    siteName: "Mahfouz Contracting",
-    title: "Mahfouz Contracting — Engineering, contracting and maintenance",
-    description:
-      "Integrated electrical, mechanical, IT and automation works, engineered and maintained in-house.",
-    url: siteUrl,
-  },
-  // No canonical here on purpose. A canonical in the root layout is inherited
-  // by every page, so each one would declare itself a duplicate of the home
-  // page. Canonicals are set per page instead.
-};
+/**
+ * The site's defaults, out of the CMS.
+ *
+ * `homeSeo` is doing two jobs: it is the home page's own metadata, and it is
+ * what every other route inherits when it has not set its own. That is why
+ * the home page declares nothing but a canonical - a title set there would be
+ * run through the template below and print the company name twice.
+ *
+ * No canonical here on purpose. A canonical in the root layout is inherited
+ * by every page, so each one would declare itself a duplicate of the home
+ * page. Canonicals are set per page instead.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const [{ settings }, copy] = await Promise.all([
+    getSiteFrame(),
+    getSectionCopy(),
+  ]);
+
+  const title = copy.homeSeo.title ?? settings.companyName;
+  const description = copy.homeSeo.description;
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: { default: title, template: titleTemplate(settings.companyName) },
+    description,
+    openGraph: {
+      type: "website",
+      siteName: settings.companyName,
+      title,
+      description,
+      url: siteUrl,
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#eae8e3",

@@ -27,8 +27,9 @@ import {
   fallbackContact,
   fallbackHome,
   fallbackProjectDetails,
+  fallbackSectionCopy,
 } from "../src/sanity/fallback/content";
-import type { SiteImage } from "../src/sanity/lib/types";
+import type { SectionIntro, Seo, SiteImage } from "../src/sanity/lib/types";
 
 const client = getCliClient();
 const PUBLIC_DIR = join(process.cwd(), "public");
@@ -87,6 +88,29 @@ async function image(source?: SiteImage): Promise<Record<string, unknown> | unde
   };
 }
 
+/**
+ * Nested objects need their `_type` or the studio cannot tell what it is
+ * editing, and empty keys are dropped so an unset field reads as unset rather
+ * than as an empty string somebody typed.
+ */
+function intro(value: SectionIntro): Record<string, unknown> {
+  return {
+    _type: "sectionIntro",
+    ...(value.label ? { label: value.label } : {}),
+    heading: value.heading,
+    ...(value.lead ? { lead: value.lead } : {}),
+    ...(value.linkLabel ? { linkLabel: value.linkLabel } : {}),
+  };
+}
+
+function seoBlock(value: Seo): Record<string, unknown> {
+  return {
+    _type: "seo",
+    ...(value.title ? { title: value.title } : {}),
+    ...(value.description ? { description: value.description } : {}),
+  };
+}
+
 /** Drops keys whose value is undefined, so documents carry no empty fields. */
 function clean(doc: Record<string, unknown>): SanityDoc {
   return Object.fromEntries(
@@ -120,6 +144,30 @@ async function buildDocuments(): Promise<SanityDoc[]> {
         "nav",
       ),
       footerNote: settings.footerNote,
+    }),
+  );
+
+  documents.push(
+    clean({
+      _id: "sectionCopy",
+      _type: "sectionCopy",
+      divisionStrip: fallbackSectionCopy.divisionStrip,
+      capabilities: intro(fallbackSectionCopy.capabilities),
+      selectedWork: intro(fallbackSectionCopy.selectedWork),
+      aboutHero: intro(fallbackSectionCopy.aboutHero),
+      aboutProcess: intro(fallbackSectionCopy.aboutProcess),
+      servicesHero: intro(fallbackSectionCopy.servicesHero),
+      projectsHero: intro(fallbackSectionCopy.projectsHero),
+      projectsMore: intro(fallbackSectionCopy.projectsMore),
+      projectsEmpty: intro(fallbackSectionCopy.projectsEmpty),
+      projectsAllFilter: fallbackSectionCopy.projectsAllFilter,
+      enquiryForm: { _type: "enquiryForm", ...fallbackSectionCopy.enquiryForm },
+      contactDirect: { _type: "contactDirect", ...fallbackSectionCopy.contactDirect },
+      homeSeo: seoBlock(fallbackSectionCopy.homeSeo),
+      aboutSeo: seoBlock(fallbackSectionCopy.aboutSeo),
+      servicesSeo: seoBlock(fallbackSectionCopy.servicesSeo),
+      projectsSeo: seoBlock(fallbackSectionCopy.projectsSeo),
+      contactSeo: seoBlock(fallbackSectionCopy.contactSeo),
     }),
   );
 

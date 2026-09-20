@@ -3,16 +3,24 @@ import { PageHero } from "@/components/layout/PageHero";
 import { LinkUnderline } from "@/components/primitives/Button";
 import { ProjectsIndex } from "@/components/projects/ProjectsIndex";
 import { ClosingCta } from "@/components/sections/ClosingCta";
-import { getClosingCta, getProjects } from "@/sanity/lib/fetch";
+import {
+  getClosingCta,
+  getProjects,
+  getSectionCopy,
+  getSiteFrame,
+} from "@/sanity/lib/fetch";
+import { pageMetadata } from "@/lib/metadata";
 
 export const revalidate = 300;
 
-export const metadata: Metadata = {
-  title: "Projects",
-  description:
-    "Electrical, mechanical, IT and automation works delivered from design through commissioning, with maintenance carried on afterwards.",
-  alternates: { canonical: "/projects" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const [copy, { settings }] = await Promise.all([
+    getSectionCopy(),
+    getSiteFrame(),
+  ]);
+
+  return pageMetadata(copy.projectsSeo, "/projects", settings.companyName);
+}
 
 /**
  * TODO(client): this wants a wide site photograph of its own. Borrowed from the
@@ -26,35 +34,45 @@ const HERO_IMAGE = {
 };
 
 export default async function ProjectsPage() {
-  const [projects, closingCta] = await Promise.all([
+  const [projects, closingCta, copy] = await Promise.all([
     getProjects(),
     getClosingCta(),
+    getSectionCopy(),
   ]);
 
   return (
     <>
       <PageHero
         crumbs={[{ label: "Home", href: "/" }, { label: "Projects" }]}
-        heading="Selected projects"
-        lead="Electrical, mechanical, IT and automation works delivered from design through commissioning, with maintenance carried on afterwards."
+        heading={copy.projectsHero.heading}
+        lead={copy.projectsHero.lead}
         image={HERO_IMAGE}
         size="medium"
       />
 
-      <ProjectsIndex projects={projects} />
+      <ProjectsIndex
+        projects={projects}
+        allLabel={copy.projectsAllFilter}
+        empty={copy.projectsEmpty}
+      />
 
       <section className="border-t-2 border-ink">
         <div className="shell flex flex-wrap items-end justify-between gap-x-10 gap-y-6 py-[clamp(2.5rem,5vw,4rem)]">
           <div>
             <h2 className="display-sentence t-h3 max-w-[20ch] text-ink">
-              More work, on request
+              {copy.projectsMore.heading}
             </h2>
-            <p className="mt-3 max-w-[48ch] t-body text-steel">
-              Further project records and references can be issued for tender or
-              prequalification.
-            </p>
+            {copy.projectsMore.lead ? (
+              <p className="mt-3 max-w-[48ch] t-body text-steel">
+                {copy.projectsMore.lead}
+              </p>
+            ) : null}
           </div>
-          <LinkUnderline href="/contact">Request references</LinkUnderline>
+          {copy.projectsMore.linkLabel ? (
+            <LinkUnderline href="/contact">
+              {copy.projectsMore.linkLabel}
+            </LinkUnderline>
+          ) : null}
         </div>
       </section>
 
