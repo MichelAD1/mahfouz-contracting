@@ -142,7 +142,7 @@ export const PROJECT_QUERY = groq`*[_type == "project" && slug.current == $slug]
 export const CONTACT_QUERY = groq`*[_type == "contact"][0]{
   heading, description,
   "details": details[]{ label, value },
-  formSubjects, recipientEmail,
+  formSubjects, enquiryChecklist, recipientEmail,
   map{ latitude, longitude, label }
 }`;
 
@@ -169,7 +169,7 @@ export const SECTION_COPY_QUERY = groq`*[_type == "sectionCopy"][0]{
     subjectLabel, subjectPlaceholder, messageLabel,
     submitLabel, submittingLabel, successLead
   },
-  contactDirect{ heading, officeLabel, emailLabel },
+  contactDirect{ formLabel, heading, officeLabel, emailLabel, checklistLabel },
   "homeSeo": homeSeo${SEO},
   "aboutSeo": aboutSeo${SEO},
   "servicesSeo": servicesSeo${SEO},

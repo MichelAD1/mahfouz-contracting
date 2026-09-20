@@ -161,9 +161,20 @@ export const contactDirect = defineType({
   type: "object",
   options: { collapsible: true, collapsed: true },
   fields: [
+    defineField({
+      name: "formLabel",
+      title: "Margin label",
+      type: "string",
+      description: "The small label in the sheet margin beside the form.",
+    }),
     defineField({ name: "heading", type: "string" }),
     defineField({ name: "officeLabel", title: "Office label", type: "string" }),
     defineField({ name: "emailLabel", title: "Email label", type: "string" }),
+    defineField({
+      name: "checklistLabel",
+      title: "What-to-send heading",
+      type: "string",
+    }),
   ],
 });
 

@@ -500,14 +500,26 @@ export const fallbackContact: Contact = {
   heading: "Request a quote",
   description:
     "Send us the scope and we will come back with an engineered answer, not a guess. For tenders and prequalification we can issue project records and references on request.",
+  /**
+   * Hours and response time only. The office address used to be a row here
+   * as well, duplicating `settings.address`, and the page filtered it back
+   * out by matching the literal string "Office" — which meant renaming that
+   * row in the studio printed the address twice. One source, no filter.
+   */
   details: [
-    {
-      label: "Office",
-      value:
-        "Sink 14th Street, Bishop Roland J. Diggs Building, Monrovia, Montserrado County, Liberia",
-    },
     { label: "Hours", value: "Mon-Fri 06:00-18:00, Sat 06:00-16:00, Sun closed" },
     { label: "Enquiries", value: "Answered 24/7" },
+  ],
+  /**
+   * TODO(client): written by me, not by you. It is the four things that make
+   * a quote possible to price without a phone call, and it is editable in the
+   * studio — change it to whatever you actually want to be sent.
+   */
+  enquiryChecklist: [
+    "Drawings or a scope of works, if you have them",
+    "Where the site is, and what stage it is at",
+    "Any standards or approvals the work has to meet",
+    "When you need it finished",
   ],
   formSubjects: [
     "Electrical",
@@ -591,9 +603,11 @@ export const fallbackSectionCopy: SectionCopy = {
   },
 
   contactDirect: {
+    formLabel: "Enquiry",
     heading: "Reach us directly",
     officeLabel: "Office",
     emailLabel: "Email",
+    checklistLabel: "What to send",
   },
 
   /**

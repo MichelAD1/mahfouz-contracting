@@ -233,6 +233,7 @@ async function buildDocuments(): Promise<SanityDoc[]> {
         "detail",
       ),
       formSubjects: fallbackContact.formSubjects,
+      enquiryChecklist: fallbackContact.enquiryChecklist,
     }),
   );
 

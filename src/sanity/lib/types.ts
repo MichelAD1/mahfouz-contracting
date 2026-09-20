@@ -185,6 +185,8 @@ export type Contact = {
   details?: DetailRow[];
   /** Populates the enquiry-type field on the form. */
   formSubjects?: string[];
+  /** What makes an enquiry answerable, listed under the contact block. */
+  enquiryChecklist?: string[];
   /**
    * Where submissions are delivered. Kept in the CMS rather than in code so
    * the client can change their own enquiry inbox without a deploy.
@@ -238,9 +240,12 @@ export type EnquiryFormCopy = {
 
 /** The column beside the enquiry form. */
 export type ContactDirectCopy = {
+  /** The margin label beside the form, in the sheet's left column. */
+  formLabel: string;
   heading: string;
   officeLabel: string;
   emailLabel: string;
+  checklistLabel: string;
 };
 
 /**

@@ -212,7 +212,16 @@ export const contact = defineType({
       name: "details",
       type: "array",
       of: [{ type: "detailRow" }],
-      description: "Shown beside the form, e.g. Office, Hours, Response time.",
+      description:
+        "Extra rows in the block beside the form, e.g. Hours, Response time. The address, the phones and the email are not entered here — they come from Site settings, so they are kept in one place and cannot disagree.",
+    }),
+    defineField({
+      name: "enquiryChecklist",
+      title: "What to send",
+      type: "array",
+      of: [{ type: "string" }],
+      description:
+        "A short list of what makes an enquiry answerable, shown under the contact block. Four entries reads best. Clear it to remove the list.",
     }),
     defineField({
       name: "formSubjects",
