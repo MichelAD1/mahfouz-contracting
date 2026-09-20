@@ -70,13 +70,11 @@ const WORDPRESS_REDIRECTS: { source: string; destination: string }[] = [
   },
   { source: "/safety-and-quality-the-cornerstones-of-every-project", destination: "/" },
 
-  /**
-   * TODO(client): the old site published a privacy policy and this one has no
-   * page to send it to. A contact form that collects a name, an email and a
-   * message wants one — flagged in the plan as a client deliverable rather
-   * than written on their behalf here.
+  /*
+   * /privacy-policy is not in this list any more. It was redirected to the
+   * home page for want of a destination; there is a real page on that exact
+   * address now, so the old URL resolves to the thing it was always about.
    */
-  { source: "/privacy-policy", destination: "/" },
 ];
 
 const nextConfig: NextConfig = {

@@ -7,12 +7,18 @@ import { Capabilities } from "@/components/sections/Capabilities";
 import { SelectedWork } from "@/components/sections/SelectedWork";
 import { Partners } from "@/components/sections/Partners";
 import { ClosingCta } from "@/components/sections/ClosingCta";
-import { getHomePage } from "@/sanity/lib/fetch";
+import { getHomePage, getSectionCopy } from "@/sanity/lib/fetch";
 
 // Next requires a literal here — an imported constant fails the build. Keep in
 // step with REVALIDATE in src/sanity/lib/fetch.ts.
 export const revalidate = 300;
 
+/**
+ * Only the canonical. The home page's title and description are the site's
+ * defaults, set once in the root layout from `homeSeo` - declaring them again
+ * here would run them through the title template and print the company name
+ * twice.
+ */
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
@@ -26,24 +32,35 @@ export const metadata: Metadata = {
  * so the two pages are not competing for the same search with the same words.
  */
 export default async function HomePage() {
-  const { settings, hero, about, services, projects, partners, closingCta } =
-    await getHomePage();
+  const [
+    { settings, hero, about, services, projects, partners, closingCta },
+    copy,
+  ] = await Promise.all([getHomePage(), getSectionCopy()]);
 
   return (
     <>
-      <Hero hero={hero} settings={settings} services={services} />
+      <Hero
+        hero={hero}
+        settings={settings}
+        services={services}
+        stripLabel={copy.divisionStrip}
+      />
 
       <About about={about} condensed />
 
-      <SectionShell id="services" label="Capabilities">
-        <Capabilities services={services} />
-        <div className="mt-[clamp(2rem,3.5vw,3rem)] border-t border-rule-strong pt-6">
-          <LinkUnderline href="/services">All services</LinkUnderline>
-        </div>
+      <SectionShell id="services" label={copy.capabilities.label}>
+        <Capabilities services={services} copy={copy.capabilities} />
+        {copy.capabilities.linkLabel ? (
+          <div className="mt-[clamp(2rem,3.5vw,3rem)] border-t border-rule-strong pt-6">
+            <LinkUnderline href="/services">
+              {copy.capabilities.linkLabel}
+            </LinkUnderline>
+          </div>
+        ) : null}
       </SectionShell>
 
-      <SectionShell id="work" label="Selected work">
-        <SelectedWork projects={projects} />
+      <SectionShell id="work" label={copy.selectedWork.label}>
+        <SelectedWork projects={projects} copy={copy.selectedWork} />
       </SectionShell>
 
       <SectionShell className="bg-paper-bright" size="compact">

@@ -1,8 +1,10 @@
 import type {
   Contact,
   HomePageContent,
+  PrivacyPolicy,
   ProjectDivision,
   ProjectFull,
+  SectionCopy,
 } from "@/sanity/lib/types";
 
 /**
@@ -72,11 +74,20 @@ export const fallbackHome: HomePageContent = {
     },
     // TODO(client): the live site's social links point at AxiomThemes accounts.
     socials: [],
+    /**
+     * Projects and About are swapped from the obvious order. The work comes
+     * before the write-up: a contractor is judged on what they have built,
+     * and About is the page people read last, if at all.
+     *
+     * This list is the one source. The header, the footer and the 404's
+     * index all read it, so the order is changed here and in the studio,
+     * and nowhere else.
+     */
     nav: [
       { label: "Home", href: "/" },
-      { label: "About", href: "/about" },
-      { label: "Services", href: "/services" },
       { label: "Projects", href: "/projects" },
+      { label: "Services", href: "/services" },
+      { label: "About", href: "/about" },
       { label: "Contact", href: "/contact" },
     ],
     /**
@@ -99,33 +110,6 @@ export const fallbackHome: HomePageContent = {
       alt: "City skyline of high-rise towers seen from above at first light",
       aspectRatio: 16 / 9,
     },
-    // Every figure here is checkable against the company's own material.
-    metrics: [
-      {
-        figure: "5",
-        countTo: 5,
-        label: "In-house divisions",
-        note: "Engineering, electrical, mechanical, IT, maintenance",
-      },
-      {
-        figure: "2",
-        countTo: 2,
-        label: "Countries served",
-        note: "Liberia and Lebanon",
-      },
-      {
-        figure: "6",
-        countTo: 6,
-        label: "Standards worked to",
-        note: "IEC, NEC, BS, NFPA, ASHRAE, SMACNA",
-      },
-      {
-        figure: "1",
-        countTo: 1,
-        label: "Point of responsibility",
-        note: "Design through commissioning and support",
-      },
-    ],
   },
 
   about: {
@@ -145,9 +129,18 @@ export const fallbackHome: HomePageContent = {
         aspectRatio: 1024 / 1536,
       },
     ],
-    metrics: [
-      { figure: "5", countTo: 5, label: "Divisions" },
-      { figure: "2", countTo: 2, label: "Countries" },
+    /**
+     * The title block over the photograph. It read "5 Divisions" and "2
+     * Countries" — the same counting pattern, and the same weak figures,
+     * as the hero band that was replaced before it. Named, the two rows
+     * say what the numbers only implied.
+     */
+    details: [
+      { label: "Operating in", value: "Liberia · Lebanon" },
+      {
+        label: "In-house divisions",
+        value: "Engineering, electrical, mechanical, IT, maintenance",
+      },
     ],
   },
 
@@ -217,7 +210,15 @@ export const fallbackHome: HomePageContent = {
     },
     {
       _id: "svc-it",
-      code: "IT",
+      /**
+       * IA, not IT. The hero's division strip sets the code beside the short
+       * name, so an "IT" code next to "IT & Automation" printed the same two
+       * letters twice in one row. IA takes the initial of each half of the
+       * full title, keeps the two-letter pattern the other four follow, and
+       * leaves the tag on every project card reading "IT & Automation" —
+       * which is what the design canvas specifies and what a client searches.
+       */
+      code: "IA",
       title: "Information Technology & Automation",
       shortTitle: "IT & Automation",
       slug: "information-technology-automation-division",
@@ -508,14 +509,26 @@ export const fallbackContact: Contact = {
   heading: "Request a quote",
   description:
     "Send us the scope and we will come back with an engineered answer, not a guess. For tenders and prequalification we can issue project records and references on request.",
+  /**
+   * Hours and response time only. The office address used to be a row here
+   * as well, duplicating `settings.address`, and the page filtered it back
+   * out by matching the literal string "Office" — which meant renaming that
+   * row in the studio printed the address twice. One source, no filter.
+   */
   details: [
-    {
-      label: "Office",
-      value:
-        "Sink 14th Street, Bishop Roland J. Diggs Building, Monrovia, Montserrado County, Liberia",
-    },
     { label: "Hours", value: "Mon-Fri 06:00-18:00, Sat 06:00-16:00, Sun closed" },
     { label: "Enquiries", value: "Answered 24/7" },
+  ],
+  /**
+   * TODO(client): written by me, not by you. It is the four things that make
+   * a quote possible to price without a phone call, and it is editable in the
+   * studio — change it to whatever you actually want to be sent.
+   */
+  enquiryChecklist: [
+    "Drawings or a scope of works, if you have them",
+    "Where the site is, and what stage it is at",
+    "Any standards or approvals the work has to meet",
+    "When you need it finished",
   ],
   formSubjects: [
     "Electrical",
@@ -525,4 +538,212 @@ export const fallbackContact: Contact = {
     "Maintenance & Facility Support",
     "General enquiry",
   ],
+};
+
+/**
+ * The site's own wording, outside the sections it labels.
+ *
+ * Every string here was typed into a component until Step 8. It has to keep
+ * all of them: the merge in `getSectionCopy` fills each field the CMS leaves
+ * empty from this module, so a string dropped here is a heading that
+ * disappears the day the CMS has an outage.
+ */
+export const fallbackSectionCopy: SectionCopy = {
+  divisionStrip: "Five divisions, one point of responsibility",
+
+  capabilities: {
+    label: "Capabilities",
+    heading: "Five divisions, one scope of responsibility",
+    lead: "Each division works in-house and to a single project program, so the scopes meet where they are supposed to.",
+    linkLabel: "All services",
+  },
+
+  selectedWork: {
+    label: "Selected work",
+    heading: "Projects delivered end to end.",
+    linkLabel: "All projects",
+  },
+
+  aboutHero: {
+    heading: "Engineering, contracting and maintenance, in-house.",
+    lead: "Five divisions under one roof, working to a single project program, so design, supply, installation and commissioning meet where they are supposed to.",
+  },
+
+  aboutProcess: {
+    label: "How we work",
+    heading: "Four stages, from brief to ongoing support",
+  },
+
+  servicesHero: {
+    heading: "Five divisions, one scope of responsibility.",
+    lead: "Each division works in-house and to a single project program, so design, supply, installation and commissioning meet where they are supposed to.",
+  },
+
+  projectsHero: {
+    heading: "Selected projects",
+    lead: "Electrical, mechanical, IT and automation works delivered from design through commissioning, with maintenance carried on afterwards.",
+  },
+
+  projectsMore: {
+    heading: "More work, on request",
+    lead: "Further project records and references can be issued for tender or prequalification.",
+    linkLabel: "Request references",
+  },
+
+  projectsEmpty: {
+    heading: "No projects listed under this division yet.",
+    lead: "Records for this division can be issued on request.",
+  },
+
+  notFound: {
+    heading: "That page is not in the set.",
+    lead: "The address you followed does not exist, or what used to be there has moved. Everywhere the site does go is in the navigation above.",
+  },
+
+  projectsAllFilter: "All work",
+
+  enquiryForm: {
+    nameLabel: "Name",
+    companyLabel: "Company",
+    emailLabel: "Email",
+    phoneLabel: "Phone",
+    subjectLabel: "Enquiry type",
+    subjectPlaceholder: "Select one",
+    messageLabel: "Scope",
+    submitLabel: "Send enquiry",
+    submittingLabel: "Sending…",
+    successLead:
+      "We read every enquiry ourselves — you will get an answer from an engineer, not an autoresponder.",
+  },
+
+  contactDirect: {
+    formLabel: "Enquiry",
+    heading: "Reach us directly",
+    officeLabel: "Office",
+    emailLabel: "Email",
+    checklistLabel: "What to send",
+  },
+
+  /**
+   * The home entry is also the site-wide default: the root layout uses it for
+   * the title every other page's template wraps, and for the description any
+   * page that has not set its own inherits.
+   */
+  homeSeo: {
+    title: "Mahfouz Contracting — Engineering, contracting and maintenance",
+    description:
+      "Integrated electrical, mechanical, IT and automation works for commercial, industrial and institutional clients. Engineered, installed and maintained in-house.",
+  },
+
+  aboutSeo: {
+    title: "About",
+    description:
+      "Mahfouz Contracting delivers integrated electrical, mechanical, IT and automation works in-house, from design through commissioning and on into maintenance.",
+  },
+
+  servicesSeo: {
+    title: "Services",
+    description:
+      "Five in-house divisions: electrical, mechanical, IT and automation, engineering and design consultancy, and maintenance and facility support.",
+  },
+
+  projectsSeo: {
+    title: "Projects",
+    description:
+      "Electrical, mechanical, IT and automation works delivered from design through commissioning, with maintenance carried on afterwards.",
+  },
+
+  contactSeo: {
+    title: "Contact",
+    description:
+      "Request a quote from Mahfouz Contracting. Send us the scope and we will come back with an engineered answer. Offices in Monrovia, Liberia.",
+  },
+};
+
+/**
+ * The privacy policy.
+ *
+ * TODO(client): THIS IS A DRAFT AND HAS NOT BEEN REVIEWED BY A LAWYER. It was
+ * written to be accurate about what this site actually does rather than to be
+ * exhaustive, because a policy describing cookies and profiling that do not
+ * exist here is worse than none: it is a claim nobody checked. Read it, correct
+ * anything that does not match how enquiries are really handled, and replace it
+ * outright if you would rather have your own. It is editable in the studio, so
+ * a replacement needs no developer.
+ *
+ * What it asserts, and what has to stay true: the form collects only the
+ * fields in `ContactForm`, a submission is emailed and never written to a
+ * database, the site sets no cookies of its own, and the typefaces are served
+ * from this origin rather than from Google. All four are true of the code as
+ * it stands. Adding analytics, a chat widget or a stored enquiry log breaks
+ * one of them, and this text has to change in the same commit.
+ */
+export const fallbackPrivacyPolicy: PrivacyPolicy = {
+  heading: "Privacy policy",
+  updated: "2026-09-20",
+  intro: [
+    "This policy explains what this website collects, why, and what happens to it afterwards.",
+    "It is short because the site does little. There is one form, and there is no advertising, no analytics and nothing that follows you anywhere.",
+  ],
+  sections: [
+    {
+      heading: "Who this is about",
+      body: [
+        "Mahfouz Contracting is responsible for the information described here. Our address, telephone numbers and email address are on the contact page, and anything to do with this policy can be sent to the same place.",
+      ],
+    },
+    {
+      heading: "What the enquiry form collects",
+      body: [
+        "The form asks for your name and an email address to reply to. Your company, telephone number and the type of enquiry are optional. The message is sent as you wrote it.",
+        "Nothing else is collected, and nothing about you is inferred or bought in from anywhere else.",
+      ],
+    },
+    {
+      heading: "What happens to an enquiry",
+      body: [
+        "A submitted form is composed into an email and sent to our own inbox. It is not written to a database, and this website keeps no record of it — the email is the only copy.",
+        "The service that delivers it handles the message in transit in order to do so. Once it arrives it sits in our inbox like any other correspondence, and it is used to answer you and for nothing else.",
+      ],
+    },
+    {
+      heading: "Cookies",
+      body: [
+        "This site sets no cookies. There is no analytics, no advertising and no third-party script watching the page.",
+        "The only cookies anywhere on this domain belong to the content management system at /studio, which is how our own staff sign in to edit the site. A visitor never reaches it.",
+      ],
+    },
+    {
+      heading: "What a page loads from elsewhere",
+      body: [
+        "Photographs are served from our content system's image network, which therefore sees the request for the image.",
+        "Typefaces are served from this site rather than from a font provider, so opening a page does not tell anyone else that you did.",
+        "Our hosting provider keeps ordinary server logs, including the network address a request came from, for security and diagnosis.",
+      ],
+    },
+    {
+      heading: "How long anything is kept",
+      body: [
+        "An enquiry stays in the inbox for as long as it is useful to the work it concerns, and is deleted sooner if you ask.",
+      ],
+    },
+    {
+      heading: "Your rights",
+      body: [
+        "You can ask what we hold about you, ask for it to be corrected, or ask for it to be deleted. Write to us using the details on the contact page.",
+        "There is no account to close and no profile to export. In practice what we hold is an email thread, and nothing else.",
+      ],
+    },
+    {
+      heading: "Changes to this policy",
+      body: [
+        "If this changes, the new wording replaces this page and the date in the margin changes with it. We do not keep an archive of earlier versions.",
+      ],
+    },
+  ],
+  seo: {
+    title: "Privacy policy",
+    description:
+      "What this website collects, what happens to an enquiry, and what it does not do: no analytics, no advertising and no cookies of its own.",
+  },
 };

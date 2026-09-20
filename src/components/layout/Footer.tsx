@@ -99,7 +99,15 @@ export function Footer({
           <p className="t-meta text-steel">
             © {year} {settings.companyName}
           </p>
-          <p className="t-meta text-steel">{settings.footerNote}</p>
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-1">
+            <Link
+              href="/privacy-policy"
+              className="t-meta py-2.5 text-steel transition-colors duration-300 hover:text-copper-bright lg:py-0"
+            >
+              Privacy
+            </Link>
+            <p className="t-meta text-steel">{settings.footerNote}</p>
+          </div>
         </div>
       </div>
     </footer>

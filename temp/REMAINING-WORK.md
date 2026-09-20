@@ -1,12 +1,14 @@
 # Mahfouz Contracting — remaining work to launch
 
-**Status:** Steps 1-7 code complete, plus an unplanned design pass. The site is
-built, seeded and rendering from the CMS.
+**Status:** Steps 1-13 code complete, plus an unplanned design pass. The site is
+built, seeded and rendering from the CMS, and every word on it is now editable
+in the Studio.
 
 What is left is no longer code. It is the client's accounts, a domain, a
 deployment, and one walkthrough — tracked in `docs/CLIENT-SETUP.md` and in the
 three held items under Step 6 (Search Console, Business Profile, Lighthouse
-against the deployed build).
+against the deployed build). One item moved from my list to theirs on 20 Sep:
+the privacy policy is written and live, and needs the client to read it.
 
 Supersedes the previous draft. Companion to `temp/PLAN.md`, which covers the
 original build; this file is only what is left.
@@ -46,6 +48,12 @@ from:
       (code complete; three items wait on a domain or a deployment)
 - [x] Step 7: Seed the dataset, then hand Sanity over to the client
       (seeded and documented; the walkthrough and the account transfer need people)
+- [x] Step 8: Move the remaining copy and the per-route metadata into Sanity
+- [x] Step 9: Write the privacy policy, and close the three design questions
+- [x] Step 10: Slow the scroll reveals, and rebuild the contact page
+- [x] Step 11: Fix the sections landing dim after a client-side navigation
+- [x] Step 12: Design the 404, swap Projects and About, make scrolling instant
+- [x] Step 13: Play the hero's entrance on the sections; cut the 404's route index
 
 ---
 
@@ -87,19 +95,33 @@ real differentiator, scannable in a second, and a route into the site rather
 than a statistic. The standards moved to the sheet's footer line as credentials,
 and gained a `standards` field on `siteSettings` so they are editable.
 
-`hero.metrics` is still in the schema but no longer rendered. **If this stays,
-strip the field** so an editor is not filling in something nothing displays.
+`hero.metrics` is gone — from the schema, the query, the fallback module and
+the dataset. So is `about.metrics`, for the reason below. With both readers
+removed the `metric` object type and the `Counter` that animated it had no
+user left either, so they went with them. See Step 9.
 
-### Open design questions, carried forward
+### The three design questions, answered 20 Sep
 
-1. **`IT  IT & Automation`** in the division strip — the code and the short name
-   both read "IT" side by side. One word to change, either way.
-2. **The About section still has "5 Divisions / 2 Countries"** as metrics — the
-   same counting pattern, and the same weak numbers, as the band just replaced.
-3. **Site-wide type scale.** The hero now fits one screen; the inner pages were
-   deliberately left at their current rhythm. Matching 80% browser zoom across
-   the whole site would mean scaling sections down too, which changes its
-   character rather than its density.
+All three were put to the client and decided; the work is in Step 9.
+
+1. **`IT  IT & Automation`** in the division strip. Fixed at the **code**, not
+   the name: `IT` became `IA`, the initial of each half of "Information
+   Technology & Automation". It keeps the two-letter pattern the other four
+   follow and leaves the short name alone, which matters because that name is
+   also the tag on every project card and the label in the /projects filter.
+   Shortening it to "Automation" would have been one character cheaper and
+   would have dropped the half of the division most people name it by.
+2. **The About section's "5 Divisions / 2 Countries".** The block stays; the
+   counters go. It is a drawing title block of label/value rows now —
+   "Operating in — Liberia, Lebanon" and "In-house divisions — Engineering,
+   electrical, mechanical, IT, maintenance". Exactly the transformation the
+   hero band got, for exactly the same reason: naming five divisions is the
+   company's differentiator, counting them is not.
+3. **Site-wide type scale. Left alone, deliberately.** The hero was tightened
+   to fit one screen, which was a fix for a specific fault, not a decision
+   about scale. Scaling the inner pages to match would change the site's
+   character rather than its density, and would put every page back in review
+   to buy nothing. Closed rather than carried forward again.
 
 ### Tooling worth reusing
 
@@ -126,6 +148,7 @@ Both quality gates are **clean** on `main`: `npm run lint` exit 0,
 | `/projects` | 200 | done |
 | `/projects/<slug>` | 200, unknown slugs 404 | done |
 | `/contact` | 200, form working | done |
+| `/privacy-policy` | 200, and no longer a redirect to the home page | Step 9 |
 | `/sitemap.xml` | 200 | Step 6 |
 | `/robots.txt` | 200 | Step 6 |
 | `/opengraph-image` | 200, a 1200×630 PNG | Step 6 |
@@ -825,38 +848,410 @@ All three previously open questions are now settled:
   established design language, for review afterwards rather than design first.
 - **CORS is untouched** — the port move to 3333 made the change unnecessary.
 
-## Step 8 — Move the remaining copy into Sanity (next session)
+## Step 8 — The copy moved into Sanity — done 20 Sep 2026
 
-Deferred deliberately on 19 Sep, not forgotten. Today the CMS holds the
-*content* and the code holds the *furniture*, which means the client cannot
-reword a section heading without a developer.
+Deferred on 19 Sep, done now. Until this, the CMS held the content and the code
+held the furniture: the client could rewrite what a section said but not what it
+was called, and could not touch a single page title or description — which is
+the copy that decides whether anyone arrives at all.
 
-What is still hard-coded, audited rather than guessed:
+One new singleton, **Page copy**, with four tabs:
 
-| Where | What |
+| Tab | What it holds |
 |---|---|
-| `Capabilities.tsx` | "Five divisions, one scope of responsibility" + its lead |
-| `Process.tsx` | "Four stages, from brief to ongoing support" |
-| `SelectedWork.tsx` | "Projects delivered end to end." |
-| `Hero.tsx` | "Five divisions, one point of responsibility" (strip label) |
-| `app/about`, `app/services`, `app/projects` | page hero headings and leads, "More work, on request" |
-| every route | `title` and `description` metadata |
-| `ContactForm.tsx` | field labels, helper text, button and success copy |
-| `ProjectsIndex.tsx` | "All work" filter label, empty states |
-| `opengraph-image.tsx` | the card's wording |
+| Home page | the division strip label, and the Capabilities and Selected work sections |
+| Inner pages | the About, Services and Projects hero headings and leads, the process heading, "More work, on request", the empty-filter state and the "All work" filter label |
+| Contact page | every label on the enquiry form, both button states, the line after a successful send, and the "Reach us directly" column |
+| Search & sharing | an `seo` object per route |
 
-Shape it as **one `sectionCopy` singleton with a field per section** rather
-than scattering headings across the section documents — the alternative is
-five more singletons and a Studio that reads like a filing cabinet. Page
-metadata wants a `seo` object per route; that object type already exists and is
-already on `siteSettings`, `service` and `project`, so it is wiring rather than
-schema design.
+One document rather than a heading field added to each section's own record.
+Rewriting the site is one job, and five more singletons would make the studio
+read like a filing cabinet.
 
-Two cautions for whoever picks it up. The fallback module must keep every
-string it has now, or a CMS outage silently empties the page furniture. And
-`opengraph-image.tsx` is generated at build time, so copy moved there would not
-follow a Studio edit until the next deploy — probably a reason to leave that
-one alone.
+### Three things worth knowing
+
+**The merge needed a second level.** `mergeObject` stops one level deep on
+purpose — below that are images and links, where half of one and half of
+another is worse than either whole. But a section here is a nested object of
+four strings, so merged at the top level an editor who rewrote a heading and
+left the lead empty would publish `{ heading }` and take the lead off the page.
+That is the identical trap, one level down. `mergeCopy` closes it, and is used
+only by documents that are copy all the way down.
+
+**Declaring `openGraph` on a page silently deletes the share card.** Next
+shallow-merges metadata, so a page's `openGraph` replaces the layout's resolved
+one outright — file-convention image included. Caught on the running site: all
+four inner pages went to zero `og:image` tags while every other tag stayed
+correct. That is the shape of failure that ships, because everything visible
+looks right. `pageMetadata` names the card explicitly now, and a share image
+set per page in the studio replaces it for that page alone.
+
+**`homeSeo` does two jobs** — the home page's own metadata, and the default
+every other route inherits. So the home page still declares nothing but its
+canonical: a title set there would run through the template and print the
+company name twice. `siteSettings.seo` went the way of `hero.metrics` — in the
+schema, never read, now gone, with one field doing the job.
+
+### Deliberately still in code
+
+- **What a visitor is told when a send fails.** Some of it reports a fault
+  rather than addressing a person, including the development-mode line that
+  says the email was composed but never sent.
+- **The Open Graph card's own wording.** It is drawn at build time, so copy
+  moved there would not follow a studio edit until the next deploy.
+- **The footer's column headings** (Navigate, Services, Contact) and the
+  "Privacy" link label. Interface furniture, consistent with each other.
+
+---
+
+## Step 9 — The privacy policy, and the design questions — done 20 Sep 2026
+
+**The privacy policy is written and live at `/privacy-policy`.** That is the
+address the old WordPress site published, and it was in the redirect table
+pointing at the home page for want of anywhere better to send it. It is out of
+that table now, so whatever authority the old URL carries lands on the page it
+was always about. The trailing-slash form still normalises to it in one hop.
+
+It is a **draft and has not been read by a lawyer**, which is said plainly in
+the fallback module and in `docs/CLIENT-SETUP.md`, where item 10 has moved from
+"supply the text" to "read this and tell me what is wrong". It lives in the CMS,
+so a replacement from the client's own lawyer needs no developer.
+
+It describes what this site actually does rather than covering everything a
+policy can cover. Boilerplate about cookie categories and profiling would have
+been faster and would have been a claim nobody checked. It asserts four
+specific things, all true of the code as it stands:
+
+- the enquiry form collects only the fields visible on it
+- a submission is emailed and never written to a database
+- the site sets no cookies of its own
+- the typefaces are served from this origin, not from Google
+
+**Adding analytics, a chat widget or a stored enquiry log breaks one of them,
+and has to change that text in the same commit.** The condition is recorded in
+the fallback module beside the policy so it is read by whoever breaks it.
+
+Two departures from the rest of the site, both deliberate. It is the only page
+that does not end on the closing banner — asking someone reading a privacy
+policy whether they have a project in mind reads as a company that was not
+listening. And the margin column carries the revision date, which is genuine
+sheet metadata rather than the decorative label that column is not allowed to
+hold.
+
+The three design questions are answered above. `hero.metrics`, `about.metrics`,
+the `metric` object type and the `Counter` component are all gone.
+
+### Verified, 20 Sep 2026
+
+Gates clean on the branch: `npm run lint` exit 0, `npx tsc --noEmit` exit 0.
+
+The dataset was reseeded: **27 documents**, 15 images deduped on hash rather
+than re-added. `svc-it.code` reads `IA`, `about.details` carries the two named
+rows, `hero.metrics` is null, and the two new documents exist. Checked by GROQ
+against the dataset, not inferred from the page.
+
+Every route 200, and the `cdn.sanity.io` count per page matches the figures
+`docs/CONNECT-SANITY.md` records for a connected CMS — home 181, about 70,
+services 65, projects 58, a project page 32, contact 0. Zero
+"serving fallback content" warnings in the server log, which is the only proof
+that every query was actually answered rather than quietly falling back. The
+share card is a real 1200x630 PNG on all five pages again.
+
+---
+
+## Step 10 — Motion and the contact page — done 20 Sep 2026
+
+Three notes from review, before the branch merges.
+
+### "The sections animate too fast"
+
+They are scrubbed by scroll position, not played on a timer, so this is never a
+duration — it is the window. `ENTER 0.9` to `ARRIVE 0.64` is **0.26 of a
+viewport**: 234px on a 900px screen for a block to go from 0.34 opacity and 32px
+low to settled. The travel was right; the run-up was not.
+
+`ENTER` is **1.06** now, past 1, so a scene starts below the fold and is a
+seventh of the way through before any of it can be seen. `ARRIVE` is untouched
+— it was measured twice (0.74 too early, 0.52 too late) and nothing should
+finish later on screen than that says.
+
+| | before | after |
+|---|---|---|
+| range | 0.26 vh (234px) | 0.42 vh (378px) |
+| visible part of it | 182px | 324px |
+| opacity on entering | 0.34 | 0.46 |
+
+The opacity stop moved 0.7 — 0.8 with it. It is a fraction of the range, and
+the range got longer, so leaving it would have pulled full opacity to a higher
+point on the screen than the measurement that set it.
+
+### "Images appear suddenly from the bottom"
+
+Worse than it sounded, and a real fault rather than a preference. On `ENTER` a
+photograph reached the bottom edge of the viewport with its clip-path still at
+`inset(100%)` — so the first thing anyone saw of it was **nothing**, and then
+all of it inside a quarter of a viewport of scroll.
+
+`ImageReveal` has its own `ENTER_IMAGE` of **1.2**. A photograph is about 40%
+uncovered by the time it is visible at all, and the rest of the wipe runs over
+0.56 of a viewport instead of 0.26.
+
+The `Process` and `ServiceDetail` parallax depths came down about 28%. The
+process cards are the one place two vertical motions land on the same element
+— the card rises on its `Reveal` while the photograph inside travels on its
+own — and at 46-94 the two compounded into a rush rather than depth.
+
+`animate-rise` went 1.35s — 1.6s and then **back to 1.35s**. The theory was
+that timed motion above the fold and scrubbed motion below it should read as one
+system; the answer on review was that the heroes were never the complaint and
+are the first thing anyone waits through. The reveals below the fold keep the
+longer run-up. `animate-wipe-up` had no caller anywhere in `src/`; the scroll
+wipe replaced it and left the utility, its keyframes and its reduced-motion
+branch behind. Removed, and it stays removed.
+
+**Verified from `framer-motion`'s source, not assumed:** `resolveEdge`
+multiplies a numeric edge by the container length with no clamp, so an offset
+past 1 resolves below the fold exactly as intended.
+
+### "The contact page is bland"
+
+It was a form on paper with a column of small text beside it under a hairline.
+Nothing on the page carried any weight, so the form had nothing to sit against.
+
+- **The contact column is a title block** — an ink panel of ruled, labelled
+  fields. The third of them on the site after the footer and the about section,
+  and deliberately the same object rather than a new idea for one page. It takes
+  any number of rows, so two phones or five need nothing to know how many.
+- **The section gained its margin label, "Enquiry".** Every other section sits
+  in the sheet grid with its name in the left column; this one was a bare shell,
+  which is a quiet part of why it read as a different site.
+- **"What to send"** — four things that make a quote possible to price without a
+  phone call. New copy, marked `TODO(client)`, and a field on the contact
+  document so it is theirs to change or clear.
+- **`contact.map` finally renders.** In the schema since Step 1 with no reader
+  — the same class of thing as `hero.metrics` and `animate-wipe-up`. It stays
+  unset, so nothing shows until the client supplies coordinates, which print as
+  sheet metadata under the address.
+
+**No embedded map, deliberately.** An iframe from a mapping provider would load
+third-party script on the one page a visitor types their name, email and phone
+number into, and would make a liar of `/privacy-policy`, which this same branch
+publishes saying the site does no such thing. Coordinates find a building and
+cost nobody anything.
+
+Fixed on the way past: the Office row is gone from `contact.details`. It
+duplicated `settings.address`, and the page filtered it back out by matching the
+literal string `"Office"`, so renaming that row in the studio printed the
+address twice. One source, no filter, and the `TODO` from Step 8 goes with it.
+
+### Verified, 20 Sep 2026
+
+Gates clean, `npm run build` exit 0. Contact checked in a real browser at 1440
+rather than from the markup: six ruled rows, no duplicate address, four
+checklist items, the panel top aligned with the form's rule. Every route still
+200, 404 still 404, per-page `cdn.sanity.io` counts unchanged, no
+"serving fallback content" warnings.
+
+Reseeded again for the contact changes. **Worth knowing:** the stale render
+survived deleting `.next/cache/fetch-cache` and a server restart — it took
+removing the whole `.next` directory. Budget for that after any reseed.
+
+**Not pixel-verified: phone width.** The stacking order is right in the markup
+(form, panel, checklist) but headless Chrome here clips the right edge of every
+page, including ones this branch never touched, so the capture proves nothing
+either way.
+
+---
+
+## Step 11 — The soft-navigation dimming — done 20 Sep 2026
+
+Reported on `/services`: the first block under the hero is right on a hard load,
+but navigate away and back and it sits dimmed and stays there. **Two faults, both
+only reachable by a client-side navigation**, which is why every check up to here
+had missed them.
+
+### The guard was measuring at the wrong moment
+
+An element inside the first screenful must not be held at rest opacity — there
+is no scroll above it to drive a reveal. The test for that was *"is it on screen
+when the page first paints"*.
+
+On a soft nav the new page mounts while the **old** scroll position is still in
+force, and the router does not jump to the top, it **animates** there. Traced over
+CDP, arriving at `/services` from a home page at 2000px:
+
+| t | scrollY | article top | on screen |
+|---|---|---|---|
+| 130ms | 1983 | -1492 | no |
+| 330ms | 1200 | -709 | **yes** |
+| 870ms | 0 | 491 | yes |
+
+The measurement at mount saw it far below the fold and left the effect enabled.
+Re-measuring for a few frames was the obvious fix and was still a race — it
+would have had to outlast the whole 870ms animation.
+
+**Adding the scroll offset back removes the race instead of racing it.**
+`rect.top + scrollY` is the element's position in the *document*, which does not
+change while the page scrolls, so the answer is identical at every point during
+that animation, on a hard load, and on a restored back navigation. No timers, no
+listeners, nothing to settle. The hook is `useInFirstScreen`.
+
+### Fixing that exposed the second fault, which was worse
+
+Motion drives these through MotionValues **straight onto the node**, and
+`style={undefined}` does not put back what it wrote — it only stops updating
+it. So the moment the guard correctly opted an element out, that element froze at
+whatever the last frame had written: `0.34` and `translateY(32px)`, permanently.
+Worse than the bug being fixed, because at least that one came back when you
+scrolled.
+
+The disabled branch states the finished position now (`SETTLED`, `UNCOVERED`)
+rather than hoping the enabled one never ran. **Anything that disables a Motion
+style has to say what the element should look like instead.**
+
+### A transform conflict, unpicked on the way
+
+The about block's overhang was a `lg:translate-y-8` on the same element as a
+`Reveal`. A Reveal owns the transform of what it wraps — Motion writes one
+inline — so the class was overwritten whenever the scene had any progress at
+all. Moved to the `dl` inside it. One element, one owner of its transform.
+
+### Verified, 20 Sep 2026
+
+Over CDP at a 900px viewport, all three ways in — hard load, soft nav from a
+home page scrolled to 2000, and browser Back — zero dimmed elements on screen
+in each. Reveals still work: scrolling `/about`, a below-fold block climbs
+0.34 — 0.39 — 1 as it comes up, so this opts out the first screenful and
+nothing else. The about title block was screenshotted — the overhang still
+hangs. Gates clean (exit codes checked, not just output), `npm run build` exit 0.
+
+**Worth keeping:** driving a real client-side navigation needs a browser. Node 22
+has a global `WebSocket`, so CDP can be driven with no dependencies at all —
+launch the Playwright chromium with `--remote-debugging-port`, connect to the page
+target, and `Runtime.evaluate`. That is how both faults were found and how the fix
+was proved; neither is visible in the markup or on a hard load.
+
+---
+
+## Step 12 — A 404, the nav order, and instant scrolling — done 20 Sep 2026
+
+### The 404
+
+`src/app/not-found.tsx`. A **root** not-found catches every unmatched URL in the
+app, not only a `notFound()` thrown from a segment, so this is where a stale link
+from the old WordPress site lands when it is not one of the 26 that redirect.
+
+It renders inside the root layout, so the header, the footer and the skip link
+come with it. **No metadata is exported** — `not-found` does not accept any, and
+Next injects `noindex` on a 404 itself. Checked against
+`node_modules/next/dist/docs` rather than remembered, per `AGENTS.md`.
+
+The status code sits in the hero's `index` slot, the same place a project detail
+page puts its number: on a sheet a code sits beside the title, and 404 is a code
+rather than a count. The way out is a ruled index of `settings.nav`, so **a route
+added to the site appears there by existing** rather than by being remembered.
+Copy lives in Page copy with the rest.
+
+### Projects and About swapped
+
+The work comes before the write-up. One edit, in `settings.nav`, which the header,
+the footer and the 404's index all read.
+
+### Scrolling is instant
+
+`scroll-behavior: smooth` sat on `html` unconditionally, and **the router
+inherits it**: changing page while scrolled down did not jump to the top, it
+animated there — traced at 870ms from 2000px, on every navigation. It is also
+what made Step 11's bug so hard to see.
+
+`html:has(:target)` was tried first, to keep the glide for in-page anchors and let
+route changes jump. **Measured both halves: it does nothing.** The style
+recalculation lands after the browser has already performed the fragment scroll,
+so the anchor jumps regardless. A rule that only looks like it works is worse than
+no rule, so it is gone, and the reduced-motion override under it went too — it
+now has nothing to turn off. Anchors jump, which is the browser default.
+
+### Two things moved
+
+`pad2` from `ProjectCard` to `lib/format`. A page whose whole job is to have gone
+wrong should not drag a project card, `next/image` and the Sanity image helpers
+into its bundle for three lines of padding. And `Arrow` is exported from `Button`
+so the 404's rows reuse it — the module's own rule is that a literal arrow
+character in a label is a copy smell.
+
+### Verified, 20 Sep 2026
+
+Over CDP: a soft nav from 2000px goes **2000 — 0 with no intermediate frames**,
+against 40+ easing frames before. `/no-such-page` returns a real 404 with the
+page; both navs read Home / Projects / Services / About / Contact; the 404 was
+screenshotted. Gates clean on **exit codes**, `npm run build` exit 0. Dataset
+reseeded for the nav order and the 404 copy.
+
+---
+
+## Step 13 — The hero's entrance, on the sections — done 20 Sep 2026
+
+### The sections play the hero's animation now
+
+They were **scrubbed by scroll position**: tied to where the page was rather than
+played on arrival, so a section sat at whatever progress your scroll implied and
+ran backwards as you scrolled up. A defensible effect, and not the one the hero
+has — which is the one this site is supposed to have.
+
+| | scrubbed (was) | played (now) |
+|---|---|---|
+| driver | scroll position | arrival in the viewport, once |
+| from | opacity 0.34, 32px | opacity 0, 40px |
+| curve | scroll-linked | `EASE_REVEAL`, 1.35s |
+| `order` | shifts the arrival point in scroll | **seconds of delay** |
+
+`EASE_REVEAL` is declared in `ease.ts` beside `--ease-reveal` in the stylesheet,
+because the hero animates in CSS and the sections animate in JS. They have to be
+the same cubic or they read as two different sites scrolling past each other.
+The existing 0.14 and 0.15 stagger gaps are already the same family of interval
+as the hero's 0.19, so no caller changed.
+
+Both load-bearing properties survive. `initial={false}` keeps the server's markup
+an ordinary, fully visible page, and content is only ever hidden while it is below
+the fold. The first-screen guard stays: that part of the page is the hero's
+entrance to make, and animating it again would mean hiding something already
+painted, which is a flicker rather than an entrance.
+
+### The trigger margin is 64px, and that is a correction
+
+At 12% of the viewport it was 108px, and a short block landing near the bottom
+edge sat **fully on screen and completely blank**, with nothing left to trigger it
+but more scrolling. Pixels, not a percentage, because the cost is asymmetric: too
+small and a section plays while it is a sliver, too large and a visible section
+stays blank. Caught by auditing three pages at four scroll positions for anything
+still faded after the animation should have finished.
+
+### The 404 loses its route index
+
+Every route is already one click away in the header above it and the footer below,
+so a third copy of the same five links was furniture rather than help. The lead
+went with it — it said "listed below" and there is no longer anything below it
+— and the hero grew to `tall` to carry the page on its own. `notFound` no longer
+carries a margin label and the field description says so, since `sectionIntro`
+offers one that nothing on this page renders.
+
+`Arrow` goes back to being `Button`'s own business; the 404's rows were its only
+caller outside the module. `pad2` stays in `lib/format`, which was the right home
+independently — three of its four callers only ever wanted padding, not a card.
+
+### Verified, 20 Sep 2026
+
+**The first attempt at verifying was wrong in an instructive way.** Tracking an
+unidentified element showed the transform animating while opacity stayed at 0,
+which looked like a bug and was a bad probe. Tagging a specific card and tracing
+that node shows what actually happens: 450ms of stagger delay, then opacity 0 to 1
+and translateY 40px to 0 across **74 distinct frames**, ending at opacity 1 and
+`transform: none`.
+
+The test that distinguishes played from scrubbed is to **scroll once and then hold
+still**: a played animation keeps going, a scrubbed one freezes. It keeps going.
+
+Gates clean on exit codes, `npm run build` exit 0, dataset reseeded.
 
 ---
 

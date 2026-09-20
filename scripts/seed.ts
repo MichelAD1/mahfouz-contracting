@@ -26,9 +26,11 @@ import { getCliClient } from "sanity/cli";
 import {
   fallbackContact,
   fallbackHome,
+  fallbackPrivacyPolicy,
   fallbackProjectDetails,
+  fallbackSectionCopy,
 } from "../src/sanity/fallback/content";
-import type { SiteImage } from "../src/sanity/lib/types";
+import type { SectionIntro, Seo, SiteImage } from "../src/sanity/lib/types";
 
 const client = getCliClient();
 const PUBLIC_DIR = join(process.cwd(), "public");
@@ -87,6 +89,29 @@ async function image(source?: SiteImage): Promise<Record<string, unknown> | unde
   };
 }
 
+/**
+ * Nested objects need their `_type` or the studio cannot tell what it is
+ * editing, and empty keys are dropped so an unset field reads as unset rather
+ * than as an empty string somebody typed.
+ */
+function intro(value: SectionIntro): Record<string, unknown> {
+  return {
+    _type: "sectionIntro",
+    ...(value.label ? { label: value.label } : {}),
+    heading: value.heading,
+    ...(value.lead ? { lead: value.lead } : {}),
+    ...(value.linkLabel ? { linkLabel: value.linkLabel } : {}),
+  };
+}
+
+function seoBlock(value: Seo): Record<string, unknown> {
+  return {
+    _type: "seo",
+    ...(value.title ? { title: value.title } : {}),
+    ...(value.description ? { description: value.description } : {}),
+  };
+}
+
 /** Drops keys whose value is undefined, so documents carry no empty fields. */
 function clean(doc: Record<string, unknown>): SanityDoc {
   return Object.fromEntries(
@@ -125,6 +150,31 @@ async function buildDocuments(): Promise<SanityDoc[]> {
 
   documents.push(
     clean({
+      _id: "sectionCopy",
+      _type: "sectionCopy",
+      divisionStrip: fallbackSectionCopy.divisionStrip,
+      capabilities: intro(fallbackSectionCopy.capabilities),
+      selectedWork: intro(fallbackSectionCopy.selectedWork),
+      aboutHero: intro(fallbackSectionCopy.aboutHero),
+      aboutProcess: intro(fallbackSectionCopy.aboutProcess),
+      servicesHero: intro(fallbackSectionCopy.servicesHero),
+      projectsHero: intro(fallbackSectionCopy.projectsHero),
+      projectsMore: intro(fallbackSectionCopy.projectsMore),
+      projectsEmpty: intro(fallbackSectionCopy.projectsEmpty),
+      notFound: intro(fallbackSectionCopy.notFound),
+      projectsAllFilter: fallbackSectionCopy.projectsAllFilter,
+      enquiryForm: { _type: "enquiryForm", ...fallbackSectionCopy.enquiryForm },
+      contactDirect: { _type: "contactDirect", ...fallbackSectionCopy.contactDirect },
+      homeSeo: seoBlock(fallbackSectionCopy.homeSeo),
+      aboutSeo: seoBlock(fallbackSectionCopy.aboutSeo),
+      servicesSeo: seoBlock(fallbackSectionCopy.servicesSeo),
+      projectsSeo: seoBlock(fallbackSectionCopy.projectsSeo),
+      contactSeo: seoBlock(fallbackSectionCopy.contactSeo),
+    }),
+  );
+
+  documents.push(
+    clean({
       _id: "hero",
       _type: "hero",
       headingLines: hero.headingLines,
@@ -132,10 +182,6 @@ async function buildDocuments(): Promise<SanityDoc[]> {
       primaryCta: { _type: "cta", ...hero.primaryCta },
       secondaryCta: { _type: "cta", ...hero.secondaryCta },
       background: await image(hero.background),
-      metrics: keyed(
-        hero.metrics.map((metric) => ({ _type: "metric", ...metric })),
-        "metric",
-      ),
     }),
   );
 
@@ -153,9 +199,9 @@ async function buildDocuments(): Promise<SanityDoc[]> {
         aboutImages.filter((entry): entry is Record<string, unknown> => Boolean(entry)),
         "image",
       ),
-      metrics: keyed(
-        about.metrics.map((metric) => ({ _type: "metric", ...metric })),
-        "metric",
+      details: keyed(
+        about.details.map((row) => ({ _type: "detailRow", ...row })),
+        "detail",
       ),
     }),
   );
@@ -188,6 +234,25 @@ async function buildDocuments(): Promise<SanityDoc[]> {
         "detail",
       ),
       formSubjects: fallbackContact.formSubjects,
+      enquiryChecklist: fallbackContact.enquiryChecklist,
+    }),
+  );
+
+  documents.push(
+    clean({
+      _id: "privacyPolicy",
+      _type: "privacyPolicy",
+      heading: fallbackPrivacyPolicy.heading,
+      updated: fallbackPrivacyPolicy.updated,
+      intro: fallbackPrivacyPolicy.intro,
+      sections: keyed(
+        fallbackPrivacyPolicy.sections.map((section) => ({
+          _type: "policySection",
+          ...section,
+        })),
+        "section",
+      ),
+      seo: seoBlock(fallbackPrivacyPolicy.seo),
     }),
   );
 

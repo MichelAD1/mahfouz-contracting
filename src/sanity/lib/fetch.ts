@@ -5,26 +5,32 @@ import {
   CLOSING_CTA_QUERY,
   CONTACT_QUERY,
   HOME_QUERY,
+  PRIVACY_POLICY_QUERY,
   PROCESS_QUERY,
   PROJECTS_QUERY,
   PROJECT_QUERY,
   PROJECT_SLUGS_QUERY,
+  SECTION_COPY_QUERY,
   SERVICES_QUERY,
   SITE_FRAME_QUERY,
 } from "./queries";
 import {
   fallbackContact,
   fallbackHome,
+  fallbackPrivacyPolicy,
   fallbackProjectDetails,
+  fallbackSectionCopy,
 } from "@/sanity/fallback/content";
 import type {
   About,
   ClosingCta,
   Contact,
   HomePageContent,
+  PrivacyPolicy,
   ProcessStep,
   Project,
   ProjectFull,
+  SectionCopy,
   Service,
   SiteFrame,
 } from "./types";
@@ -63,6 +69,43 @@ function mergeObject<T extends object>(base: T, incoming: unknown): T {
 
   for (const [key, value] of Object.entries(incoming as Record<string, unknown>)) {
     if (!isEmpty(value)) merged[key] = value;
+  }
+
+  return merged as T;
+}
+
+
+/** A plain object: not null, and not an array. */
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * `mergeObject`, one level deeper, for documents made of nested copy.
+ *
+ * The page copy holds a label, a heading, a lead and a link label together per
+ * section. Merged at the top level only, an editor who rewrites a heading and
+ * leaves the lead empty publishes `{ heading }` - which replaces the whole
+ * section and takes the lead off the page. That is exactly the trap
+ * `mergeObject` exists to close, one level down.
+ *
+ * It stops here for the same reason `mergeObject` stops above: below this are
+ * images and links, where half of one and half of another is worse than either
+ * whole. Only documents that are copy all the way down use this.
+ */
+function mergeCopy<T extends object>(base: T, incoming: unknown): T {
+  if (!isPlainObject(incoming)) return base;
+
+  const merged: Record<string, unknown> = { ...(base as Record<string, unknown>) };
+
+  for (const [key, value] of Object.entries(incoming)) {
+    const current = merged[key];
+
+    if (isPlainObject(current) && isPlainObject(value)) {
+      merged[key] = mergeObject(current, value);
+    } else if (!isEmpty(value)) {
+      merged[key] = value;
+    }
   }
 
   return merged as T;
@@ -169,6 +212,25 @@ export const getSiteFrame = cache(
     ),
 );
 
+/**
+ * The copy that used to live in the components.
+ *
+ * Cached for the same reason as `getSiteFrame`: `generateMetadata` and the
+ * page body both ask for it inside one render, and without this every route
+ * would run the query twice.
+ */
+export const getSectionCopy = cache(
+  (): Promise<SectionCopy> =>
+    fetchOrFallback(
+      "section copy",
+      SECTION_COPY_QUERY,
+      {},
+      "sectionCopy",
+      fallbackSectionCopy,
+      (result) => mergeCopy(fallbackSectionCopy, result),
+    ),
+);
+
 export function getAbout(): Promise<About> {
   return fetchOrFallback(
     "about",
@@ -212,6 +274,21 @@ export function getProcess(): Promise<ProcessStep[]> {
     fallbackHome.process,
     (result) =>
       Array.isArray(result) && result.length > 0 ? (result as ProcessStep[]) : null,
+  );
+}
+
+/**
+ * The privacy policy. Merged rather than replaced for the usual reason: a
+ * half-saved policy that silently drops a section is worse than a stale one.
+ */
+export function getPrivacyPolicy(): Promise<PrivacyPolicy> {
+  return fetchOrFallback(
+    "privacy policy",
+    PRIVACY_POLICY_QUERY,
+    {},
+    "privacyPolicy",
+    fallbackPrivacyPolicy,
+    (result) => mergeCopy(fallbackPrivacyPolicy, result),
   );
 }
 

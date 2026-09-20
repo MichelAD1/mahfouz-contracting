@@ -18,10 +18,13 @@ export function Hero({
   hero,
   settings,
   services,
+  stripLabel,
 }: {
   hero: HeroContent;
   settings: SiteSettings;
   services: Service[];
+  /** The line above the division strip. */
+  stripLabel: string;
 }) {
   const showPhoto = hasImage(hero.background);
 
@@ -124,7 +127,7 @@ export function Hero({
         </div>
       </div>
 
-      <DivisionStrip services={services} settings={settings} />
+      <DivisionStrip services={services} settings={settings} label={stripLabel} />
     </section>
   );
 }
@@ -146,9 +149,11 @@ export function Hero({
 function DivisionStrip({
   services,
   settings,
+  label,
 }: {
   services: Service[];
   settings: SiteSettings;
+  label: string;
 }) {
   if (services.length === 0) return null;
 
@@ -158,9 +163,7 @@ function DivisionStrip({
       style={{ animationDelay: "1.05s" }}
     >
       <div className="shell">
-        <p className="pt-4 t-meta text-steel-light lg:pt-5">
-          Five divisions, one point of responsibility
-        </p>
+        <p className="pt-4 t-meta text-steel-light lg:pt-5">{label}</p>
 
         {/*
          * Rules are placed by nth-child rather than by index, because the

@@ -28,45 +28,6 @@ export const imageWithAlt = defineType({
   ],
 });
 
-export const metric = defineType({
-  name: "metric",
-  title: "Metric",
-  type: "object",
-  fields: [
-    defineField({
-      name: "figure",
-      title: "Figure",
-      type: "string",
-      description: "What is displayed, e.g. 5 or 24/7.",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "label",
-      title: "Label",
-      type: "string",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "note",
-      title: "Note",
-      type: "string",
-      description: "Optional supporting line beneath the label.",
-    }),
-    defineField({
-      name: "countTo",
-      title: "Count up to",
-      type: "number",
-      description:
-        "Set for numeric figures to animate a counter. Leave empty for figures like 24/7.",
-    }),
-    defineField({ name: "prefix", type: "string" }),
-    defineField({ name: "suffix", type: "string" }),
-  ],
-  preview: {
-    select: { title: "figure", subtitle: "label" },
-  },
-});
-
 export const cta = defineType({
   name: "cta",
   title: "Call to action",
@@ -133,4 +94,117 @@ export const seo = defineType({
   ],
 });
 
-export const objects = [imageWithAlt, metric, cta, detailRow, seo];
+export const sectionIntro = defineType({
+  name: "sectionIntro",
+  title: "Section",
+  type: "object",
+  options: { collapsible: true, collapsed: true },
+  fields: [
+    defineField({
+      name: "label",
+      title: "Margin label",
+      type: "string",
+      description:
+        "The small label in the sheet's left margin, e.g. Capabilities. Not every section has one.",
+    }),
+    defineField({ name: "heading", type: "string" }),
+    defineField({ name: "lead", type: "text", rows: 3 }),
+    defineField({
+      name: "linkLabel",
+      title: "Link label",
+      type: "string",
+      description:
+        "The wording on the link out of this section, e.g. All projects. Clear it to remove the link; where it goes is set in code.",
+    }),
+  ],
+  preview: { select: { title: "heading", subtitle: "label" } },
+});
+
+export const enquiryForm = defineType({
+  name: "enquiryForm",
+  title: "Enquiry form",
+  type: "object",
+  options: { collapsible: true, collapsed: true },
+  fields: [
+    defineField({ name: "nameLabel", title: "Name", type: "string" }),
+    defineField({ name: "companyLabel", title: "Company", type: "string" }),
+    defineField({ name: "emailLabel", title: "Email", type: "string" }),
+    defineField({ name: "phoneLabel", title: "Phone", type: "string" }),
+    defineField({ name: "subjectLabel", title: "Enquiry type", type: "string" }),
+    defineField({
+      name: "subjectPlaceholder",
+      title: "Enquiry type placeholder",
+      type: "string",
+      description: "The unselected option, e.g. Select one.",
+    }),
+    defineField({ name: "messageLabel", title: "Message", type: "string" }),
+    defineField({ name: "submitLabel", title: "Submit button", type: "string" }),
+    defineField({
+      name: "submittingLabel",
+      title: "Submit button, while sending",
+      type: "string",
+    }),
+    defineField({
+      name: "successLead",
+      title: "After a successful send",
+      type: "text",
+      rows: 3,
+      description:
+        "The line under the thank-you. What the visitor is told went wrong is written in code, because some of it reports a fault rather than a message.",
+    }),
+  ],
+});
+
+export const contactDirect = defineType({
+  name: "contactDirect",
+  title: "Beside the form",
+  type: "object",
+  options: { collapsible: true, collapsed: true },
+  fields: [
+    defineField({
+      name: "formLabel",
+      title: "Margin label",
+      type: "string",
+      description: "The small label in the sheet margin beside the form.",
+    }),
+    defineField({ name: "heading", type: "string" }),
+    defineField({ name: "officeLabel", title: "Office label", type: "string" }),
+    defineField({ name: "emailLabel", title: "Email label", type: "string" }),
+    defineField({
+      name: "checklistLabel",
+      title: "What-to-send heading",
+      type: "string",
+    }),
+  ],
+});
+
+export const policySection = defineType({
+  name: "policySection",
+  title: "Section",
+  type: "object",
+  fields: [
+    defineField({
+      name: "heading",
+      type: "string",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "body",
+      type: "array",
+      of: [{ type: "text", rows: 4 }],
+      description: "One entry per paragraph.",
+    }),
+  ],
+  preview: { select: { title: "heading" } },
+});
+
+export const objects = [
+  imageWithAlt,
+  cta,
+  detailRow,
+  seo,
+  sectionIntro,
+  enquiryForm,
+  contactDirect,
+  policySection,
+];

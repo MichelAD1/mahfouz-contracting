@@ -13,11 +13,12 @@ import type { Service } from "@/sanity/lib/types";
  * viewport instead, so it reads as depth for as long as it is on screen rather
  * than as something that happens once and stops.
  *
- * The distances differ so five stacked blocks do not travel as one sheet, and
- * all stay inside the range Parallax is built for — past ~100px it stops being
- * depth and starts being an effect.
+ * The distances differ so five stacked blocks do not travel as one sheet. All
+ * came down about 28% from 50-86: the ceiling that matters turned out to be
+ * well under the ~100px the module warns about, because a 4:5 photograph at
+ * this size makes every pixel of travel legible.
  */
-const DEPTH = [58, 74, 50, 86, 66] as const;
+const DEPTH = [42, 54, 36, 62, 48] as const;
 
 /**
  * One division, in full.

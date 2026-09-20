@@ -17,6 +17,10 @@ const structure: StructureResolver = (S) =>
         .title("Site settings")
         .id("siteSettings")
         .child(S.document().schemaType("siteSettings").documentId("siteSettings")),
+      S.listItem()
+        .title("Page copy")
+        .id("sectionCopy")
+        .child(S.document().schemaType("sectionCopy").documentId("sectionCopy")),
       S.divider(),
       S.listItem()
         .title("Home page")
@@ -52,6 +56,12 @@ const structure: StructureResolver = (S) =>
         .title("Contact")
         .id("contact")
         .child(S.document().schemaType("contact").documentId("contact")),
+      S.listItem()
+        .title("Privacy policy")
+        .id("privacyPolicy")
+        .child(
+          S.document().schemaType("privacyPolicy").documentId("privacyPolicy"),
+        ),
     ]);
 
 export default defineConfig({

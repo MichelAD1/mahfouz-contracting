@@ -60,8 +60,27 @@
 
   html {
     -webkit-text-size-adjust: 100%;
-    scroll-behavior: smooth;
   }
+
+  /*
+   * Scrolling is instant, everywhere. There is deliberately no
+   * `scroll-behavior: smooth` on this element.
+   *
+   * It used to be here unconditionally, and the router inherits it: changing
+   * page while scrolled down did not jump to the top, it *animated* there.
+   * Traced at 870ms from 2000px — a long time to watch a page you have
+   * already left slide past, on every single navigation.
+   *
+   * `html:has(:target)` was tried first, to keep the glide for in-page
+   * anchors while letting route changes jump. It does nothing: the style
+   * recalculation lands after the browser has already performed the fragment
+   * scroll, so the anchor jumps anyway. Measured, both halves — keeping a
+   * rule that only looks like it works is worse than not having one.
+   *
+   * So anchors jump too, which is the browser default and what most of the
+   * web does. The reduced-motion override that used to sit below is gone
+   * with it: there is nothing left to turn off.
+   */
 
   body {
     background: var(--color-paper);
@@ -100,11 +119,6 @@
     max-width: 100%;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
-    }
-  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -250,29 +264,27 @@
   }
 }
 
-@keyframes wipe-up {
-  from {
-    clip-path: inset(100% 0 0 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
+/* The page-load entrance: the hero and the inner-page plates, the only motion
+   on the site that is timed rather than scrubbed, because above the fold there
+   is no scroll to scrub against.
 
+   1.35s, unchanged. It went to 1.6s alongside the scroll reveals on the theory
+   that timed and scrubbed motion should read as one system, and that was the
+   wrong theory: the heroes were never the complaint, and they are the first
+   thing anyone waits through. The reveals below the fold are slower; this is
+   not.
+
+   `animate-wipe-up` sat beside it with no caller anywhere in src/ - the scroll
+   wipe in ImageReveal replaced it and the utility, its keyframes and its
+   reduced-motion branch were left behind. Removed. */
 @utility animate-rise {
   animation: rise 1.35s var(--ease-reveal) both;
 }
 
-@utility animate-wipe-up {
-  animation: wipe-up 1.6s var(--ease-reveal) both;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .animate-rise,
-  .animate-wipe-up {
+  .animate-rise {
     animation: none;
     opacity: 1;
-    clip-path: none;
     transform: none;
   }
 }

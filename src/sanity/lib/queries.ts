@@ -13,9 +13,11 @@ const IMAGE = groq`{
   slotHint
 }`;
 
-const METRIC = groq`{ figure, label, note, countTo, prefix, suffix }`;
-
 const CTA = groq`{ label, href }`;
+
+const SEO = groq`{ title, description, "image": image${IMAGE} }`;
+
+const SECTION_INTRO = groq`{ label, heading, lead, linkLabel }`;
 
 /**
  * A division, dereferenced from the service it points at.
@@ -63,14 +65,13 @@ export const HOME_QUERY = groq`{
     headingLines, lead,
     "primaryCta": primaryCta${CTA},
     "secondaryCta": secondaryCta${CTA},
-    "background": background${IMAGE},
-    "metrics": metrics[]${METRIC}
+    "background": background${IMAGE}
   },
   "about": *[_type == "about"][0]{
     sheet, statement, body,
     "cta": cta${CTA},
     "images": images[]${IMAGE},
-    "metrics": metrics[]${METRIC}
+    "details": details[]{ label, value }
   },
   "services": *[_type == "service"]|order(order asc)${SERVICE},
   "projects": *[_type == "project"]|order(featured desc, order asc)${PROJECT_CARD},
@@ -118,7 +119,7 @@ export const ABOUT_QUERY = groq`*[_type == "about"][0]{
   sheet, statement, body,
   "cta": cta${CTA},
   "images": images[]${IMAGE},
-  "metrics": metrics[]${METRIC}
+  "details": details[]{ label, value }
 }`;
 
 export const PROJECT_SLUGS_QUERY = groq`*[_type == "project" && defined(slug.current)].slug.current`;
@@ -141,6 +142,44 @@ export const PROJECT_QUERY = groq`*[_type == "project" && slug.current == $slug]
 export const CONTACT_QUERY = groq`*[_type == "contact"][0]{
   heading, description,
   "details": details[]{ label, value },
-  formSubjects, recipientEmail,
+  formSubjects, enquiryChecklist, recipientEmail,
   map{ latitude, longitude, label }
+}`;
+
+/**
+ * The page copy, in one document.
+ *
+ * Read by `generateMetadata` and by the page body on the same render, which is
+ * why its fetcher is wrapped in React `cache` - otherwise every route would
+ * run this twice.
+ */
+export const SECTION_COPY_QUERY = groq`*[_type == "sectionCopy"][0]{
+  divisionStrip,
+  "capabilities": capabilities${SECTION_INTRO},
+  "selectedWork": selectedWork${SECTION_INTRO},
+  "aboutHero": aboutHero${SECTION_INTRO},
+  "aboutProcess": aboutProcess${SECTION_INTRO},
+  "servicesHero": servicesHero${SECTION_INTRO},
+  "projectsHero": projectsHero${SECTION_INTRO},
+  "projectsMore": projectsMore${SECTION_INTRO},
+  "projectsEmpty": projectsEmpty${SECTION_INTRO},
+  "notFound": notFound${SECTION_INTRO},
+  projectsAllFilter,
+  enquiryForm{
+    nameLabel, companyLabel, emailLabel, phoneLabel,
+    subjectLabel, subjectPlaceholder, messageLabel,
+    submitLabel, submittingLabel, successLead
+  },
+  contactDirect{ formLabel, heading, officeLabel, emailLabel, checklistLabel },
+  "homeSeo": homeSeo${SEO},
+  "aboutSeo": aboutSeo${SEO},
+  "servicesSeo": servicesSeo${SEO},
+  "projectsSeo": projectsSeo${SEO},
+  "contactSeo": contactSeo${SEO}
+}`;
+
+export const PRIVACY_POLICY_QUERY = groq`*[_type == "privacyPolicy"][0]{
+  heading, updated, intro,
+  sections[]{ heading, body },
+  "seo": seo${SEO}
 }`;

@@ -23,16 +23,6 @@ export type SiteImage = {
   slotHint?: string;
 };
 
-export type Metric = {
-  figure: string;
-  label: string;
-  note?: string;
-  /** Drives the animated counter. Omit for non-numeric figures. */
-  countTo?: number;
-  prefix?: string;
-  suffix?: string;
-};
-
 export type Cta = {
   label: string;
   href: string;
@@ -64,7 +54,6 @@ export type Hero = {
   primaryCta: Cta;
   secondaryCta: Cta;
   background: SiteImage;
-  metrics: Metric[];
 };
 
 export type About = {
@@ -73,7 +62,13 @@ export type About = {
   body: string[];
   cta: Cta;
   images: SiteImage[];
-  metrics: Metric[];
+  /**
+   * The title block over the photograph. Label/value rows rather than
+   * counters: this carried "5 Divisions" and "2 Countries", which is the
+   * pattern the hero band was cut for. Named, the same space says which
+   * divisions and which countries.
+   */
+  details: DetailRow[];
 };
 
 export type Service = {
@@ -190,6 +185,8 @@ export type Contact = {
   details?: DetailRow[];
   /** Populates the enquiry-type field on the form. */
   formSubjects?: string[];
+  /** What makes an enquiry answerable, listed under the contact block. */
+  enquiryChecklist?: string[];
   /**
    * Where submissions are delivered. Kept in the CMS rather than in code so
    * the client can change their own enquiry inbox without a deploy.
@@ -208,4 +205,100 @@ export type HomePageContent = {
   process: ProcessStep[];
   partners: Partner[];
   closingCta: ClosingCta;
+};
+
+/** Search-and-sharing wording for one route. */
+export type Seo = {
+  title?: string;
+  description?: string;
+  image?: SiteImage;
+};
+
+/**
+ * A section's furniture: the label in the sheet margin, the heading, the lead
+ * under it, and the wording on the link out of it. No section uses all four.
+ */
+export type SectionIntro = {
+  label?: string;
+  heading: string;
+  lead?: string;
+  linkLabel?: string;
+};
+
+export type EnquiryFormCopy = {
+  nameLabel: string;
+  companyLabel: string;
+  emailLabel: string;
+  phoneLabel: string;
+  subjectLabel: string;
+  subjectPlaceholder: string;
+  messageLabel: string;
+  submitLabel: string;
+  submittingLabel: string;
+  successLead: string;
+};
+
+/** The column beside the enquiry form. */
+export type ContactDirectCopy = {
+  /** The margin label beside the form, in the sheet's left column. */
+  formLabel: string;
+  heading: string;
+  officeLabel: string;
+  emailLabel: string;
+  checklistLabel: string;
+};
+
+/**
+ * The copy that used to be typed into components.
+ *
+ * Until this existed the CMS held the content and the code held the furniture,
+ * which meant the client could change what a section said but not what it was
+ * called. Both are content; only one of them was editable.
+ *
+ * What is deliberately still in code: the wording of a failed send (some of it
+ * reports a fault rather than addressing a visitor), and the Open Graph card,
+ * which is drawn at build time and so would not follow a studio edit until the
+ * next deploy.
+ */
+export type SectionCopy = {
+  divisionStrip: string;
+  capabilities: SectionIntro;
+  selectedWork: SectionIntro;
+  aboutHero: SectionIntro;
+  aboutProcess: SectionIntro;
+  servicesHero: SectionIntro;
+  projectsHero: SectionIntro;
+  projectsMore: SectionIntro;
+  projectsEmpty: SectionIntro;
+  /** The 404. `label` is the margin label over the list of routes. */
+  notFound: SectionIntro;
+  projectsAllFilter: string;
+  enquiryForm: EnquiryFormCopy;
+  contactDirect: ContactDirectCopy;
+  /** Also the site-wide default, inherited by any page without its own. */
+  homeSeo: Seo;
+  aboutSeo: Seo;
+  servicesSeo: Seo;
+  projectsSeo: Seo;
+  contactSeo: Seo;
+};
+
+export type PolicySection = {
+  heading: string;
+  body: string[];
+};
+
+/**
+ * The privacy policy. `seo` sits on the document rather than in the page copy
+ * because this is the one route whose metadata belongs with its own text -
+ * the same place a replacement policy would arrive.
+ */
+export type PrivacyPolicy = {
+  heading: string;
+  /** ISO date, rendered in the sheet margin. */
+  updated?: string;
+  /** One entry per paragraph; the first becomes the lead under the heading. */
+  intro: string[];
+  sections: PolicySection[];
+  seo: Seo;
 };

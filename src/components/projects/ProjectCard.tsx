@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SiteImage } from "@/components/primitives/SiteImage";
+import { pad2 } from "@/lib/format";
 import type { Project } from "@/sanity/lib/types";
 
 /**
@@ -18,11 +19,6 @@ export function projectMeta(project: Project): string | null {
   if (project.location) parts.push(project.location);
 
   return parts.length > 0 ? parts.join(" — ") : null;
-}
-
-/** Two digits, so counts and index columns keep a fixed width. */
-export function pad2(value: number): string {
-  return String(Math.max(value, 0)).padStart(2, "0");
 }
 
 /** A card's position in the grid, numbered from 01 rather than 00. */

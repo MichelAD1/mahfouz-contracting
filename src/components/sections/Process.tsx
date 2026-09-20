@@ -31,20 +31,27 @@ const STAIR = [
 
 /**
  * Parallax travel per stage, increasing left to right. Equal depth across four
- * columns reads as one sheet sliding; unequal depth reads as four. Kept well
- * inside the range Parallax is built for — past ~100px it stops being depth and
- * starts being an effect.
+ * columns reads as one sheet sliding; unequal depth reads as four.
+ *
+ * Brought down about 28% from 46-94. These cards are the one place two vertical
+ * motions land on the same element — the card rises on its Reveal while the
+ * photograph inside it travels on its own — and at the old depths the two
+ * compounded into something that read as a rush rather than as depth.
  */
-const DEPTH = [46, 62, 78, 94] as const;
+const DEPTH = [32, 44, 56, 68] as const;
 
-export function Process({ steps }: { steps: ProcessStep[] }) {
+export function Process({
+  steps,
+  heading,
+}: {
+  steps: ProcessStep[];
+  heading: string;
+}) {
   if (steps.length === 0) return null;
 
   return (
     <div>
-      <h2 className="display-sentence t-h2 max-w-[21ch] text-ink">
-        Four stages, from brief to ongoing support
-      </h2>
+      <h2 className="display-sentence t-h2 max-w-[21ch] text-ink">{heading}</h2>
 
       <Stagger
         className="mt-[clamp(2.5rem,5vw,4rem)] grid gap-x-[clamp(1.5rem,3vw,2.5rem)] gap-y-12 sm:grid-cols-2 lg:grid-cols-4"

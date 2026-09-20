@@ -4,7 +4,7 @@ import { useId, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { SiteImage } from "@/components/primitives/SiteImage";
 import { EASE } from "@/components/motion/ease";
-import type { Service } from "@/sanity/lib/types";
+import type { SectionIntro, Service } from "@/sanity/lib/types";
 
 /**
  * The strongest idea in the original design — a sticky image panel driven by
@@ -25,7 +25,13 @@ import type { Service } from "@/sanity/lib/types";
 const PANEL_HEIGHT = "min(30rem, calc(100svh - 12rem))";
 const HEADER_HEIGHT = "5rem";
 
-export function Capabilities({ services }: { services: Service[] }) {
+export function Capabilities({
+  services,
+  copy,
+}: {
+  services: Service[];
+  copy: SectionIntro;
+}) {
   const [openIndex, setOpenIndex] = useState(0);
   const baseId = useId();
 
@@ -39,12 +45,11 @@ export function Capabilities({ services }: { services: Service[] }) {
     <div className="grid gap-[clamp(2rem,4vw,4rem)] lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:items-start">
       <div>
         <h2 className="display-sentence t-h2 max-w-[19ch] text-ink">
-          Five divisions, one scope of responsibility
+          {copy.heading}
         </h2>
-        <p className="mt-6 max-w-[46ch] t-body text-steel">
-          Each division works in-house and to a single project program, so the
-          scopes meet where they are supposed to.
-        </p>
+        {copy.lead ? (
+          <p className="mt-6 max-w-[46ch] t-body text-steel">{copy.lead}</p>
+        ) : null}
 
         <ul className="mt-[clamp(2rem,3.5vw,3rem)] border-t border-ink">
           {services.map((service, index) => {
