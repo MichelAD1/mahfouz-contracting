@@ -102,7 +102,7 @@ export const fallbackHome: HomePageContent = {
 
   hero: {
     headingLines: ["Engineering", "solutions.", "Built to last."],
-    lead: "Integrated electrical, mechanical, IT and automation works for commercial, industrial and institutional clients — engineered, installed and maintained in-house.",
+    lead: "Integrated electrical, mechanical, IT and automation works for commercial, industrial and institutional clients - engineered, installed and maintained in-house.",
     primaryCta: { label: "Request a Quote", href: "/contact" },
     secondaryCta: { label: "See Our Work", href: "/projects" },
     background: {
@@ -157,7 +157,7 @@ export const fallbackHome: HomePageContent = {
       shortTitle: "Engineering",
       slug: "engineering-design-consultancy",
       shortDescription:
-        "Coordinated MEP and IT design — load calculations, BOQs, tender documents and BIM development, issued before work starts on site.",
+        "Coordinated MEP and IT design - load calculations, BOQs, tender documents and BIM development, issued before work starts on site.",
       features: [
         "Mechanical, electrical and plumbing design",
         "IT and low-voltage system planning",
@@ -613,7 +613,7 @@ export const fallbackSectionCopy: SectionCopy = {
     submitLabel: "Send enquiry",
     submittingLabel: "Sending…",
     successLead:
-      "We read every enquiry ourselves — you will get an answer from an engineer, not an autoresponder.",
+      "We read every enquiry ourselves - you will get an answer from an engineer, not an autoresponder.",
   },
 
   contactDirect: {
@@ -630,7 +630,7 @@ export const fallbackSectionCopy: SectionCopy = {
    * page that has not set its own inherits.
    */
   homeSeo: {
-    title: "Mahfouz Contracting — Engineering, contracting and maintenance",
+    title: "Mahfouz Contracting - Engineering, contracting and maintenance",
     description:
       "Integrated electrical, mechanical, IT and automation works for commercial, industrial and institutional clients. Engineered, installed and maintained in-house.",
   },
@@ -702,7 +702,7 @@ export const fallbackPrivacyPolicy: PrivacyPolicy = {
     {
       heading: "What happens to an enquiry",
       body: [
-        "A submitted form is composed into an email and sent to our own inbox. It is not written to a database, and this website keeps no record of it — the email is the only copy.",
+        "A submitted form is composed into an email and sent to our own inbox. It is not written to a database, and this website keeps no record of it - the email is the only copy.",
         "The service that delivers it handles the message in transit in order to do so. Once it arrives it sits in our inbox like any other correspondence, and it is used to answer you and for nothing else.",
       ],
     },

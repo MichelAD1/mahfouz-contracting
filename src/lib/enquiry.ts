@@ -87,7 +87,7 @@ export function isTooFast(startedAt: string | null, now = Date.now()): boolean {
 }
 
 export function composeSubject(values: EnquiryValues): string {
-  return `Website enquiry — ${values.subject || "General"} — ${values.name}`;
+  return `Website enquiry - ${values.subject || "General"} - ${values.name}`;
 }
 
 export function composeBody(values: EnquiryValues): string {
