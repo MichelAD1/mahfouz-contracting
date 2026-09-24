@@ -3,7 +3,9 @@ import { Archivo, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { MotionProvider } from "@/components/motion/MotionProvider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { getSectionCopy, getSiteFrame } from "@/sanity/lib/fetch";
+import { getSiteFrame } from "@/sanity/lib/fetch";
+import { hasImage, isVector, sanityImageUrl } from "@/sanity/lib/image";
+import type { SiteImage } from "@/sanity/lib/types";
 import { siteUrl } from "@/lib/site";
 import { titleTemplate } from "@/lib/metadata";
 import { buildBusinessJsonLd, serializeJsonLd } from "@/lib/structured-data";
@@ -36,30 +38,47 @@ const plexMono = IBM_Plex_Mono({
 });
 
 /**
- * The site's defaults, out of the CMS.
- *
- * `homeSeo` is doing two jobs: it is the home page's own metadata, and it is
- * what every other route inherits when it has not set its own. That is why
- * the home page declares nothing but a canonical - a title set there would be
- * run through the template below and print the company name twice.
+ * The browser-tab icon from Site settings, as PNGs cut square by the CDN.
+ * Without one, nothing is declared and browsers fetch /favicon.ico as they
+ * always have. An SVG is handed over as it is: browsers draw it at any size,
+ * but it cannot stand in as the home-screen icon.
+ */
+function faviconIcons(favicon?: SiteImage): Metadata["icons"] {
+  if (!hasImage(favicon) || !favicon.url) return undefined;
+
+  if (isVector(favicon)) return { icon: [{ url: favicon.url, type: "image/svg+xml" }] };
+
+  const square = (size: number) =>
+    sanityImageUrl(favicon, { width: size, height: size, format: "png" });
+
+  return {
+    icon: [
+      { url: square(32), sizes: "32x32", type: "image/png" },
+      { url: square(192), sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: square(180), sizes: "180x180", type: "image/png" }],
+  };
+}
+
+/**
+ * The site's defaults, out of Site settings: the title every page's template
+ * wraps, the description any page without its own inherits, and the icon.
  *
  * No canonical here on purpose. A canonical in the root layout is inherited
  * by every page, so each one would declare itself a duplicate of the home
  * page. Canonicals are set per page instead.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const [{ settings }, copy] = await Promise.all([
-    getSiteFrame(),
-    getSectionCopy(),
-  ]);
+  const { settings } = await getSiteFrame();
 
-  const title = copy.homeSeo.title ?? settings.companyName;
-  const description = copy.homeSeo.description;
+  const title = settings.seo.title ?? settings.companyName;
+  const description = settings.seo.description;
 
   return {
     metadataBase: new URL(siteUrl),
     title: { default: title, template: titleTemplate(settings.companyName) },
     description,
+    icons: faviconIcons(settings.favicon),
     openGraph: {
       type: "website",
       siteName: settings.companyName,

@@ -1,67 +1,68 @@
 import { defineConfig } from "sanity";
-import { structureTool, type StructureResolver } from "sanity/structure";
+import {
+  structureTool,
+  type StructureBuilder,
+  type StructureResolver,
+} from "sanity/structure";
 import { visionTool } from "@sanity/vision";
 import { schemaTypes, singletonTypes } from "@/sanity/schemas";
-import { apiVersion, dataset, projectId } from "@/sanity/lib/client";
+import { apiVersion, dataset, projectId } from "@/sanity/lib/env";
+
+/** A singleton opens straight into its one document. */
+const singleton = (S: StructureBuilder, type: string, title: string) =>
+  S.listItem()
+    .title(title)
+    .id(type)
+    .child(S.document().schemaType(type).documentId(type).title(title));
+
+/** A collection sorted the way the site sorts it, not alphabetically. */
+const ordered = (S: StructureBuilder, type: string, title: string) =>
+  S.listItem()
+    .title(title)
+    .id(type)
+    .schemaType(type)
+    .child(
+      S.documentTypeList(type)
+        .title(title)
+        .defaultOrdering([{ field: "order", direction: "asc" }]),
+    );
 
 /**
- * Studio structure: singletons open straight into their document, collections
- * open as lists. The home page sections are grouped so an editor sees the page
- * in the order it renders.
+ * Studio structure. It reads like the site: the settings every page shares,
+ * then the pages in navigation order, then the things the pages are built from.
  */
 const structure: StructureResolver = (S) =>
   S.list()
     .title("Content")
     .items([
+      singleton(S, "siteSettings", "Site settings"),
       S.listItem()
-        .title("Site settings")
-        .id("siteSettings")
-        .child(S.document().schemaType("siteSettings").documentId("siteSettings")),
-      S.listItem()
-        .title("Page copy")
-        .id("sectionCopy")
-        .child(S.document().schemaType("sectionCopy").documentId("sectionCopy")),
-      S.divider(),
-      S.listItem()
-        .title("Home page")
-        .id("home")
+        .title("Pages")
+        .id("pages")
         .child(
           S.list()
-            .title("Home page")
+            .title("Pages")
             .items([
-              S.listItem()
-                .title("Hero")
-                .id("hero")
-                .child(S.document().schemaType("hero").documentId("hero")),
-              S.listItem()
-                .title("About")
-                .id("about")
-                .child(S.document().schemaType("about").documentId("about")),
-              S.listItem()
-                .title("Closing banner")
-                .id("closingCta")
-                .child(
-                  S.document().schemaType("closingCta").documentId("closingCta"),
-                ),
+              singleton(S, "homePage", "Home"),
+              singleton(S, "projectsPage", "Projects"),
+              singleton(S, "servicesPage", "Services"),
+              singleton(S, "aboutPage", "About"),
+              singleton(S, "contact", "Contact"),
+              S.divider(),
+              singleton(S, "privacyPolicy", "Privacy policy"),
+              singleton(S, "notFoundPage", "404 page"),
             ]),
         ),
+      singleton(S, "closingCta", "Closing banner"),
       S.divider(),
-      S.documentTypeListItem("service").title("Services"),
       S.documentTypeListItem("project").title("Projects"),
-      S.documentTypeListItem("process").title("Process steps"),
-      S.documentTypeListItem("testimonial").title("Testimonials"),
-      S.documentTypeListItem("partner").title("Partners"),
+      ordered(S, "projectTag", "Project tags"),
+      ordered(S, "projectCategory", "Project categories"),
       S.divider(),
-      S.listItem()
-        .title("Contact")
-        .id("contact")
-        .child(S.document().schemaType("contact").documentId("contact")),
-      S.listItem()
-        .title("Privacy policy")
-        .id("privacyPolicy")
-        .child(
-          S.document().schemaType("privacyPolicy").documentId("privacyPolicy"),
-        ),
+      ordered(S, "service", "Services"),
+      ordered(S, "process", "Process steps"),
+      ordered(S, "partner", "Partners"),
+      S.documentTypeListItem("testimonial").title("Testimonials"),
     ]);
 
 export default defineConfig({

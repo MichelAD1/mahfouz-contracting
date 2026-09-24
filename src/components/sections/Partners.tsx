@@ -105,7 +105,7 @@ function PartnerMark({ partner }: { partner: Partner }) {
   }
 
   const logo = partner.logo;
-  const src = logo.url ? sanityImageUrl(logo.url, { width: 320 }) : imageSrc(logo)!;
+  const src = logo.url ? sanityImageUrl(logo, { width: 320 }) : imageSrc(logo)!;
   const ratio = logo.aspectRatio ?? 2.6;
   const height = logoHeight(ratio);
 

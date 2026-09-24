@@ -6,7 +6,13 @@ import { Reveal } from "@/components/motion/Reveal";
 import { hasImage } from "@/sanity/lib/image";
 import type { ClosingCta as ClosingCtaContent } from "@/sanity/lib/types";
 
-/** The third and last parallax surface on the page. */
+/**
+ * The third and last parallax surface on the page.
+ *
+ * The shared banner from the studio, with whatever the page's own document
+ * overrides already laid over it - so this renders one resolved banner and
+ * does not know which page it is on.
+ */
 export function ClosingCta({ content }: { content: ClosingCtaContent }) {
   const showPhoto = hasImage(content.background);
 
@@ -45,14 +51,18 @@ export function ClosingCta({ content }: { content: ClosingCtaContent }) {
           <h2 className="display-sentence t-plate max-w-[17ch] text-paper-bright">
             {content.heading}
           </h2>
-          <p className="mt-6 max-w-[44ch] t-lead text-paper-bright/70">
-            {content.lead}
-          </p>
-          <div className="mt-10">
-            <ButtonLink href={content.cta.href} tone="onInk" variant="solid" withArrow>
-              {content.cta.label}
-            </ButtonLink>
-          </div>
+          {content.lead ? (
+            <p className="mt-6 max-w-[44ch] t-lead text-paper-bright/70">
+              {content.lead}
+            </p>
+          ) : null}
+          {content.cta ? (
+            <div className="mt-10">
+              <ButtonLink href={content.cta.href} tone="onInk" variant="solid" withArrow>
+                {content.cta.label}
+              </ButtonLink>
+            </div>
+          ) : null}
         </Reveal>
       </div>
     </section>

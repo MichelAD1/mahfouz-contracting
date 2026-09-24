@@ -1,7 +1,11 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { BlueprintPlate } from "@/components/primitives/BlueprintPlate";
+import { ButtonRow } from "@/components/primitives/ButtonRow";
 import { SiteImage } from "@/components/primitives/SiteImage";
-import type { SiteImage as SiteImageType } from "@/sanity/lib/types";
+import { headingLines } from "@/lib/text";
+import { hasImage } from "@/sanity/lib/image";
+import type { Button, SiteImage as SiteImageType } from "@/sanity/lib/types";
 
 export type Crumb = {
   label: string;
@@ -37,26 +41,30 @@ export function PageHero({
   heading,
   lead,
   image,
+  buttons = [],
   size = "medium",
   seed = 0,
 }: {
   crumbs: Crumb[];
   /** The project's number, shown beside the title on a detail page. */
   index?: string;
+  /** Line breaks typed in the studio are kept. */
   heading: string;
   lead?: string;
   image?: SiteImageType | null;
+  /** Up to two, from the page's document. */
+  buttons?: Button[];
   size?: keyof typeof SIZES;
   /** Shifts the blueprint wash, so two pages do not read as the same tile. */
   seed?: number;
 }) {
-  const hasImage = Boolean(image && (image.url || image.src));
+  const lines = headingLines(heading);
 
   return (
     <section
       className={`relative flex items-end overflow-hidden bg-ink text-paper-bright ${SIZES[size]}`}
     >
-      {hasImage && image ? (
+      {hasImage(image) ? (
         <>
           <div className="absolute inset-0">
             <SiteImage image={image} sizes="100vw" maxWidth={2000} priority />
@@ -74,7 +82,7 @@ export function PageHero({
         <nav aria-label="Breadcrumb" className="animate-rise" style={{ animationDelay: "0.05s" }}>
           <ol className="flex flex-wrap items-center gap-x-3 gap-y-1">
             {crumbs.map((crumb, crumbIndex) => (
-              <li key={crumb.label} className="flex items-center gap-3">
+              <li key={`${crumbIndex}-${crumb.label}`} className="flex items-center gap-3">
                 {crumbIndex > 0 ? (
                   <span aria-hidden="true" className="t-meta text-steel">
                     /
@@ -107,7 +115,12 @@ export function PageHero({
             </span>
           ) : null}
           <h1 className="display-sentence t-plate max-w-[18ch] text-paper-bright">
-            {heading}
+            {lines.map((line, lineIndex) => (
+              <Fragment key={`${lineIndex}-${line}`}>
+                {lineIndex > 0 ? <br /> : null}
+                {line}
+              </Fragment>
+            ))}
           </h1>
         </div>
 
@@ -119,6 +132,12 @@ export function PageHero({
             {lead}
           </p>
         ) : null}
+
+        <ButtonRow
+          buttons={buttons}
+          className="mt-8 animate-rise"
+          style={{ animationDelay: "0.48s" }}
+        />
       </div>
     </section>
   );

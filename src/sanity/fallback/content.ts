@@ -1,16 +1,40 @@
 import type {
-  Contact,
-  HomePageContent,
+  AboutPage,
+  ClosingCta,
+  ContactPage,
+  HomePage,
+  NotFoundPage,
+  Partner,
   PrivacyPolicy,
+  ProcessStep,
+  Project,
+  ProjectCategory,
   ProjectDivision,
   ProjectFull,
-  SectionCopy,
+  ProjectsPage,
+  ProjectTag,
+  Service,
+  ServicesPage,
+  SiteSettings,
 } from "@/sanity/lib/types";
 
 /**
- * Division tags, in the short form the project cards and the filter use. These
- * mirror the `service` documents by `_id`, so the same records come back once
- * the dataset is populated.
+ * Fallback content — used whenever no Sanity project is configured, when a
+ * document has not been created yet, and as the seed for the dataset.
+ *
+ * Everything here is sourced from the client's own material: the design canvas
+ * and the live site's REST API. Nothing is invented except where marked TODO.
+ * Theme-demo filler on the live site (the "Prism" brand name, lorem ipsum
+ * portfolio entries, placeholder emails, 0% counters) has been left out
+ * deliberately — see temp/PLAN.md §4 and §8.
+ *
+ * Imports from this module must stay type-only: `scripts/seed.ts` runs it
+ * through the Sanity CLI, outside Next.
+ */
+
+/**
+ * Divisions as they appear on a project, mirroring the `service` documents by
+ * `_id` so the same records come back once the dataset is populated.
  */
 const DIVISION = {
   engineering: {
@@ -41,417 +65,332 @@ const DIVISION = {
 } satisfies Record<string, ProjectDivision>;
 
 /**
- * Fallback content — used whenever no Sanity project is configured.
+ * Project tags: the filter buttons on /projects and the line under each card.
  *
- * Everything here is sourced from the client's own material: the design canvas
- * and the live site's REST API. Nothing is invented except where marked TODO.
- * Theme-demo filler on the live site (the "Prism" brand name, lorem ipsum
- * portfolio entries, placeholder emails, 0% counters) has been left out
- * deliberately — see temp/PLAN.md §4 and §8.
+ * They start out mirroring the divisions, because that is what the design
+ * canvas tags projects with. They are their own documents so the client can
+ * add a tag a division does not cover without creating a division for it.
  *
- * Once the Sanity project exists this module becomes the seed for the dataset.
+ * Ordered as the canvas orders its filter row.
  */
-export const fallbackHome: HomePageContent = {
-  settings: {
-    companyName: "Mahfouz Contracting",
-    shortName: "Mahfouz",
-    descriptor: "Contracting",
-    tagline: "Built right. Built to last.",
-    phones: [
-      { label: "Liberia", number: "+231 077 340 0671" },
-      { label: "Lebanon", number: "+961 3 246 171" },
-    ],
-    // TODO(client): the live site shows theme placeholders (info@mail.com,
-    // info@email.com). Confirm the real address before launch.
-    emails: ["info@mahfouzcontracting.com"],
-    address: {
-      lines: [
-        "Sink 14th Street",
-        "Bishop Roland J. Diggs Building",
-        "Monrovia, Montserrado County",
-        "Liberia",
-      ],
-    },
-    // TODO(client): the live site's social links point at AxiomThemes accounts.
-    socials: [],
-    /**
-     * Projects and About are swapped from the obvious order. The work comes
-     * before the write-up: a contractor is judged on what they have built,
-     * and About is the page people read last, if at all.
-     *
-     * This list is the one source. The header, the footer and the 404's
-     * index all read it, so the order is changed here and in the studio,
-     * and nowhere else.
-     */
-    nav: [
-      { label: "Home", href: "/" },
-      { label: "Projects", href: "/projects" },
-      { label: "Services", href: "/services" },
-      { label: "About", href: "/about" },
-      { label: "Contact", href: "/contact" },
-    ],
-    /**
-     * Shown as the line under the home hero, in place of a "6 standards worked
-     * to" metric. The count was meaningless — nobody cares that it is six, they
-     * care that it is these six, and to the people who evaluate contractors
-     * these read as credentials.
-     */
-    standards: ["IEC", "NEC", "BS", "NFPA", "ASHRAE", "SMACNA"],
-    footerNote: "Engineering, contracting and maintenance",
-  },
+const TAG = {
+  electrical: { _id: "tag-electrical", title: "Electrical", slug: "electrical" },
+  mechanical: { _id: "tag-mechanical", title: "Mechanical", slug: "mechanical" },
+  it: { _id: "tag-it-automation", title: "IT & Automation", slug: "it-automation" },
+  maintenance: { _id: "tag-maintenance", title: "Maintenance", slug: "maintenance" },
+  engineering: { _id: "tag-engineering", title: "Engineering", slug: "engineering" },
+} satisfies Record<string, ProjectTag>;
 
-  hero: {
-    headingLines: ["Engineering", "solutions.", "Built to last."],
-    lead: "Integrated electrical, mechanical, IT and automation works for commercial, industrial and institutional clients - engineered, installed and maintained in-house.",
-    primaryCta: { label: "Request a Quote", href: "/contact" },
-    secondaryCta: { label: "See Our Work", href: "/projects" },
-    background: {
-      src: "/images/hero-skyline.webp",
-      alt: "City skyline of high-rise towers seen from above at first light",
-      aspectRatio: 16 / 9,
-    },
-  },
+export const fallbackProjectTags: ProjectTag[] = [
+  TAG.electrical,
+  TAG.mechanical,
+  TAG.it,
+  TAG.maintenance,
+  TAG.engineering,
+];
 
-  about: {
-    sheet: "About",
-    statement: "Responsibility for the result stays in one place.",
-    body: [
-      "Mahfouz Contracting delivers integrated electrical, mechanical, IT and automation works for commercial, industrial and institutional clients. Design, supply, installation and commissioning are handled by our own divisions.",
-      "The approach is straightforward: understand the requirement, engineer it properly, build it to standard, and support it for as long as it runs.",
-    ],
-    cta: { label: "See our capabilities", href: "/services" },
-    // One image only. TODO(client): replace with a dedicated photograph of the
-    // team on site — this file is also used by the Electrical division.
-    images: [
-      {
-        src: "/images/divisions/electrical.webp",
-        alt: "Electrical distribution panels with cable containment and conduit",
-        aspectRatio: 1024 / 1536,
-      },
-    ],
-    /**
-     * The title block over the photograph. It read "5 Divisions" and "2
-     * Countries" — the same counting pattern, and the same weak figures,
-     * as the hero band that was replaced before it. Named, the two rows
-     * say what the numbers only implied.
-     */
-    details: [
-      { label: "Operating in", value: "Liberia · Lebanon" },
-      {
-        label: "In-house divisions",
-        value: "Engineering, electrical, mechanical, IT, maintenance",
-      },
+/**
+ * Sectors. These five were a fixed list typed into the schema; they are
+ * documents now, so the client can rename, reorder or add to them.
+ */
+const CATEGORY = {
+  commercial: { _id: "cat-commercial", title: "Commercial", slug: "commercial" },
+  industrial: { _id: "cat-industrial", title: "Industrial", slug: "industrial" },
+  institutional: {
+    _id: "cat-institutional",
+    title: "Institutional",
+    slug: "institutional",
+  },
+  residential: { _id: "cat-residential", title: "Residential", slug: "residential" },
+  infrastructure: {
+    _id: "cat-infrastructure",
+    title: "Infrastructure",
+    slug: "infrastructure",
+  },
+} satisfies Record<string, ProjectCategory>;
+
+export const fallbackProjectCategories: ProjectCategory[] = [
+  CATEGORY.commercial,
+  CATEGORY.industrial,
+  CATEGORY.institutional,
+  CATEGORY.residential,
+  CATEGORY.infrastructure,
+];
+
+export const fallbackSettings: SiteSettings = {
+  companyName: "Mahfouz Contracting",
+  shortName: "Mahfouz",
+  descriptor: "Contracting",
+  tagline: "Built right. Built to last.",
+  /**
+   * TODO(client): no logo file exists yet - the live site sets the name in
+   * type too. The header and footer keep the typeset wordmark until one is
+   * uploaded in Site settings, which is the moment it appears everywhere.
+   */
+  showNameWithLogo: false,
+  phones: [
+    { label: "Liberia", number: "+231 077 340 0671" },
+    { label: "Lebanon", number: "+961 3 246 171" },
+  ],
+  // TODO(client): the live site shows theme placeholders (info@mail.com,
+  // info@email.com). Confirm the real address before launch.
+  emails: ["info@mahfouzcontracting.com"],
+  address: {
+    lines: [
+      "Sink 14th Street",
+      "Bishop Roland J. Diggs Building",
+      "Monrovia, Montserrado County",
+      "Liberia",
     ],
   },
-
+  /** The same address in the parts Google reads. */
+  postalAddress: {
+    streetAddress: "Sink 14th Street, Bishop Roland J. Diggs Building",
+    locality: "Monrovia",
+    region: "Montserrado County",
+    countryCode: "LR",
+  },
+  /** The only figures here taken from the live WordPress site. */
+  openingHours: [
+    {
+      days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      opens: "06:00",
+      closes: "18:00",
+    },
+    { days: ["Saturday"], opens: "06:00", closes: "16:00" },
+  ],
+  areaServed: ["Liberia", "Lebanon"],
+  // TODO(client): the live site's social links point at AxiomThemes accounts.
+  socials: [],
   /**
-   * Ordered by the project lifecycle — design, build, integrate, support —
-   * which mirrors the company's own four-stage process rather than an
-   * arbitrary sequence. Copy condensed from the live site's division pages.
+   * Projects and About are swapped from the obvious order. The work comes
+   * before the write-up: a contractor is judged on what they have built,
+   * and About is the page people read last, if at all.
+   *
+   * This list is the one source. The header, the footer, the mobile menu and
+   * the breadcrumbs all read it, so the order is changed here and in the
+   * studio, and nowhere else.
    */
-  services: [
-    {
-      _id: "svc-engineering",
-      code: "ED",
-      title: "Engineering & Design Consultancy",
-      shortTitle: "Engineering",
-      slug: "engineering-design-consultancy",
-      shortDescription:
-        "Coordinated MEP and IT design - load calculations, BOQs, tender documents and BIM development, issued before work starts on site.",
-      features: [
-        "Mechanical, electrical and plumbing design",
-        "IT and low-voltage system planning",
-        "Load calculations and system simulations",
-        "Bills of quantities and tender documents",
-      ],
-      image: {
-        src: "/images/divisions/engineering.webp",
-        alt: "Engineering drawings and design review materials",
-        aspectRatio: 1024 / 1536,
-      },
-    },
-    {
-      _id: "svc-electrical",
-      code: "EL",
-      title: "Electrical",
-      slug: "electrical-division",
-      shortDescription:
-        "Power distribution, panels, protection and low-current works, engineered and tested to IEC, NEC and BS.",
-      features: [
-        "LV distribution, panels and lighting",
-        "MV and HV transformers, switchgear and substations",
-        "CCTV, access control and fire alarm systems",
-        "Generators, ATS, UPS and load management",
-      ],
-      image: {
-        src: "/images/divisions/electrical.webp",
-        alt: "Electrical distribution panels with cable containment and conduit",
-        aspectRatio: 1024 / 1536,
-      },
-    },
-    {
-      _id: "svc-mechanical",
-      code: "ME",
-      title: "Mechanical",
-      slug: "mechanical-division",
-      shortDescription:
-        "HVAC, plumbing, pumping and NFPA-compliant firefighting, sized on real load calculations rather than oversized for safety.",
-      features: [
-        "Chillers, VRF and VRV, and air handling units",
-        "Water supply, drainage and process piping",
-        "Fire sprinklers, hydrants, pumps and tanks",
-        "Pressure testing and commissioning",
-      ],
-      image: {
-        src: "/images/divisions/mechanical.webp",
-        alt: "Mechanical plant equipment and pipework",
-        aspectRatio: 1024 / 1536,
-      },
-    },
-    {
-      _id: "svc-it",
-      /**
-       * IA, not IT. The hero's division strip sets the code beside the short
-       * name, so an "IT" code next to "IT & Automation" printed the same two
-       * letters twice in one row. IA takes the initial of each half of the
-       * full title, keeps the two-letter pattern the other four follow, and
-       * leaves the tag on every project card reading "IT & Automation" —
-       * which is what the design canvas specifies and what a client searches.
-       */
-      code: "IA",
-      title: "Information Technology & Automation",
-      shortTitle: "IT & Automation",
-      slug: "information-technology-automation-division",
-      shortDescription:
-        "Structured cabling, networks, security and building automation, integrated with the electrical and mechanical scope.",
-      features: [
-        "Data and fiber optic cabling",
-        "Server rooms, switches and wireless access",
-        "Access control and intrusion detection",
-        "Building management and energy monitoring",
-      ],
-      image: {
-        src: "/images/divisions/it-automation.webp",
-        alt: "Network and automation control equipment",
-        aspectRatio: 1024 / 1536,
-      },
-    },
-    {
-      _id: "svc-maintenance",
-      code: "MF",
-      title: "Maintenance & Facility Support",
-      shortTitle: "Maintenance",
-      slug: "maintenance-facility-support",
-      shortDescription:
-        "Preventive and corrective programs, annual contracts and compliance testing that keep installed systems performing after handover.",
-      features: [
-        "Scheduled preventive maintenance",
-        "Emergency fault isolation and repair",
-        "Annual maintenance contracts",
-        "Thermal imaging and compliance audits",
-      ],
-      image: {
-        src: "/images/divisions/maintenance.webp",
-        alt: "Maintenance tools and servicing equipment",
-        aspectRatio: 1024 / 1536,
-      },
-    },
+  nav: [
+    { label: "Home", href: "/" },
+    { label: "Projects", href: "/projects" },
+    { label: "Services", href: "/services" },
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
   ],
-
+  headerCta: { label: "Request a Quote", href: "/contact" },
   /**
-   * TODO(client): these four names are the only real portfolio data that
-   * exists. Location, year, client and scope are all unknown, and the live
-   * site's own entries are lorem ipsum on stock solar photography. The section
-   * renders whatever metadata is present, so real records enrich it with no
-   * code change. See temp/PLAN.md §8, item 2.
-   *
-   * TODO(client): the division tags below are inferred from the project names
-   * and the design canvas, not confirmed by the client. They drive the tags on
-   * every card and the filter on /projects, so they need checking before
-   * launch. Location, year and client are deliberately left unset rather than
-   * guessed — those are claims about specific work.
+   * Shown as the line under the home hero, in place of a "6 standards worked
+   * to" metric. The count was meaningless — nobody cares that it is six, they
+   * care that it is these six, and to the people who evaluate contractors
+   * these read as credentials.
    */
-  projects: [
-    {
-      _id: "prj-panels-maintenance",
-      name: "Panels Maintenance",
-      slug: "panels-maintenance",
-      category: "Commercial",
-      featured: true,
-      divisions: [DIVISION.electrical, DIVISION.maintenance],
-      cover: {
-        src: "/images/switchgear-assembly.webp",
-        alt: "Electricians assembling and wiring switchgear panels in a workshop",
-        aspectRatio: 1,
-      },
-    },
-    {
-      _id: "prj-green-enterprises",
-      name: "Green Enterprises",
-      slug: "green-enterprises",
-      category: "Commercial",
-      divisions: [DIVISION.electrical, DIVISION.mechanical],
-      cover: {
-        src: "/images/site-team-review.webp",
-        alt: "Site team reviewing drawings in front of a concrete frame",
-        aspectRatio: 1,
-      },
-    },
-    {
-      _id: "prj-reliable-energy",
-      name: "Reliable Energy",
-      slug: "reliable-energy",
-      category: "Commercial",
-      divisions: [DIVISION.electrical],
-      cover: {
-        src: "/images/switchgear-assembly.webp",
-        alt: "Electricians assembling and wiring switchgear panels in a workshop",
-        aspectRatio: 1,
-      },
-    },
-    {
-      _id: "prj-branding-ideas",
-      name: "Branding Ideas",
-      slug: "branding-ideas",
-      category: "Commercial",
-      divisions: [DIVISION.it],
-      cover: {
-        src: "/images/site-tower-construction.webp",
-        alt: "Tower under construction with a crane above the exposed frame",
-        aspectRatio: 1289 / 860,
-      },
-    },
-  ],
-
-  process: [
-    {
-      _id: "prc-1",
-      step: "01",
-      title: "Understand",
-      description:
-        "Requirements, site conditions and constraints are established before anything is priced.",
-      image: {
-        src: "/images/site-team-review.webp",
-        alt: "Site team reviewing drawings in front of a concrete frame",
-        aspectRatio: 1,
-      },
-    },
-    {
-      _id: "prc-2",
-      step: "02",
-      title: "Design",
-      description:
-        "Drawings, load calculations and specifications are issued for approval.",
-      image: {
-        src: "/images/divisions/engineering.webp",
-        alt: "Rolled drawings, a floor plan on a clipboard and a pair of dividers",
-        aspectRatio: 1,
-      },
-    },
-    {
-      _id: "prc-3",
-      step: "03",
-      title: "Build",
-      description:
-        "Installation, testing and commissioning by in-house crews across every discipline.",
-      image: {
-        src: "/images/site-tower-construction.webp",
-        alt: "Tower under construction with a crane above the exposed frame",
-        aspectRatio: 1289 / 860,
-      },
-    },
-    {
-      _id: "prc-4",
-      step: "04",
-      title: "Support",
-      description:
-        "Scheduled maintenance and fault response continue after handover.",
-      image: {
-        src: "/images/divisions/maintenance.webp",
-        alt: "Servicing tools laid out for a scheduled maintenance visit",
-        aspectRatio: 1,
-      },
-    },
-  ],
-
+  standards: ["IEC", "NEC", "BS", "NFPA", "ASHRAE", "SMACNA"],
+  footerNote: "Engineering, contracting and maintenance",
+  footer: {
+    navHeading: "Navigate",
+    servicesHeading: "Services",
+    contactHeading: "Contact",
+    legalLinks: [{ label: "Privacy", href: "/privacy-policy" }],
+  },
   /**
-   * TODO(client): these six SVGs are stand-ins, not supplied assets. Four come
-   * from simple-icons (CC0) and two from Wikimedia Commons; the trademarks
-   * belong to their owners either way. Before launch the client needs to
-   * confirm in writing that they may display these marks — manufacturer brand
-   * guidelines usually permit "authorised dealer" use and prohibit anything
-   * implying endorsement — and ideally supply the official assets from their
-   * supplier relationships.
-   *
-   * Gewiss is deliberately left without one: no clean vector was available, and
-   * a traced approximation of somebody's trademark is worse than a wordmark.
-   * The strip renders the name instead, which is also what every partner looked
-   * like before this step.
-   *
-   * `aspectRatio` is each file's own viewBox ratio, so the strip sizes by
-   * height and nothing is stretched.
+   * The site-wide default: the title every page's template wraps, and the
+   * description any page that has not set its own inherits.
    */
-  partners: [
-    {
-      _id: "ptn-legrand",
-      name: "Legrand",
-      logo: {
-        src: "/images/partners/legrand.svg",
-        alt: "Legrand",
-        aspectRatio: 250 / 62.096,
-      },
-    },
-    {
-      _id: "ptn-schneider",
-      name: "Schneider Electric",
-      logo: {
-        src: "/images/partners/schneider-electric.svg",
-        alt: "Schneider Electric",
-        aspectRatio: 188.74001 / 57,
-      },
-    },
-    {
-      _id: "ptn-abb",
-      name: "ABB",
-      logo: { src: "/images/partners/abb.svg", alt: "ABB", aspectRatio: 88.2 / 35 },
-    },
-    {
-      _id: "ptn-siemens",
-      name: "Siemens",
-      logo: {
-        src: "/images/partners/siemens.svg",
-        alt: "Siemens",
-        aspectRatio: 210 / 50,
-      },
-    },
-    { _id: "ptn-gewiss", name: "Gewiss" },
-    {
-      _id: "ptn-daikin",
-      name: "Daikin",
-      logo: {
-        src: "/images/partners/daikin.svg",
-        alt: "Daikin",
-        aspectRatio: 300 / 64.616861,
-      },
-    },
-    {
-      _id: "ptn-lg",
-      name: "LG",
-      logo: { src: "/images/partners/lg.svg", alt: "LG", aspectRatio: 113.983 / 17.009 },
-    },
-  ],
-
-  closingCta: {
-    heading: "Have a project in mind?",
-    lead: "Send us the scope and we will come back with an engineered answer, not a guess.",
-    cta: { label: "Request a Quote", href: "/contact" },
-    background: {
-      src: "/images/hero-skyline.webp",
-      alt: "City skyline of high-rise towers seen from above at first light",
-      aspectRatio: 16 / 9,
-    },
+  seo: {
+    title: "Mahfouz Contracting - Engineering, contracting and maintenance",
+    description:
+      "Integrated electrical, mechanical, IT and automation works for commercial, industrial and institutional clients. Engineered, installed and maintained in-house.",
   },
 };
+
+/**
+ * Ordered by the project lifecycle — design, build, integrate, support —
+ * which mirrors the company's own four-stage process rather than an
+ * arbitrary sequence. Copy condensed from the live site's division pages.
+ */
+export const fallbackServices: Service[] = [
+  {
+    _id: "svc-engineering",
+    code: "ED",
+    title: "Engineering & Design Consultancy",
+    shortTitle: "Engineering",
+    slug: "engineering-design-consultancy",
+    shortDescription:
+      "Coordinated MEP and IT design - load calculations, BOQs, tender documents and BIM development, issued before work starts on site.",
+    fullDescription: [],
+    features: [
+      "Mechanical, electrical and plumbing design",
+      "IT and low-voltage system planning",
+      "Load calculations and system simulations",
+      "Bills of quantities and tender documents",
+    ],
+    image: {
+      src: "/images/divisions/engineering.webp",
+      alt: "Engineering drawings and design review materials",
+      aspectRatio: 1024 / 1536,
+    },
+  },
+  {
+    _id: "svc-electrical",
+    code: "EL",
+    title: "Electrical",
+    slug: "electrical-division",
+    shortDescription:
+      "Power distribution, panels, protection and low-current works, engineered and tested to IEC, NEC and BS.",
+    fullDescription: [],
+    features: [
+      "LV distribution, panels and lighting",
+      "MV and HV transformers, switchgear and substations",
+      "CCTV, access control and fire alarm systems",
+      "Generators, ATS, UPS and load management",
+    ],
+    image: {
+      src: "/images/divisions/electrical.webp",
+      alt: "Electrical distribution panels with cable containment and conduit",
+      aspectRatio: 1024 / 1536,
+    },
+  },
+  {
+    _id: "svc-mechanical",
+    code: "ME",
+    title: "Mechanical",
+    slug: "mechanical-division",
+    shortDescription:
+      "HVAC, plumbing, pumping and NFPA-compliant firefighting, sized on real load calculations rather than oversized for safety.",
+    fullDescription: [],
+    features: [
+      "Chillers, VRF and VRV, and air handling units",
+      "Water supply, drainage and process piping",
+      "Fire sprinklers, hydrants, pumps and tanks",
+      "Pressure testing and commissioning",
+    ],
+    image: {
+      src: "/images/divisions/mechanical.webp",
+      alt: "Mechanical plant equipment and pipework",
+      aspectRatio: 1024 / 1536,
+    },
+  },
+  {
+    _id: "svc-it",
+    /**
+     * IA, not IT. The hero's division strip sets the code beside the short
+     * name, so an "IT" code next to "IT & Automation" printed the same two
+     * letters twice in one row. IA takes the initial of each half of the
+     * full title, keeps the two-letter pattern the other four follow, and
+     * leaves the short name reading "IT & Automation" — which is what the
+     * design canvas specifies and what a client searches.
+     */
+    code: "IA",
+    title: "Information Technology & Automation",
+    shortTitle: "IT & Automation",
+    slug: "information-technology-automation-division",
+    shortDescription:
+      "Structured cabling, networks, security and building automation, integrated with the electrical and mechanical scope.",
+    fullDescription: [],
+    features: [
+      "Data and fiber optic cabling",
+      "Server rooms, switches and wireless access",
+      "Access control and intrusion detection",
+      "Building management and energy monitoring",
+    ],
+    image: {
+      src: "/images/divisions/it-automation.webp",
+      alt: "Network and automation control equipment",
+      aspectRatio: 1024 / 1536,
+    },
+  },
+  {
+    _id: "svc-maintenance",
+    code: "MF",
+    title: "Maintenance & Facility Support",
+    shortTitle: "Maintenance",
+    slug: "maintenance-facility-support",
+    shortDescription:
+      "Preventive and corrective programs, annual contracts and compliance testing that keep installed systems performing after handover.",
+    fullDescription: [],
+    features: [
+      "Scheduled preventive maintenance",
+      "Emergency fault isolation and repair",
+      "Annual maintenance contracts",
+      "Thermal imaging and compliance audits",
+    ],
+    image: {
+      src: "/images/divisions/maintenance.webp",
+      alt: "Maintenance tools and servicing equipment",
+      aspectRatio: 1024 / 1536,
+    },
+  },
+];
+
+/**
+ * TODO(client): these four names are the only real portfolio data that
+ * exists. Location, year, client and scope are all unknown, and the live
+ * site's own entries are lorem ipsum on stock solar photography. The section
+ * renders whatever metadata is present, so real records enrich it with no
+ * code change. See temp/PLAN.md §8, item 2.
+ *
+ * TODO(client): the tags and divisions below are inferred from the project
+ * names and the design canvas, not confirmed by the client. They drive the
+ * line under every card and the whole filter on /projects, so they need
+ * checking before launch. Location, year and client are deliberately left
+ * unset rather than guessed — those are claims about specific work.
+ */
+export const fallbackProjects: Project[] = [
+  {
+    _id: "prj-panels-maintenance",
+    name: "Panels Maintenance",
+    slug: "panels-maintenance",
+    category: CATEGORY.commercial,
+    featured: true,
+    tags: [TAG.electrical, TAG.maintenance],
+    divisions: [DIVISION.electrical, DIVISION.maintenance],
+    cover: {
+      src: "/images/switchgear-assembly.webp",
+      alt: "Electricians assembling and wiring switchgear panels in a workshop",
+      aspectRatio: 1,
+    },
+  },
+  {
+    _id: "prj-green-enterprises",
+    name: "Green Enterprises",
+    slug: "green-enterprises",
+    category: CATEGORY.commercial,
+    tags: [TAG.electrical, TAG.mechanical],
+    divisions: [DIVISION.electrical, DIVISION.mechanical],
+    cover: {
+      src: "/images/site-team-review.webp",
+      alt: "Site team reviewing drawings in front of a concrete frame",
+      aspectRatio: 1,
+    },
+  },
+  {
+    _id: "prj-reliable-energy",
+    name: "Reliable Energy",
+    slug: "reliable-energy",
+    category: CATEGORY.commercial,
+    tags: [TAG.electrical],
+    divisions: [DIVISION.electrical],
+    cover: {
+      src: "/images/switchgear-assembly.webp",
+      alt: "Electricians assembling and wiring switchgear panels in a workshop",
+      aspectRatio: 1,
+    },
+  },
+  {
+    _id: "prj-branding-ideas",
+    name: "Branding Ideas",
+    slug: "branding-ideas",
+    category: CATEGORY.commercial,
+    tags: [TAG.it],
+    divisions: [DIVISION.it],
+    cover: {
+      src: "/images/site-tower-construction.webp",
+      alt: "Tower under construction with a crane above the exposed frame",
+      aspectRatio: 1289 / 860,
+    },
+  },
+];
 
 /**
  * Detail-page content, keyed by slug.
@@ -465,8 +404,8 @@ export const fallbackHome: HomePageContent = {
  * It is here so the detail layout can be reviewed against real-looking copy,
  * and it is deliberately limited to the one project the canvas specifies. The
  * other three render the sparse version, which is what an unfilled record
- * genuinely looks like. Project detail pages carry `noindex` until this is
- * resolved — see generateMetadata in src/app/projects/[slug]/page.tsx.
+ * genuinely looks like. Every project page carries `noindex` until its
+ * "Show in search engines" switch is turned on in the studio.
  */
 export const fallbackProjectDetails: Record<string, Partial<ProjectFull>> = {
   "panels-maintenance": {
@@ -489,15 +428,344 @@ export const fallbackProjectDetails: Record<string, Partial<ProjectFull>> = {
       { _id: "ptn-legrand", name: "Legrand" },
       { _id: "ptn-abb", name: "ABB" },
     ],
+    /**
+     * TODO(client): stand-in photographs from the site's own library, not
+     * pictures of this job. They are here so the carousel can be reviewed with
+     * a real mix of shapes - landscape, square and portrait - and the captions
+     * describe what each photograph shows rather than claiming it was taken
+     * on this project. Replace them with site photography.
+     */
+    gallery: [
+      {
+        src: "/images/site-tower-construction.webp",
+        alt: "Tower under construction with a crane above the exposed frame",
+        aspectRatio: 1289 / 860,
+        caption: "Structure under construction",
+      },
+      {
+        src: "/images/divisions/electrical.webp",
+        alt: "Electrical distribution panels with cable containment and conduit",
+        aspectRatio: 1024 / 1536,
+        caption: "Distribution panels and cable containment",
+      },
+      {
+        src: "/images/site-team-review.webp",
+        alt: "Site team reviewing drawings in front of a concrete frame",
+        aspectRatio: 1,
+        caption: "Drawings reviewed on site",
+      },
+      {
+        src: "/images/divisions/maintenance.webp",
+        alt: "Servicing tools laid out for a scheduled maintenance visit",
+        aspectRatio: 1024 / 1536,
+        caption: "Tools for a scheduled maintenance visit",
+      },
+    ],
+  },
+};
+
+export const fallbackProcess: ProcessStep[] = [
+  {
+    _id: "prc-1",
+    step: "01",
+    title: "Understand",
+    description:
+      "Requirements, site conditions and constraints are established before anything is priced.",
+    image: {
+      src: "/images/site-team-review.webp",
+      alt: "Site team reviewing drawings in front of a concrete frame",
+      aspectRatio: 1,
+    },
+  },
+  {
+    _id: "prc-2",
+    step: "02",
+    title: "Design",
+    description:
+      "Drawings, load calculations and specifications are issued for approval.",
+    image: {
+      src: "/images/divisions/engineering.webp",
+      alt: "Rolled drawings, a floor plan on a clipboard and a pair of dividers",
+      aspectRatio: 1,
+    },
+  },
+  {
+    _id: "prc-3",
+    step: "03",
+    title: "Build",
+    description:
+      "Installation, testing and commissioning by in-house crews across every discipline.",
+    image: {
+      src: "/images/site-tower-construction.webp",
+      alt: "Tower under construction with a crane above the exposed frame",
+      aspectRatio: 1289 / 860,
+    },
+  },
+  {
+    _id: "prc-4",
+    step: "04",
+    title: "Support",
+    description:
+      "Scheduled maintenance and fault response continue after handover.",
+    image: {
+      src: "/images/divisions/maintenance.webp",
+      alt: "Servicing tools laid out for a scheduled maintenance visit",
+      aspectRatio: 1,
+    },
+  },
+];
+
+/**
+ * TODO(client): these six SVGs are stand-ins, not supplied assets. Four come
+ * from simple-icons (CC0) and two from Wikimedia Commons; the trademarks
+ * belong to their owners either way. Before launch the client needs to
+ * confirm in writing that they may display these marks — manufacturer brand
+ * guidelines usually permit "authorised dealer" use and prohibit anything
+ * implying endorsement — and ideally supply the official assets from their
+ * supplier relationships.
+ *
+ * Gewiss is deliberately left without one: no clean vector was available, and
+ * a traced approximation of somebody's trademark is worse than a wordmark.
+ * The strip renders the name instead, which is also what every partner looked
+ * like before this step.
+ *
+ * `aspectRatio` is each file's own viewBox ratio, so the strip sizes by
+ * height and nothing is stretched.
+ */
+export const fallbackPartners: Partner[] = [
+  {
+    _id: "ptn-legrand",
+    name: "Legrand",
+    logo: {
+      src: "/images/partners/legrand.svg",
+      alt: "Legrand",
+      aspectRatio: 250 / 62.096,
+    },
+  },
+  {
+    _id: "ptn-schneider",
+    name: "Schneider Electric",
+    logo: {
+      src: "/images/partners/schneider-electric.svg",
+      alt: "Schneider Electric",
+      aspectRatio: 188.74001 / 57,
+    },
+  },
+  {
+    _id: "ptn-abb",
+    name: "ABB",
+    logo: { src: "/images/partners/abb.svg", alt: "ABB", aspectRatio: 88.2 / 35 },
+  },
+  {
+    _id: "ptn-siemens",
+    name: "Siemens",
+    logo: {
+      src: "/images/partners/siemens.svg",
+      alt: "Siemens",
+      aspectRatio: 210 / 50,
+    },
+  },
+  { _id: "ptn-gewiss", name: "Gewiss" },
+  {
+    _id: "ptn-daikin",
+    name: "Daikin",
+    logo: {
+      src: "/images/partners/daikin.svg",
+      alt: "Daikin",
+      aspectRatio: 300 / 64.616861,
+    },
+  },
+  {
+    _id: "ptn-lg",
+    name: "LG",
+    logo: { src: "/images/partners/lg.svg", alt: "LG", aspectRatio: 113.983 / 17.009 },
+  },
+];
+
+export const fallbackClosingCta: ClosingCta = {
+  heading: "Have a project in mind?",
+  lead: "Send us the scope and we will come back with an engineered answer, not a guess.",
+  cta: { label: "Request a Quote", href: "/contact" },
+  background: {
+    src: "/images/hero-skyline.webp",
+    alt: "City skyline of high-rise towers seen from above at first light",
+    aspectRatio: 16 / 9,
+  },
+};
+
+export const fallbackHomePage: HomePage = {
+  hero: {
+    heading: "Engineering\nsolutions.\nBuilt to last.",
+    lead: "Integrated electrical, mechanical, IT and automation works for commercial, industrial and institutional clients - engineered, installed and maintained in-house.",
+    image: {
+      src: "/images/hero-skyline.webp",
+      alt: "City skyline of high-rise towers seen from above at first light",
+      aspectRatio: 16 / 9,
+    },
+    /**
+     * One button, outlined. The quote request is already the header's button
+     * and the closing banner's single job, so the hero points at the work.
+     */
+    buttons: [{ label: "See Our Work", href: "/projects", style: "outline" }],
+  },
+  divisionStrip: "Five divisions, one point of responsibility",
+  standardsLabel: "Worked to",
+  aboutLinkLabel: "More about us",
+  capabilities: {
+    label: "Capabilities",
+    heading: "Five divisions, one scope of responsibility",
+    lead: "Each division works in-house and to a single project program, so the scopes meet where they are supposed to.",
+    linkLabel: "All services",
+  },
+  selectedWork: {
+    label: "Selected work",
+    heading: "Projects delivered end to end.",
+    linkLabel: "All projects",
+  },
+  selectedWorkLimit: 4,
+  /** Empty on purpose: the defaults in Site settings are the home page's. */
+  seo: {},
+};
+
+export const fallbackAboutPage: AboutPage = {
+  hero: {
+    heading: "Engineering, contracting and maintenance, in-house.",
+    lead: "Five divisions under one roof, working to a single project program, so design, supply, installation and commissioning meet where they are supposed to.",
+    buttons: [],
+  },
+  whoWeAre: {
+    label: "Who we are",
+    heading: "Responsibility for the result stays in one place.",
+    body: [
+      "Mahfouz Contracting delivers integrated electrical, mechanical, IT and automation works for commercial, industrial and institutional clients. Design, supply, installation and commissioning are handled by our own divisions.",
+      "The approach is straightforward: understand the requirement, engineer it properly, build it to standard, and support it for as long as it runs.",
+    ],
+    // TODO(client): replace with a dedicated photograph of the team on site —
+    // this file is also used by the Electrical division.
+    image: {
+      src: "/images/divisions/electrical.webp",
+      alt: "Electrical distribution panels with cable containment and conduit",
+      aspectRatio: 1024 / 1536,
+    },
+    /**
+     * The title block over the photograph. It read "5 Divisions" and "2
+     * Countries" — the same counting pattern, and the same weak figures,
+     * as the hero band that was replaced before it. Named, the two rows
+     * say what the numbers only implied.
+     */
+    details: [
+      { label: "Operating in", value: "Liberia · Lebanon" },
+      {
+        label: "In-house divisions",
+        value: "Engineering, electrical, mechanical, IT, maintenance",
+      },
+    ],
+    /**
+     * TODO(client): assembled from what the site already says - the About
+     * text, the Capabilities line, the division write-ups and the fourth
+     * process stage - rather than written fresh, so every claim here is one
+     * the site was already making. Confirm the wording.
+     */
+    highlights: [
+      {
+        title: "In-house divisions",
+        text: "Design, supply, installation and commissioning are handled by our own engineering, electrical, mechanical, IT and maintenance divisions.",
+      },
+      {
+        title: "One project program",
+        text: "Every division works to a single program, so the scopes meet where they are supposed to.",
+      },
+      {
+        title: "Worked to standard",
+        text: "Installations are engineered and tested to recognised standards, including IEC, NEC, BS and NFPA.",
+      },
+      {
+        title: "Support after handover",
+        text: "Scheduled maintenance and fault response continue after handover, for as long as the installation runs.",
+      },
+    ],
+    cta: { label: "See our capabilities", href: "/services" },
+  },
+  process: {
+    label: "How we work",
+    heading: "Four stages, from brief to ongoing support",
+  },
+  seo: {
+    title: "About",
+    description:
+      "Mahfouz Contracting delivers integrated electrical, mechanical, IT and automation works in-house, from design through commissioning and on into maintenance.",
+  },
+};
+
+export const fallbackServicesPage: ServicesPage = {
+  hero: {
+    heading: "Five divisions, one scope of responsibility.",
+    lead: "Each division works in-house and to a single project program, so design, supply, installation and commissioning meet where they are supposed to.",
+    buttons: [],
+  },
+  seo: {
+    title: "Services",
+    description:
+      "Five in-house divisions: electrical, mechanical, IT and automation, engineering and design consultancy, and maintenance and facility support.",
+  },
+};
+
+export const fallbackProjectsPage: ProjectsPage = {
+  hero: {
+    heading: "Selected projects",
+    lead: "Electrical, mechanical, IT and automation works delivered from design through commissioning, with maintenance carried on afterwards.",
+    /**
+     * TODO(client): this wants a wide site photograph of its own. Borrowed
+     * from the project photography for now, and replaceable in the studio.
+     */
+    image: {
+      src: "/images/site-tower-construction.webp",
+      alt: "Tower under construction with a crane above the exposed frame",
+      aspectRatio: 1289 / 860,
+    },
+    buttons: [],
+  },
+  filters: {
+    allLabel: "All work",
+    categoriesLabel: "Sector",
+    projectSingular: "project",
+    projectPlural: "projects",
+  },
+  empty: {
+    heading: "No projects listed under this filter yet.",
+    lead: "Records for this kind of work can be issued on request.",
+  },
+  more: {
+    heading: "More work, on request",
+    lead: "Further project records and references can be issued for tender or prequalification.",
+    linkLabel: "Request references",
+  },
+  detail: {
+    overview: "Overview",
+    scope: "Scope of works",
+    equipment: "Equipment specified",
+    gallery: "On site",
+    nextProject: "Next project",
+    allProjects: "All projects",
+    category: "Category",
+    location: "Location",
+    divisions: "Divisions engaged",
+    status: "Status",
+    year: "Year",
+    client: "Client",
+  },
+  seo: {
+    title: "Projects",
+    description:
+      "Electrical, mechanical, IT and automation works delivered from design through commissioning, with maintenance carried on afterwards.",
   },
 };
 
 /**
- * The contact page, used until a `contact` document exists.
+ * The contact page.
  *
- * The hours are the only figures here taken from the live WordPress site; the
- * address and phone numbers are the same records as `settings` above, kept in
- * one place there rather than repeated.
+ * The address, phones and opening hours are not here: they are the same
+ * records as `fallbackSettings`, kept in one place there rather than repeated.
  *
  * TODO(client): `recipientEmail` is deliberately unset. Every email address
  * published on the live site is a theme placeholder (info@mail.com,
@@ -505,104 +773,13 @@ export const fallbackProjectDetails: Record<string, Partial<ProjectFull>> = {
  * yet. Until one is confirmed the form delivers to CONTACT_RECIPIENT_EMAIL
  * from the environment, which is a developer address for testing only.
  */
-export const fallbackContact: Contact = {
-  heading: "Request a quote",
-  description:
-    "Send us the scope and we will come back with an engineered answer, not a guess. For tenders and prequalification we can issue project records and references on request.",
-  /**
-   * Hours and response time only. The office address used to be a row here
-   * as well, duplicating `settings.address`, and the page filtered it back
-   * out by matching the literal string "Office" — which meant renaming that
-   * row in the studio printed the address twice. One source, no filter.
-   */
-  details: [
-    { label: "Hours", value: "Mon-Fri 06:00-18:00, Sat 06:00-16:00, Sun closed" },
-    { label: "Enquiries", value: "Answered 24/7" },
-  ],
-  /**
-   * TODO(client): written by me, not by you. It is the four things that make
-   * a quote possible to price without a phone call, and it is editable in the
-   * studio — change it to whatever you actually want to be sent.
-   */
-  enquiryChecklist: [
-    "Drawings or a scope of works, if you have them",
-    "Where the site is, and what stage it is at",
-    "Any standards or approvals the work has to meet",
-    "When you need it finished",
-  ],
-  formSubjects: [
-    "Electrical",
-    "Mechanical",
-    "IT & Automation",
-    "Engineering & Design Consultancy",
-    "Maintenance & Facility Support",
-    "General enquiry",
-  ],
-};
-
-/**
- * The site's own wording, outside the sections it labels.
- *
- * Every string here was typed into a component until Step 8. It has to keep
- * all of them: the merge in `getSectionCopy` fills each field the CMS leaves
- * empty from this module, so a string dropped here is a heading that
- * disappears the day the CMS has an outage.
- */
-export const fallbackSectionCopy: SectionCopy = {
-  divisionStrip: "Five divisions, one point of responsibility",
-
-  capabilities: {
-    label: "Capabilities",
-    heading: "Five divisions, one scope of responsibility",
-    lead: "Each division works in-house and to a single project program, so the scopes meet where they are supposed to.",
-    linkLabel: "All services",
+export const fallbackContactPage: ContactPage = {
+  hero: {
+    heading: "Request a quote",
+    lead: "Send us the scope and we will come back with an engineered answer, not a guess. For tenders and prequalification we can issue project records and references on request.",
+    buttons: [],
   },
-
-  selectedWork: {
-    label: "Selected work",
-    heading: "Projects delivered end to end.",
-    linkLabel: "All projects",
-  },
-
-  aboutHero: {
-    heading: "Engineering, contracting and maintenance, in-house.",
-    lead: "Five divisions under one roof, working to a single project program, so design, supply, installation and commissioning meet where they are supposed to.",
-  },
-
-  aboutProcess: {
-    label: "How we work",
-    heading: "Four stages, from brief to ongoing support",
-  },
-
-  servicesHero: {
-    heading: "Five divisions, one scope of responsibility.",
-    lead: "Each division works in-house and to a single project program, so design, supply, installation and commissioning meet where they are supposed to.",
-  },
-
-  projectsHero: {
-    heading: "Selected projects",
-    lead: "Electrical, mechanical, IT and automation works delivered from design through commissioning, with maintenance carried on afterwards.",
-  },
-
-  projectsMore: {
-    heading: "More work, on request",
-    lead: "Further project records and references can be issued for tender or prequalification.",
-    linkLabel: "Request references",
-  },
-
-  projectsEmpty: {
-    heading: "No projects listed under this division yet.",
-    lead: "Records for this division can be issued on request.",
-  },
-
-  notFound: {
-    heading: "That page is not in the set.",
-    lead: "The address you followed does not exist, or what used to be there has moved. Everywhere the site does go is in the navigation above.",
-  },
-
-  projectsAllFilter: "All work",
-
-  enquiryForm: {
+  form: {
     nameLabel: "Name",
     companyLabel: "Company",
     emailLabel: "Email",
@@ -615,48 +792,52 @@ export const fallbackSectionCopy: SectionCopy = {
     successLead:
       "We read every enquiry ourselves - you will get an answer from an engineer, not an autoresponder.",
   },
-
-  contactDirect: {
+  formSubjects: [
+    "Electrical",
+    "Mechanical",
+    "IT & Automation",
+    "Engineering & Design Consultancy",
+    "Maintenance & Facility Support",
+    "General enquiry",
+  ],
+  direct: {
     formLabel: "Enquiry",
     heading: "Reach us directly",
     officeLabel: "Office",
     emailLabel: "Email",
+    hoursLabel: "Hours",
+    closedLabel: "closed",
     checklistLabel: "What to send",
   },
-
   /**
-   * The home entry is also the site-wide default: the root layout uses it for
-   * the title every other page's template wraps, and for the description any
-   * page that has not set its own inherits.
+   * Response time only. The hours used to be a row here, typed as free text,
+   * while the structured data carried its own copy of them in code; they
+   * come from Site settings now, which feeds both.
    */
-  homeSeo: {
-    title: "Mahfouz Contracting - Engineering, contracting and maintenance",
-    description:
-      "Integrated electrical, mechanical, IT and automation works for commercial, industrial and institutional clients. Engineered, installed and maintained in-house.",
-  },
-
-  aboutSeo: {
-    title: "About",
-    description:
-      "Mahfouz Contracting delivers integrated electrical, mechanical, IT and automation works in-house, from design through commissioning and on into maintenance.",
-  },
-
-  servicesSeo: {
-    title: "Services",
-    description:
-      "Five in-house divisions: electrical, mechanical, IT and automation, engineering and design consultancy, and maintenance and facility support.",
-  },
-
-  projectsSeo: {
-    title: "Projects",
-    description:
-      "Electrical, mechanical, IT and automation works delivered from design through commissioning, with maintenance carried on afterwards.",
-  },
-
-  contactSeo: {
+  details: [{ label: "Enquiries", value: "Answered 24/7" }],
+  /**
+   * TODO(client): written by me, not by you. It is the four things that make
+   * a quote possible to price without a phone call, and it is editable in the
+   * studio — change it to whatever you actually want to be sent.
+   */
+  enquiryChecklist: [
+    "Drawings or a scope of works, if you have them",
+    "Where the site is, and what stage it is at",
+    "Any standards or approvals the work has to meet",
+    "When you need it finished",
+  ],
+  seo: {
     title: "Contact",
     description:
       "Request a quote from Mahfouz Contracting. Send us the scope and we will come back with an engineered answer. Offices in Monrovia, Liberia.",
+  },
+};
+
+export const fallbackNotFoundPage: NotFoundPage = {
+  hero: {
+    heading: "That page is not in the set.",
+    lead: "The address you followed does not exist, or what used to be there has moved. Everywhere the site does go is in the navigation above.",
+    buttons: [],
   },
 };
 

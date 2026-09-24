@@ -68,17 +68,3 @@ export const siteUrl = resolveSiteUrl();
 export function absoluteUrl(path = "/"): string {
   return `${siteUrl}${path.startsWith("/") ? path : `/${path}`}`;
 }
-
-/**
- * Whether project detail pages are fit to be indexed.
- *
- * Step 3 put `noindex` on them: they carry a real name and a stock cover, and
- * placeholder copy for everything else. Two places have to agree about that —
- * the page's own `robots` metadata and the sitemap — and if they ever disagree
- * the site asks Google to index pages it has told Google to ignore, which
- * Search Console reports as an error rather than a warning.
- *
- * One constant, both readers. Flip it to `true` once the client has verified
- * the project records and the detail pages enter the sitemap by themselves.
- */
-export const PROJECT_DETAILS_INDEXABLE = false;

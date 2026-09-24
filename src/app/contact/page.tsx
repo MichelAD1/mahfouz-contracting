@@ -4,18 +4,20 @@ import { PageHero } from "@/components/layout/PageHero";
 import { SectionShell } from "@/components/primitives/SectionShell";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { coordinates, mailHref, telHref } from "@/lib/format";
-import { getContact, getSectionCopy, getSiteFrame } from "@/sanity/lib/fetch";
+import { formatOpeningHours } from "@/lib/hours";
 import { pageMetadata } from "@/lib/metadata";
+import { navLabel } from "@/lib/nav";
+import { getContactPage, getSiteFrame } from "@/sanity/lib/fetch";
 
 export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [copy, { settings }] = await Promise.all([
-    getSectionCopy(),
-    getSiteFrame(),
-  ]);
+  const [page, { settings }] = await Promise.all([getContactPage(), getSiteFrame()]);
 
-  return pageMetadata(copy.contactSeo, "/contact", settings.companyName);
+  return pageMetadata(page.seo, "/contact", {
+    siteName: settings.companyName,
+    defaults: settings.seo,
+  });
 }
 
 /**
@@ -44,73 +46,69 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
  * one part of this site with a dependency outside it — the page still does its
  * job. That is the whole reason this route exists.
  *
- * They are set as a **title block** now, which is the third of them on the site
+ * They are set as a **title block**, which is the third of them on the site
  * after the footer and the about section, and the same object in all three: an
- * ink panel of ruled, labelled fields. Before, this column was bare text on
- * paper with a hairline over it, which is the one part of the page that looked
- * unfinished rather than quiet — nothing on the page carried any weight, so the
- * form had nothing to sit against.
+ * ink panel of ruled, labelled fields.
  *
  * There is deliberately **no embedded map**. An iframe from a mapping provider
  * would load third-party script on the one page a visitor types their details
- * into, and would contradict what /privacy-policy now says about this site in
+ * into, and would contradict what /privacy-policy says about this site in
  * writing. The coordinates are printed instead, as sheet metadata, which is
  * what a drawing would do and is enough to find a building.
  */
 export default async function ContactPage() {
-  const [contact, { settings }, copy] = await Promise.all([
-    getContact(),
-    getSiteFrame(),
-    getSectionCopy(),
-  ]);
+  const [page, { settings }] = await Promise.all([getContactPage(), getSiteFrame()]);
+  const { direct } = page;
 
-  const { latitude, longitude, label } = contact.map ?? {};
+  const { latitude, longitude } = page.map ?? {};
   const grid =
     typeof latitude === "number" && typeof longitude === "number"
-      ? { label: label ?? "Coordinates", value: coordinates(latitude, longitude) }
+      ? coordinates(latitude, longitude)
       : null;
 
-  const checklist = contact.enquiryChecklist ?? [];
+  // The same hours Google is given, from the one place they are entered.
+  const hours = formatOpeningHours(settings.openingHours, direct.closedLabel);
 
   return (
     <>
       <PageHero
-        crumbs={[{ label: "Home", href: "/" }, { label: "Contact" }]}
+        crumbs={[
+          { label: navLabel(settings.nav, "/", "Home"), href: "/" },
+          { label: navLabel(settings.nav, "/contact", "Contact") },
+        ]}
         seed={3}
-        heading={contact.heading}
-        lead={contact.description}
+        heading={page.hero.heading}
+        lead={page.hero.lead}
+        image={page.hero.image}
+        buttons={page.hero.buttons}
       />
 
-      <SectionShell label={copy.contactDirect.formLabel} divided={false}>
+      <SectionShell label={direct.formLabel} divided={false}>
         <div className="grid gap-[clamp(2.5rem,5vw,4rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,0.78fr)] lg:items-start">
-          <ContactForm
-            subjects={contact.formSubjects ?? []}
-            settings={settings}
-            copy={copy.enquiryForm}
-          />
+          <ContactForm subjects={page.formSubjects} settings={settings} copy={page.form} />
 
           <aside>
             <div className="bg-ink text-paper-bright">
               <h2 className="px-6 pt-5 pb-4 t-meta text-copper-bright lg:px-7">
-                {copy.contactDirect.heading}
+                {direct.heading}
               </h2>
 
               <address className="not-italic">
-                <Row label={copy.contactDirect.officeLabel}>
-                  {settings.address.lines.map((line) => (
-                    <span key={line} className="block">
-                      {line}
-                    </span>
-                  ))}
-                  {grid ? (
-                    <span className="mt-2.5 block t-meta text-steel-light">
-                      {grid.value}
-                    </span>
-                  ) : null}
-                </Row>
+                {settings.address.lines.length > 0 || grid ? (
+                  <Row label={direct.officeLabel}>
+                    {settings.address.lines.map((line) => (
+                      <span key={line} className="block">
+                        {line}
+                      </span>
+                    ))}
+                    {grid ? (
+                      <span className="mt-2.5 block t-meta text-steel-light">{grid}</span>
+                    ) : null}
+                  </Row>
+                ) : null}
 
                 {settings.phones.map((phone) => (
-                  <Row key={phone.number} label={phone.label}>
+                  <Row key={phone.number} label={phone.label || page.form.phoneLabel}>
                     <a
                       href={telHref(phone.number)}
                       className="block transition-colors duration-300 hover:text-copper-bright"
@@ -121,7 +119,7 @@ export default async function ContactPage() {
                 ))}
 
                 {settings.emails.map((email) => (
-                  <Row key={email} label={copy.contactDirect.emailLabel}>
+                  <Row key={email} label={direct.emailLabel}>
                     <a
                       href={mailHref(email)}
                       className="block break-words transition-colors duration-300 hover:text-copper-bright"
@@ -132,25 +130,25 @@ export default async function ContactPage() {
                 ))}
               </address>
 
+              {hours ? <Row label={direct.hoursLabel}>{hours}</Row> : null}
+
               {/*
-               * Whatever else the studio carries — hours, response time. The
-               * address, the phones and the email are not in this list: they
-               * come from Site settings, which is the one place they are kept.
+               * Whatever else the studio carries - response time, say. The
+               * address, the phones, the email and the hours are not in this
+               * list: they come from Site settings, the one place they are kept.
                */}
-              {(contact.details ?? []).map((detail) => (
+              {page.details.map((detail) => (
                 <Row key={detail.label} label={detail.label}>
                   {detail.value}
                 </Row>
               ))}
             </div>
 
-            {checklist.length > 0 ? (
+            {page.enquiryChecklist.length > 0 ? (
               <div className="mt-[clamp(2rem,3.5vw,2.75rem)] border-t-2 border-ink pt-7">
-                <h2 className="t-meta text-steel">
-                  {copy.contactDirect.checklistLabel}
-                </h2>
+                <h2 className="t-meta text-steel">{direct.checklistLabel}</h2>
                 <ul className="mt-5 grid gap-2.5">
-                  {checklist.map((item) => (
+                  {page.enquiryChecklist.map((item) => (
                     <li
                       key={item}
                       className="flex gap-3 text-[0.875rem] leading-relaxed text-ink/75"

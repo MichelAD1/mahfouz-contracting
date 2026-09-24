@@ -3,18 +3,20 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHero } from "@/components/layout/PageHero";
 import { LinkUnderline } from "@/components/primitives/Button";
-import { SiteImage } from "@/components/primitives/SiteImage";
-import { ImageReveal, Reveal } from "@/components/motion/Reveal";
+import { Reveal } from "@/components/motion/Reveal";
+import { ProjectCarousel } from "@/components/projects/ProjectCarousel";
 import { projectMeta } from "@/components/projects/ProjectCard";
 import { pad2 } from "@/lib/format";
+import { pageMetadata } from "@/lib/metadata";
+import { navLabel } from "@/lib/nav";
 import { ClosingCta } from "@/components/sections/ClosingCta";
 import {
-  getClosingCta,
   getProject,
   getProjectSlugs,
-  getProjects,
+  getProjectsIndex,
+  getSiteFrame,
 } from "@/sanity/lib/fetch";
-import type { Project, ProjectFull } from "@/sanity/lib/types";
+import type { Project, ProjectDetailLabels, ProjectFull } from "@/sanity/lib/types";
 
 export const revalidate = 300;
 
@@ -29,25 +31,29 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const project = await getProject(slug);
+  const [project, { settings }] = await Promise.all([getProject(slug), getSiteFrame()]);
 
   if (!project) return { title: "Project not found" };
 
   return {
-    title: project.name,
-    description: project.summary ?? undefined,
-    alternates: { canonical: `/projects/${project.slug}` },
-    openGraph: project.cover?.url
-      ? { images: [{ url: project.cover.url }] }
-      : undefined,
+    ...pageMetadata(
+      {
+        title: project.seo.title ?? project.name,
+        description: project.seo.description ?? project.summary,
+        image: project.seo.image ?? project.cover,
+      },
+      `/projects/${project.slug}`,
+      { siteName: settings.companyName, defaults: settings.seo },
+    ),
     /**
-     * Held back from search on purpose. These records carry a name, a category
-     * and a stock cover; the rest is placeholder copy awaiting the client's
-     * confirmation. Asking Google to rank four near-empty pages of unverified
-     * claims about real work would cost more than it earns. Lift this once the
-     * records are real.
+     * Held back from search until the studio says otherwise. These records
+     * carry a name, a category and a stock cover; the rest is placeholder copy
+     * awaiting the client's confirmation, and asking Google to rank unverified
+     * claims about real work would cost more than it earns. "Show in search
+     * engines" on the project lifts this and adds the page to the sitemap -
+     * one switch, both readers, so the two can never disagree.
      */
-    robots: { index: false, follow: true },
+    robots: project.searchVisible ? undefined : { index: false, follow: true },
   };
 }
 
@@ -57,26 +63,25 @@ export default async function ProjectPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [project, projects, closingCta] = await Promise.all([
+  const [project, { page, projects, closingCta }, { settings }] = await Promise.all([
     getProject(slug),
-    getProjects(),
-    getClosingCta(),
+    getProjectsIndex(),
+    getSiteFrame(),
   ]);
 
   if (!project) notFound();
 
+  const labels = page.detail;
   const position = projects.findIndex((entry) => entry.slug === project.slug);
-  const next =
-    projects.length > 1
-      ? projects[(Math.max(position, 0) + 1) % projects.length]
-      : null;
+  const following = projects[(Math.max(position, 0) + 1) % Math.max(projects.length, 1)];
+  const next = following && following.slug !== project.slug ? following : null;
 
   return (
     <>
       <PageHero
         crumbs={[
-          { label: "Home", href: "/" },
-          { label: "Projects", href: "/projects" },
+          { label: navLabel(settings.nav, "/", "Home"), href: "/" },
+          { label: navLabel(settings.nav, "/projects", "Projects"), href: "/projects" },
           { label: project.name },
         ]}
         index={position >= 0 ? pad2(position + 1) : undefined}
@@ -85,13 +90,17 @@ export default async function ProjectPage({
         size="tall"
       />
 
-      <ProjectFacts project={project} />
+      <ProjectFacts project={project} labels={labels} />
 
-      <Overview project={project} />
+      <Overview project={project} labels={labels} />
 
-      <Gallery project={project} />
+      <ProjectCarousel
+        images={project.gallery}
+        label={labels.gallery}
+        projectName={project.name}
+      />
 
-      {next ? <NextProject project={next} /> : null}
+      {next ? <NextProject project={next} labels={labels} /> : null}
 
       <ClosingCta content={closingCta} />
     </>
@@ -102,17 +111,27 @@ export default async function ProjectPage({
  * The dark strip directly under the hero. Cells with no value are dropped
  * rather than rendered empty, so a sparse record reads as a short bar instead
  * of four labelled blanks.
+ *
+ * The project's own "Project details" rows follow the fixed facts - the title
+ * block the studio has always said they appear in, and until now never did.
  */
-function ProjectFacts({ project }: { project: ProjectFull }) {
-  const divisions = project.divisions?.map((division) => division.title) ?? [];
+function ProjectFacts({
+  project,
+  labels,
+}: {
+  project: ProjectFull;
+  labels: ProjectDetailLabels;
+}) {
+  const divisions = project.divisions.map((division) => division.title);
 
   const facts = [
-    { label: "Category", value: project.category },
-    { label: "Location", value: project.location },
-    { label: "Divisions engaged", value: divisions.join(", ") || undefined },
-    { label: "Status", value: project.status },
-    { label: "Year", value: project.year },
-    { label: "Client", value: project.client },
+    { label: labels.category, value: project.category?.title },
+    { label: labels.location, value: project.location },
+    { label: labels.divisions, value: divisions.join(", ") || undefined },
+    { label: labels.status, value: project.status },
+    { label: labels.year, value: project.year },
+    { label: labels.client, value: project.client },
+    ...project.details,
   ].filter((fact): fact is { label: string; value: string } => Boolean(fact.value));
 
   if (facts.length === 0) return null;
@@ -135,9 +154,9 @@ function ProjectFacts({ project }: { project: ProjectFull }) {
          * there is no empty cell to misread, at any count from one to six.
          */}
         <dl className="flex flex-wrap gap-px border-t border-rule-dark bg-rule-dark">
-          {facts.map((fact) => (
+          {facts.map((fact, index) => (
             <div
-              key={fact.label}
+              key={`${index}-${fact.label}`}
               className="grow basis-[12rem] bg-ink py-[clamp(1.5rem,3vw,2.25rem)] sm:px-7 sm:first:pl-0"
             >
               <dt className="t-meta text-steel-light">{fact.label}</dt>
@@ -152,19 +171,27 @@ function ProjectFacts({ project }: { project: ProjectFull }) {
   );
 }
 
-function Overview({ project }: { project: ProjectFull }) {
-  const body = project.description ?? [];
-  const scope = project.scopeOfWorks ?? [];
-  const equipment = project.equipment ?? [];
+function Overview({
+  project,
+  labels,
+}: {
+  project: ProjectFull;
+  labels: ProjectDetailLabels;
+}) {
+  const body = project.description;
+  const scope = project.scopeOfWorks;
+  const equipment = project.equipment;
 
-  if (!project.summary && body.length === 0 && scope.length === 0) return null;
+  if (!project.summary && body.length === 0 && scope.length === 0 && equipment.length === 0) {
+    return null;
+  }
 
   return (
     <section className="shell py-[clamp(3.5rem,8vw,7.5rem)]">
       <div className="grid gap-[clamp(2.25rem,6vw,5.5rem)] lg:grid-cols-2 lg:items-start">
         <div>
           <Reveal>
-            <p className="t-meta text-copper">Overview</p>
+            <p className="t-meta text-copper">{labels.overview}</p>
             {project.summary ? (
               <h2 className="mt-5 display-sentence t-h2 max-w-[22ch] text-ink">
                 {project.summary}
@@ -191,7 +218,7 @@ function Overview({ project }: { project: ProjectFull }) {
         <div>
           {scope.length > 0 ? (
             <Reveal order={0.08}>
-              <p className="t-meta text-copper">Scope of works</p>
+              <p className="t-meta text-copper">{labels.scope}</p>
               <ol className="mt-5 border-t-2 border-ink">
                 {scope.map((item, index) => (
                   <li
@@ -223,7 +250,9 @@ function Overview({ project }: { project: ProjectFull }) {
 
           {equipment.length > 0 ? (
             <Reveal order={0.16}>
-              <p className="mt-10 t-meta text-copper">Equipment specified</p>
+              <p className={`${scope.length > 0 ? "mt-10" : ""} t-meta text-copper`}>
+                {labels.equipment}
+              </p>
               <ul className="mt-4 flex flex-wrap gap-2">
                 {equipment.map((item) => (
                   <li
@@ -242,54 +271,20 @@ function Overview({ project }: { project: ProjectFull }) {
   );
 }
 
-/** Three uprights and a wide crop beneath, per the design. */
-function Gallery({ project }: { project: ProjectFull }) {
-  const gallery = project.gallery ?? [];
-  if (gallery.length === 0) return null;
-
-  // The last image runs full width beneath the others; everything before it is
-  // an upright. A gallery of one is therefore just the wide crop.
-  const uprights = gallery.slice(0, -1);
-  const wide = gallery[gallery.length - 1];
-
-  return (
-    <section className="border-t-2 border-ink bg-paper-bright">
-      <div className="shell py-[clamp(3rem,6vw,5.5rem)]">
-        <p className="t-meta text-copper">On site</p>
-
-        {uprights.length > 0 ? (
-          <div className="mt-7 grid gap-[clamp(1rem,2.5vw,2rem)] sm:grid-cols-2 lg:grid-cols-3">
-            {uprights.map((image, index) => (
-              <ImageReveal
-                key={image.url ?? image.src ?? index}
-                className="relative aspect-4/5 w-full"
-              >
-                <SiteImage
-                  image={image}
-                  sizes="(min-width: 1024px) 31vw, (min-width: 640px) 47vw, 100vw"
-                  maxWidth={1100}
-                />
-              </ImageReveal>
-            ))}
-          </div>
-        ) : null}
-
-        <ImageReveal className="relative mt-[clamp(1rem,2.5vw,2rem)] aspect-16/7 w-full">
-          <SiteImage image={wide} sizes="100vw" maxWidth={2000} />
-        </ImageReveal>
-      </div>
-    </section>
-  );
-}
-
-function NextProject({ project }: { project: Project }) {
+function NextProject({
+  project,
+  labels,
+}: {
+  project: Project;
+  labels: ProjectDetailLabels;
+}) {
   const meta = projectMeta(project);
 
   return (
     <section className="border-t-2 border-ink">
       <div className="shell flex flex-wrap items-end justify-between gap-x-10 gap-y-6 py-[clamp(2.5rem,5vw,4rem)]">
         <div>
-          <p className="t-meta text-steel">Next project</p>
+          <p className="t-meta text-steel">{labels.nextProject}</p>
           <Link href={`/projects/${project.slug}`} className="group mt-4 block">
             <span className="block display-sentence t-h3 text-ink transition-colors duration-300 group-hover:text-copper">
               {project.name}
@@ -297,7 +292,7 @@ function NextProject({ project }: { project: Project }) {
             {meta ? <span className="mt-2 block t-meta text-steel">{meta}</span> : null}
           </Link>
         </div>
-        <LinkUnderline href="/projects">All projects</LinkUnderline>
+        <LinkUnderline href="/projects">{labels.allProjects}</LinkUnderline>
       </div>
     </section>
   );

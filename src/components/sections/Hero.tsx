@@ -1,14 +1,11 @@
 import Link from "next/link";
-import { ButtonLink } from "@/components/primitives/Button";
 import { BlueprintPlate } from "@/components/primitives/BlueprintPlate";
+import { ButtonRow } from "@/components/primitives/ButtonRow";
 import { SiteImage } from "@/components/primitives/SiteImage";
 import { Parallax } from "@/components/motion/Parallax";
+import { headingLines } from "@/lib/text";
 import { hasImage } from "@/sanity/lib/image";
-import type {
-  Hero as HeroContent,
-  Service,
-  SiteSettings,
-} from "@/sanity/lib/types";
+import type { PageHero, Service, SiteSettings } from "@/sanity/lib/types";
 
 /**
  * The hero is a server component: its entrance is CSS, so nothing above the
@@ -19,14 +16,19 @@ export function Hero({
   settings,
   services,
   stripLabel,
+  standardsLabel,
 }: {
-  hero: HeroContent;
+  hero: PageHero;
   settings: SiteSettings;
   services: Service[];
   /** The line above the division strip. */
   stripLabel: string;
+  /** The words before the standards, e.g. Worked to. */
+  standardsLabel?: string;
 }) {
-  const showPhoto = hasImage(hero.background);
+  const showPhoto = hasImage(hero.image);
+  // Each line of the heading is set, and animated in, on its own.
+  const lines = headingLines(hero.heading);
 
   /**
    * A full viewport, with no cap.
@@ -47,7 +49,7 @@ export function Hero({
         {showPhoto ? (
           <>
             <SiteImage
-              image={hero.background}
+              image={hero.image}
               sizes="100vw"
               priority
               maxWidth={2400}
@@ -79,9 +81,9 @@ export function Hero({
        */}
       <div className="shell pb-[clamp(2rem,3vw,3rem)] pt-[clamp(6.5rem,10vw,8.5rem)]">
         <h1 className="display t-hero max-w-[18ch] text-paper-bright">
-          {hero.headingLines.map((line, index) => (
+          {lines.map((line, index) => (
             <span
-              key={line}
+              key={`${index}-${line}`}
               className="block animate-rise"
               style={{ animationDelay: `${0.12 + index * 0.19}s` }}
             >
@@ -96,38 +98,39 @@ export function Hero({
          * what gives the band its width — packed together at the left they read
          * as one paragraph with a button stuck to it.
          */}
-        <div className="mt-[clamp(1.75rem,3vw,2.5rem)] flex flex-col gap-7 lg:grid lg:grid-cols-[minmax(0,34rem)_auto] lg:items-end lg:justify-between lg:gap-x-14">
-          <p
-            className="max-w-[54ch] t-lead animate-rise text-paper-bright/75"
-            style={{ animationDelay: `${0.12 + hero.headingLines.length * 0.19}s` }}
-          >
-            {hero.lead}
-          </p>
+        {hero.lead || hero.buttons.length > 0 ? (
+          <div className="mt-[clamp(1.75rem,3vw,2.5rem)] flex flex-col gap-7 lg:grid lg:grid-cols-[minmax(0,34rem)_auto] lg:items-end lg:justify-between lg:gap-x-14">
+            {hero.lead ? (
+              <p
+                className="max-w-[54ch] t-lead animate-rise text-paper-bright/75"
+                style={{ animationDelay: `${0.12 + lines.length * 0.19}s` }}
+              >
+                {hero.lead}
+              </p>
+            ) : (
+              <span aria-hidden="true" />
+            )}
 
-          <div
-            className="flex flex-col gap-3 animate-rise sm:flex-row sm:flex-wrap"
-            style={{
-              animationDelay: `${0.3 + hero.headingLines.length * 0.19}s`,
-            }}
-          >
             {/*
-             * One call to action only. The quote request is already the
-             * closing banner's single job, and the header carries it too.
+             * The buttons come from the Home page document. It ships with one,
+             * outlined: the quote request is already the header's button and
+             * the closing banner's single job, so the hero points at the work.
              */}
-            <ButtonLink
-              href={hero.secondaryCta.href}
-              tone="onInk"
-              variant="outline"
-              withArrow
-              className="justify-center sm:justify-start"
-            >
-              {hero.secondaryCta.label}
-            </ButtonLink>
+            <ButtonRow
+              buttons={hero.buttons}
+              className="animate-rise"
+              style={{ animationDelay: `${0.3 + lines.length * 0.19}s` }}
+            />
           </div>
-        </div>
+        ) : null}
       </div>
 
-      <DivisionStrip services={services} settings={settings} label={stripLabel} />
+      <DivisionStrip
+        services={services}
+        settings={settings}
+        label={stripLabel}
+        standardsLabel={standardsLabel}
+      />
     </section>
   );
 }
@@ -150,12 +153,19 @@ function DivisionStrip({
   services,
   settings,
   label,
+  standardsLabel,
 }: {
   services: Service[];
   settings: SiteSettings;
   label: string;
+  standardsLabel?: string;
 }) {
   if (services.length === 0) return null;
+
+  const credentials =
+    settings.standards.length > 0
+      ? [standardsLabel, settings.standards.join(" · ")].filter(Boolean).join(" ")
+      : settings.footerNote;
 
   return (
     <div
@@ -209,11 +219,7 @@ function DivisionStrip({
 
       {/* Title block: the sheet's own footer line. */}
       <div className="shell flex flex-wrap items-center justify-between gap-x-8 gap-y-1.5 border-t border-rule-dark py-3">
-        <span className="t-meta text-steel-light">
-          {settings.standards && settings.standards.length > 0
-            ? `Worked to ${settings.standards.join(" · ")}`
-            : settings.footerNote}
-        </span>
+        <span className="t-meta text-steel-light">{credentials}</span>
         <span className="t-meta text-steel-light">
           {settings.address.lines.slice(-2).join(", ")}
         </span>

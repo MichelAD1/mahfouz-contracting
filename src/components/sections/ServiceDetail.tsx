@@ -38,9 +38,11 @@ export function ServiceDetail({
   index: number;
 }) {
   const body =
-    service.fullDescription && service.fullDescription.length > 0
+    service.fullDescription.length > 0
       ? service.fullDescription
-      : [service.shortDescription];
+      : service.shortDescription
+        ? [service.shortDescription]
+        : [];
 
   const imageFirst = index % 2 === 1;
 
@@ -52,10 +54,12 @@ export function ServiceDetail({
       <div className="grid gap-[clamp(2rem,5vw,4.5rem)] lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:items-start">
         <div className={imageFirst ? "lg:order-2" : undefined}>
           <Reveal>
-            <div className="flex items-baseline gap-4">
-              <span className="t-meta text-copper">{service.code}</span>
-              <span aria-hidden="true" className="h-px w-8 bg-rule-strong" />
-            </div>
+            {service.code ? (
+              <div className="flex items-baseline gap-4">
+                <span className="t-meta text-copper">{service.code}</span>
+                <span aria-hidden="true" className="h-px w-8 bg-rule-strong" />
+              </div>
+            ) : null}
 
             <h2 className="mt-4 display-sentence t-h2 max-w-[18ch] text-ink">
               {service.title}

@@ -1,12 +1,82 @@
 import { defineField, defineType } from "sanity";
 
-/** Repeatable documents: services, projects, process steps, partners, testimonials. */
+/**
+ * Repeatable documents: services, projects and the tags and categories that
+ * sort them, process steps, partners, testimonials.
+ */
 
 const orderField = defineField({
   name: "order",
   title: "Order",
   type: "number",
   description: "Lower numbers appear first.",
+});
+
+/**
+ * A label a project can carry, and a button in the projects filter.
+ *
+ * Its own document rather than a word typed onto each project, so "Electrical"
+ * is spelled one way everywhere, renaming it renames every card at once, and
+ * the filter can never grow two buttons for the same thing.
+ */
+export const projectTag = defineType({
+  name: "projectTag",
+  title: "Project tag",
+  type: "document",
+  fields: [
+    defineField({
+      name: "title",
+      type: "string",
+      description:
+        "As it reads on the filter button and under a project card, e.g. Electrical.",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "slug",
+      type: "slug",
+      options: { source: "title", maxLength: 64 },
+      description:
+        "Used in the address of a filtered view, e.g. /projects?tag=electrical.",
+      validation: (rule) => rule.required(),
+    }),
+    orderField,
+  ],
+  orderings: [
+    { name: "manual", title: "Manual order", by: [{ field: "order", direction: "asc" }] },
+  ],
+  preview: { select: { title: "title", subtitle: "slug.current" } },
+});
+
+/**
+ * The sector a project was for: commercial, industrial and so on. One per
+ * project, where tags can be several - so it is a fact on the project page, and
+ * a second filter row once more than one is in use.
+ */
+export const projectCategory = defineType({
+  name: "projectCategory",
+  title: "Project category",
+  type: "document",
+  fields: [
+    defineField({
+      name: "title",
+      type: "string",
+      description: "e.g. Commercial, Industrial, Institutional.",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "slug",
+      type: "slug",
+      options: { source: "title", maxLength: 64 },
+      description:
+        "Used in the address of a filtered view, e.g. /projects?category=industrial.",
+      validation: (rule) => rule.required(),
+    }),
+    orderField,
+  ],
+  orderings: [
+    { name: "manual", title: "Manual order", by: [{ field: "order", direction: "asc" }] },
+  ],
+  preview: { select: { title: "title", subtitle: "slug.current" } },
 });
 
 export const service = defineType({
@@ -83,6 +153,7 @@ export const project = defineType({
     { name: "main", title: "Project", default: true },
     { name: "media", title: "Media" },
     { name: "meta", title: "Metadata" },
+    { name: "search", title: "Search & sharing" },
   ],
   fields: [
     defineField({
@@ -124,18 +195,21 @@ export const project = defineType({
         "One entry per line of work, in the order it was carried out. Numbered automatically on the project page.",
     }),
     defineField({
+      name: "tags",
+      type: "array",
+      group: "main",
+      of: [{ type: "reference", to: [{ type: "projectTag" }] }],
+      description:
+        "Drive the filter on the projects page and the line under each project card, e.g. Electrical, Maintenance. New tags are created under Project tags.",
+      validation: (rule) => rule.unique(),
+    }),
+    defineField({
       name: "category",
-      type: "string",
+      type: "reference",
       group: "meta",
-      options: {
-        list: [
-          "Commercial",
-          "Industrial",
-          "Institutional",
-          "Residential",
-          "Infrastructure",
-        ],
-      },
+      to: [{ type: "projectCategory" }],
+      description:
+        "The sector, e.g. Commercial. Shown on the project page, and offered as a filter once two or more categories are in use.",
     }),
     defineField({ name: "location", type: "string", group: "meta" }),
     defineField({
@@ -159,7 +233,8 @@ export const project = defineType({
       group: "meta",
       of: [{ type: "reference", to: [{ type: "service" }] }],
       description:
-        "Drives the tags on each project card and the filter on the projects index. A project with no divisions cannot be filtered to.",
+        "Which of your divisions worked on it. Shown on the project page as Divisions engaged, and under the card when the project has no tags.",
+      validation: (rule) => rule.unique(),
     }),
     defineField({
       name: "equipment",
@@ -189,7 +264,10 @@ export const project = defineType({
       name: "gallery",
       type: "array",
       group: "media",
-      of: [{ type: "imageWithAlt" }],
+      of: [{ type: "galleryImage" }],
+      options: { layout: "grid" },
+      description:
+        "Photographs for the carousel on the project page, in the order they are shown - drag to reorder. Two or more get arrows, swiping and a counter.",
     }),
     defineField({
       name: "featured",
@@ -199,7 +277,22 @@ export const project = defineType({
       initialValue: false,
     }),
     { ...orderField, group: "main" },
-    defineField({ name: "seo", type: "seo", group: "main" }),
+    defineField({
+      name: "searchVisible",
+      title: "Show in search engines",
+      type: "boolean",
+      group: "search",
+      initialValue: false,
+      description:
+        "Leave off until every fact on this project's page is confirmed. Turning it on lists the page in the sitemap and lets Google index it.",
+    }),
+    defineField({
+      name: "seo",
+      type: "seo",
+      group: "search",
+      description:
+        "Leave empty to use the project's name, summary and cover image.",
+    }),
   ],
   orderings: [
     {
@@ -212,7 +305,12 @@ export const project = defineType({
     },
   ],
   preview: {
-    select: { title: "name", category: "category", year: "year", media: "cover" },
+    select: {
+      title: "name",
+      category: "category.title",
+      year: "year",
+      media: "cover",
+    },
     prepare: ({ title, category, year, media }) => ({
       title,
       subtitle: [category, year].filter(Boolean).join(", "),
@@ -315,4 +413,12 @@ export const testimonial = defineType({
   },
 });
 
-export const collections = [service, project, process, partner, testimonial];
+export const collections = [
+  service,
+  project,
+  projectTag,
+  projectCategory,
+  process,
+  partner,
+  testimonial,
+];

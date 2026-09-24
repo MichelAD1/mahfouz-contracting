@@ -102,6 +102,12 @@ npx sanity exec scripts/seed.ts --with-user-token
 Writes every document the site renders, from `src/sanity/fallback/content.ts`,
 and uploads the images in `public/images/` as Sanity assets.
 
+To see what it would write first — no login needed, nothing uploaded or
+written — add `-- --dry-run --out=seed-preview.json` in place of
+`--with-user-token`. The documents the site stopped reading in Step 14
+(`hero`, `about`, `sectionCopy`) are left in place unless you add
+`-- --prune-legacy` to a real run; nothing reads them either way.
+
 Safe to re-run: ids are deterministic and writes are `createOrReplace`, so a
 second run updates in place rather than duplicating the site. Assets dedupe on
 content hash at Sanity's end.

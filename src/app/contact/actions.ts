@@ -10,7 +10,7 @@ import {
   validate,
   type ContactState,
 } from "@/lib/enquiry";
-import { getContact, getSiteFrame } from "@/sanity/lib/fetch";
+import { getContactPage, getSiteFrame } from "@/sanity/lib/fetch";
 
 /**
  * `ContactState` and `initialContactState` live in @/lib/enquiry, not here: a
@@ -62,7 +62,7 @@ export async function submitEnquiry(
     };
   }
 
-  const [contact, { settings }] = await Promise.all([getContact(), getSiteFrame()]);
+  const [contact, { settings }] = await Promise.all([getContactPage(), getSiteFrame()]);
   const to = contact.recipientEmail ?? process.env.CONTACT_RECIPIENT_EMAIL;
 
   if (!to) {

@@ -6,16 +6,19 @@ import type { Project } from "@/sanity/lib/types";
 /**
  * The meta line under a project's name.
  *
- * Divisions first, then where the work was. Both are optional and the line
- * degrades to whichever exists — a project with neither renders no line at all
- * rather than an empty rule, which is what the records look like until the
- * client fills them in.
+ * Its tags first - the same words as the filter buttons, so a card says why it
+ * is under the button that was pressed - then where the work was. A project
+ * with no tags falls back to naming its divisions. Everything is optional and
+ * the line degrades to whatever exists; a project with nothing renders no line
+ * at all rather than an empty rule.
  */
 export function projectMeta(project: Project): string | null {
-  const divisions = project.divisions?.map((division) => division.title) ?? [];
+  const labels = (project.tags.length > 0 ? project.tags : project.divisions).map(
+    (term) => term.title,
+  );
   const parts: string[] = [];
 
-  if (divisions.length > 0) parts.push(divisions.join(" · "));
+  if (labels.length > 0) parts.push(labels.join(" · "));
   if (project.location) parts.push(project.location);
 
   return parts.length > 0 ? parts.join(" - ") : null;

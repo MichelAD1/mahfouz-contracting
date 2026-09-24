@@ -4,39 +4,81 @@ import { groq } from "next-sanity";
  * Image projection: resolves the asset once so the UI never has to know about
  * Sanity refs. `slotHint` lets an editor describe the photograph a slot wants
  * before the photograph exists.
+ *
+ * The asset id, the crop and the hotspot travel with it, because without them
+ * the studio's crop tool and focal point were decoration: set in the editor,
+ * ignored by the site.
  */
-const IMAGE = groq`{
+const IMAGE_FIELDS = `
   "url": asset->url,
+  "assetId": asset._ref,
   "lqip": asset->metadata.lqip,
   "aspectRatio": asset->metadata.dimensions.aspectRatio,
-  "alt": coalesce(alt, ""),
-  slotHint
-}`;
+  alt,
+  slotHint,
+  "crop": crop{ top, bottom, left, right },
+  "hotspot": hotspot{ x, y, width, height }
+`;
+
+const IMAGE = groq`{${IMAGE_FIELDS}}`;
+
+const GALLERY_IMAGE = groq`{${IMAGE_FIELDS}, caption}`;
 
 const CTA = groq`{ label, href }`;
+
+const BUTTON = groq`{ label, href, style }`;
 
 const SEO = groq`{ title, description, "image": image${IMAGE} }`;
 
 const SECTION_INTRO = groq`{ label, heading, lead, linkLabel }`;
 
+const PAGE_HERO = groq`{
+  heading, lead,
+  "image": image${IMAGE},
+  "buttons": buttons[]${BUTTON}
+}`;
+
+/** The shared closing banner, and a page's override of it - same shape. */
+const CLOSING_BANNER = groq`{
+  heading, lead,
+  "cta": cta${CTA},
+  "background": background${IMAGE}
+}`;
+
+/** A tag or a category: a label, and a slug to filter on. */
+const TERM = groq`{ _id, title, "slug": slug.current }`;
+
 /**
  * A division, dereferenced from the service it points at.
  *
- * `shortTitle` wins here and only here: a project tag reads "Maintenance"
- * where the division's own page is headed "Maintenance & Facility Support".
+ * `shortTitle` wins here and only here: a project page lists "Maintenance"
+ * where the division's own section is headed "Maintenance & Facility Support".
  */
 const DIVISION = groq`{ _id, "title": coalesce(shortTitle, title), "slug": slug.current }`;
 
-/** Site-wide settings. Shared by the home query and the layout frame. */
+/** Site-wide settings. Shared by every query that renders the frame. */
 const SETTINGS = groq`{
   companyName, shortName, descriptor, tagline,
+  "logo": logo${IMAGE},
+  "logoOnDark": logoOnDark${IMAGE},
+  showNameWithLogo,
+  "favicon": favicon${IMAGE},
   phones[]{ label, number },
   emails,
   address{ lines },
+  postalAddress{ streetAddress, locality, region, postalCode, countryCode },
+  openingHours[]{ days, opens, closes },
+  areaServed,
   socials[]{ platform, url },
-  nav[]{ label, href },
+  "nav": nav[]${CTA},
+  "headerCta": headerCta${CTA},
   standards,
-  footerNote
+  footerNote,
+  footer{
+    navHeading, servicesHeading, contactHeading, copyright,
+    "legalLinks": legalLinks[]${CTA}
+  },
+  "seo": seo${SEO}
 }`;
 
 const SERVICE = groq`{
@@ -50,136 +92,164 @@ const SERVICE = groq`{
  * never drags galleries and body copy across the wire to render a thumbnail.
  */
 const PROJECT_CARD = groq`{
-  _id, name, "slug": slug.current, category, location, year, status, summary, featured,
+  _id, name, "slug": slug.current, location, year, status, summary, featured,
+  "category": category->${TERM},
   "cover": cover${IMAGE},
+  "tags": tags[]->${TERM},
   "divisions": services[]->${DIVISION}
 }`;
 
-/**
- * The whole home page in a single round trip. Sections are server components
- * so there is no client-side fetching and no request waterfall.
- */
-export const HOME_QUERY = groq`{
-  "settings": *[_type == "siteSettings"][0]${SETTINGS},
-  "hero": *[_type == "hero"][0]{
-    headingLines, lead,
-    "primaryCta": primaryCta${CTA},
-    "secondaryCta": secondaryCta${CTA},
-    "background": background${IMAGE}
-  },
-  "about": *[_type == "about"][0]{
-    sheet, statement, body,
-    "cta": cta${CTA},
-    "images": images[]${IMAGE},
-    "details": details[]{ label, value }
-  },
-  "services": *[_type == "service"]|order(order asc)${SERVICE},
-  "projects": *[_type == "project"]|order(featured desc, order asc)${PROJECT_CARD},
-  "process": *[_type == "process"]|order(order asc){
-    _id, step, title, description,
-    "image": image${IMAGE}
-  },
-  "partners": *[_type == "partner"]|order(order asc){
-    _id, name, url, "logo": logo${IMAGE}
-  },
-  "closingCta": *[_type == "closingCta"][0]{
-    heading, lead,
-    "cta": cta${CTA},
-    "background": background${IMAGE}
-  }
+/** Projects in the order the site shows them: featured first, then by hand. */
+const PROJECTS = groq`*[_type == "project" && defined(slug.current)]|order(featured desc, order asc)`;
+
+const WHO_WE_ARE = groq`{
+  label, heading, body,
+  "image": image${IMAGE},
+  "details": details[]{ label, value },
+  "highlights": highlights[]{ title, text },
+  "cta": cta${CTA}
 }`;
+
+const CLOSING_CTA = groq`*[_type == "closingCta"][0]${CLOSING_BANNER}`;
 
 /**
  * Everything the shared header and footer need, and nothing a page owns.
  *
  * The layout renders on every route, so this is the one query that runs on all
- * of them. Keeping it separate from HOME_QUERY means an inner page pulls the
+ * of them. Keeping it apart from the page queries means an inner page pulls the
  * navigation and the footer without also pulling the home page's hero.
  */
 export const SITE_FRAME_QUERY = groq`{
   "settings": *[_type == "siteSettings"][0]${SETTINGS},
-  "services": *[_type == "service"]|order(order asc){ _id, title, "slug": slug.current }
+  "services": *[_type == "service" && defined(slug.current)]|order(order asc){ _id, title, "slug": slug.current }
 }`;
 
-export const SERVICES_QUERY = groq`*[_type == "service"]|order(order asc)${SERVICE}`;
-
-export const PROCESS_QUERY = groq`*[_type == "process"]|order(order asc){
-  _id, step, title, description,
-  "image": image${IMAGE}
+/**
+ * The whole home page in a single round trip. Sections are server components
+ * so there is no client-side fetching and no request waterfall.
+ *
+ * The Who we are block is read from the About page's document: the home page
+ * carries the short version of it, so the two can never say different things.
+ */
+export const HOME_QUERY = groq`{
+  "page": *[_type == "homePage"][0]{
+    "hero": hero${PAGE_HERO},
+    divisionStrip, standardsLabel, aboutLinkLabel,
+    "capabilities": capabilities${SECTION_INTRO},
+    "selectedWork": selectedWork${SECTION_INTRO},
+    selectedWorkLimit,
+    "closingCta": closingCta${CLOSING_BANNER},
+    "seo": seo${SEO}
+  },
+  "about": *[_type == "aboutPage"][0]{ "whoWeAre": whoWeAre${WHO_WE_ARE} },
+  "services": *[_type == "service" && defined(slug.current)]|order(order asc)${SERVICE},
+  "projects": ${PROJECTS}${PROJECT_CARD},
+  "partners": *[_type == "partner"]|order(order asc){ _id, name, url, "logo": logo${IMAGE} },
+  "closingCta": ${CLOSING_CTA}
 }`;
 
-/** The closing banner, which every page ends on. */
-export const CLOSING_CTA_QUERY = groq`*[_type == "closingCta"][0]{
-  heading, lead,
-  "cta": cta${CTA},
-  "background": background${IMAGE}
+export const ABOUT_PAGE_QUERY = groq`{
+  "page": *[_type == "aboutPage"][0]{
+    "hero": hero${PAGE_HERO},
+    "whoWeAre": whoWeAre${WHO_WE_ARE},
+    "process": process${SECTION_INTRO},
+    "closingCta": closingCta${CLOSING_BANNER},
+    "seo": seo${SEO}
+  },
+  "process": *[_type == "process"]|order(order asc){
+    _id, step, title, description,
+    "image": image${IMAGE}
+  },
+  "closingCta": ${CLOSING_CTA}
 }`;
 
-export const ABOUT_QUERY = groq`*[_type == "about"][0]{
-  sheet, statement, body,
-  "cta": cta${CTA},
-  "images": images[]${IMAGE},
-  "details": details[]{ label, value }
+export const SERVICES_PAGE_QUERY = groq`{
+  "page": *[_type == "servicesPage"][0]{
+    "hero": hero${PAGE_HERO},
+    "closingCta": closingCta${CLOSING_BANNER},
+    "seo": seo${SEO}
+  },
+  "services": *[_type == "service" && defined(slug.current)]|order(order asc)${SERVICE},
+  "closingCta": ${CLOSING_CTA}
+}`;
+
+/**
+ * The projects index, and the labels every project page shares.
+ *
+ * Every tag and category comes back in the studio's order; the filter shows the
+ * ones at least one project carries, so a tag nobody uses yet is not a button
+ * that empties the grid.
+ */
+export const PROJECTS_PAGE_QUERY = groq`{
+  "page": *[_type == "projectsPage"][0]{
+    "hero": hero${PAGE_HERO},
+    filters{ allLabel, categoriesLabel, projectSingular, projectPlural },
+    "empty": empty${SECTION_INTRO},
+    "more": more${SECTION_INTRO},
+    detail{
+      overview, scope, equipment, gallery, nextProject, allProjects,
+      category, location, divisions, status, year, client
+    },
+    "closingCta": closingCta${CLOSING_BANNER},
+    "seo": seo${SEO}
+  },
+  "projects": ${PROJECTS}${PROJECT_CARD},
+  "tags": *[_type == "projectTag" && defined(slug.current)]|order(order asc, title asc)${TERM},
+  "categories": *[_type == "projectCategory" && defined(slug.current)]|order(order asc, title asc)${TERM},
+  "closingCta": ${CLOSING_CTA}
 }`;
 
 export const PROJECT_SLUGS_QUERY = groq`*[_type == "project" && defined(slug.current)].slug.current`;
 
-/** The projects index. Same shape as the home section, unfiltered and unlimited. */
-export const PROJECTS_QUERY = groq`*[_type == "project"]|order(featured desc, order asc)${PROJECT_CARD}`;
+/** Only the project pages the studio has cleared for search. */
+export const SITEMAP_PROJECTS_QUERY = groq`*[_type == "project" && searchVisible == true && defined(slug.current)]{
+  "slug": slug.current, _updatedAt
+}`;
 
 export const PROJECT_QUERY = groq`*[_type == "project" && slug.current == $slug][0]{
-  _id, name, "slug": slug.current, category, location, year, client, status, summary, featured,
+  _id, name, "slug": slug.current, location, year, client, status, summary, featured, searchVisible,
+  "category": category->${TERM},
   "cover": cover${IMAGE},
-  "gallery": gallery[]${IMAGE},
+  "gallery": gallery[]${GALLERY_IMAGE},
   "details": details[]{ label, value },
+  "tags": tags[]->${TERM},
   "divisions": services[]->${DIVISION},
-  "description": description[],
+  description,
   scopeOfWorks,
   "equipment": equipment[]->{ _id, name },
-  "related": *[_type == "project" && slug.current != $slug]|order(featured desc, order asc)[0..2]${PROJECT_CARD}
+  "seo": seo${SEO}
 }`;
 
 export const CONTACT_QUERY = groq`*[_type == "contact"][0]{
-  heading, description,
-  "details": details[]{ label, value },
-  formSubjects, enquiryChecklist, recipientEmail,
-  map{ latitude, longitude, label }
-}`;
-
-/**
- * The page copy, in one document.
- *
- * Read by `generateMetadata` and by the page body on the same render, which is
- * why its fetcher is wrapped in React `cache` - otherwise every route would
- * run this twice.
- */
-export const SECTION_COPY_QUERY = groq`*[_type == "sectionCopy"][0]{
-  divisionStrip,
-  "capabilities": capabilities${SECTION_INTRO},
-  "selectedWork": selectedWork${SECTION_INTRO},
-  "aboutHero": aboutHero${SECTION_INTRO},
-  "aboutProcess": aboutProcess${SECTION_INTRO},
-  "servicesHero": servicesHero${SECTION_INTRO},
-  "projectsHero": projectsHero${SECTION_INTRO},
-  "projectsMore": projectsMore${SECTION_INTRO},
-  "projectsEmpty": projectsEmpty${SECTION_INTRO},
-  "notFound": notFound${SECTION_INTRO},
-  projectsAllFilter,
-  enquiryForm{
+  "hero": hero${PAGE_HERO},
+  form{
     nameLabel, companyLabel, emailLabel, phoneLabel,
     subjectLabel, subjectPlaceholder, messageLabel,
     submitLabel, submittingLabel, successLead
   },
-  contactDirect{ formLabel, heading, officeLabel, emailLabel, checklistLabel },
-  "homeSeo": homeSeo${SEO},
-  "aboutSeo": aboutSeo${SEO},
-  "servicesSeo": servicesSeo${SEO},
-  "projectsSeo": projectsSeo${SEO},
-  "contactSeo": contactSeo${SEO}
+  formSubjects,
+  recipientEmail,
+  direct{
+    formLabel, heading, officeLabel, emailLabel,
+    hoursLabel, closedLabel, checklistLabel
+  },
+  "details": details[]{ label, value },
+  enquiryChecklist,
+  map{ latitude, longitude, label },
+  "seo": seo${SEO}
+}`;
+
+export const NOT_FOUND_QUERY = groq`{
+  "page": *[_type == "notFoundPage"][0]{
+    "hero": hero${PAGE_HERO},
+    "closingCta": closingCta${CLOSING_BANNER}
+  },
+  "closingCta": ${CLOSING_CTA}
 }`;
 
 export const PRIVACY_POLICY_QUERY = groq`*[_type == "privacyPolicy"][0]{
   heading, updated, intro,
+  "heroImage": heroImage${IMAGE},
   sections[]{ heading, body },
   "seo": seo${SEO}
 }`;

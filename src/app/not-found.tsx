@@ -1,6 +1,7 @@
 import { PageHero } from "@/components/layout/PageHero";
 import { ClosingCta } from "@/components/sections/ClosingCta";
-import { getClosingCta, getSectionCopy } from "@/sanity/lib/fetch";
+import { navLabel } from "@/lib/nav";
+import { getNotFoundPage, getSiteFrame } from "@/sanity/lib/fetch";
 
 export const revalidate = 300;
 
@@ -24,20 +25,25 @@ export const revalidate = 300;
  * is a code rather than a count.
  */
 export default async function NotFound() {
-  const [closingCta, copy] = await Promise.all([
-    getClosingCta(),
-    getSectionCopy(),
+  const [{ page, closingCta }, { settings }] = await Promise.all([
+    getNotFoundPage(),
+    getSiteFrame(),
   ]);
 
   return (
     <>
       <PageHero
-        crumbs={[{ label: "Home", href: "/" }, { label: "Not found" }]}
+        crumbs={[
+          { label: navLabel(settings.nav, "/", "Home"), href: "/" },
+          { label: "Not found" },
+        ]}
         index="404"
         seed={5}
         size="tall"
-        heading={copy.notFound.heading}
-        lead={copy.notFound.lead}
+        heading={page.hero.heading}
+        lead={page.hero.lead}
+        image={page.hero.image}
+        buttons={page.hero.buttons}
       />
 
       <ClosingCta content={closingCta} />
