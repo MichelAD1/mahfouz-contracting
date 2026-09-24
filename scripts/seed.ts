@@ -230,7 +230,10 @@ async function buildDocuments(): Promise<SanityDoc[]> {
       shortName: settings.shortName,
       descriptor: settings.descriptor,
       tagline: settings.tagline,
+      logo: await image(settings.logo),
+      logoOnDark: await image(settings.logoOnDark),
       showNameWithLogo: settings.showNameWithLogo ?? false,
+      favicon: await image(settings.favicon),
       standards: settings.standards,
       phones: keyed(settings.phones, "phone"),
       emails: settings.emails,
@@ -462,6 +465,8 @@ async function buildDocuments(): Promise<SanityDoc[]> {
         category: project.category
           ? { _type: "reference", _ref: project.category._id }
           : undefined,
+        city: project.city,
+        country: project.country,
         location: project.location,
         year: project.year,
         client: project.client,

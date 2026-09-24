@@ -146,6 +146,42 @@ function TitleBlockCell({
 }
 
 /**
+ * The logo for dark grounds, as a data URI Satori can draw - read from the CDN
+ * when it is an upload, from /public when it is the fallback. Only the dark
+ * version: the card is ink, and the colour logo would vanish into it.
+ */
+async function markDataUri(
+  image: Parameters<typeof sanityImageUrl>[0] | undefined,
+): Promise<{ uri: string; ratio: number } | null> {
+  if (!hasImage(image)) return null;
+
+  try {
+    let bytes: Buffer;
+    let type: string;
+
+    if (image.url) {
+      const response = await fetch(sanityImageUrl(image, { width: 400 }), {
+        next: { revalidate },
+      });
+      if (!response.ok) return null;
+      bytes = Buffer.from(await response.arrayBuffer());
+      type = response.headers.get("content-type") ?? "image/png";
+    } else {
+      bytes = await readFile(join(process.cwd(), "public", image.src!));
+      type = image.src!.endsWith(".svg") ? "image/svg+xml" : "image/png";
+    }
+
+    return {
+      uri: `data:${type};base64,${bytes.toString("base64")}`,
+      ratio: image.aspectRatio ?? 2,
+    };
+  } catch (error) {
+    console.error("[share card] the logo could not be read", error);
+    return null;
+  }
+}
+
+/**
  * The uploaded share image, as PNG bytes - or nothing, and the card is drawn.
  * SVGs are skipped: the CDN does not rasterise them.
  */
@@ -173,6 +209,9 @@ export default async function Image() {
 
   const uploaded = await uploadedCard(settings.seo.image);
   if (uploaded) return uploaded;
+
+  const mark = await markDataUri(settings.logoOnDark);
+  const MARK_HEIGHT = 40;
 
   const headline = `${settings.footerNote ?? settings.tagline ?? settings.companyName}.`.replace(
     /\.+$/,
@@ -230,12 +269,23 @@ export default async function Image() {
           <div
             style={{
               display: "flex",
+              alignItems: "center",
               fontFamily: "IBM Plex Mono",
               fontSize: 20,
               letterSpacing: 6,
               color: COPPER,
             }}
           >
+            {mark ? (
+              // eslint-disable-next-line @next/next/no-img-element -- Satori draws <img>, not next/image
+              <img
+                src={mark.uri}
+                alt=""
+                width={Math.round(MARK_HEIGHT * mark.ratio)}
+                height={MARK_HEIGHT}
+                style={{ marginRight: 22 }}
+              />
+            ) : null}
             {settings.companyName.toUpperCase()}
           </div>
 

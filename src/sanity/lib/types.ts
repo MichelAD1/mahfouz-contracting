@@ -187,6 +187,10 @@ export type Project = {
   name: string;
   slug: string;
   category?: ProjectCategory;
+  city?: string;
+  /** The one fact a card prints under the project's name. */
+  country?: string;
+  /** More specific than the city - a district, a building or a site. */
   location?: string;
   year?: string;
   client?: string;
@@ -336,7 +340,11 @@ export type ProjectDetailLabels = {
   nextProject: string;
   allProjects: string;
   category: string;
+  /** The fact for the city and the country. */
   location: string;
+  /** The fact for the site or district. */
+  site: string;
+  tags: string;
   divisions: string;
   status: string;
   year: string;

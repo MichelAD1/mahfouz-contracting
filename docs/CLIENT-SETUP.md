@@ -160,7 +160,14 @@ should be a formality someone has actually completed.
 
 ## 9. A logo file
 
-**What to do.** Upload it yourself, in the Studio: **Site settings → Identity**.
+**Done from the brand identity presentation — confirm the direction.** The MC
+mark from **Direction 01** (page 5) is on the site: extracted as a vector from
+the PDF, in its own colours on light grounds and the deck's reversed off-white
+on dark ones, plus a square icon for the browser tab. The presentation shows
+three directions; tell me if Direction 01 is not the chosen one, and send the
+final artwork files once the designer issues them.
+
+**To change it later**, upload in the Studio: **Site settings → Identity**.
 There are three slots, and only the first is needed:
 
 - **Logo** — the version for light backgrounds. An **SVG** if one exists,
@@ -227,5 +234,5 @@ there, worse than a policy somebody with authority has read.
 | 6 | Google Search Console | You | No — but do it now, it is free |
 | 7 | Google Business Profile | You | No — **start early**, it is slow |
 | 8 | Partner logo permission | You | No, but before launch |
-| 9 | Logo file — upload it in the Studio | You | No |
+| 9 | Logo — **in place** from Direction 01; confirm the direction | You | No |
 | 10 | Privacy policy | **Drafted** — you review it | No |

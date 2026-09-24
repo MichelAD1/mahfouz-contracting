@@ -15,6 +15,7 @@ import type {
   ProjectTag,
   Service,
   ServicesPage,
+  SiteImage,
   SiteSettings,
 } from "@/sanity/lib/types";
 
@@ -123,11 +124,31 @@ export const fallbackSettings: SiteSettings = {
   descriptor: "Contracting",
   tagline: "Built right. Built to last.",
   /**
-   * TODO(client): no logo file exists yet - the live site sets the name in
-   * type too. The header and footer keep the typeset wordmark until one is
-   * uploaded in Site settings, which is the moment it appears everywhere.
+   * The MC mark from the brand identity presentation - Direction 01, page 5 -
+   * without the lettering under it, taken from the PDF's own vector paths so
+   * it stays crisp at any size. The colours are the brand's: the navy M and
+   * the grey C on light grounds, and the whole mark in #fcfcf7 on dark ones,
+   * which is the reversed version the same presentation shows on page 6.
+   *
+   * It is a symbol without the name, so the typeset wordmark stays beside it.
    */
-  showNameWithLogo: false,
+  logo: {
+    src: "/brand/mahfouz-mark.svg",
+    alt: "Mahfouz Contracting",
+    aspectRatio: 488.14 / 260.44,
+  },
+  logoOnDark: {
+    src: "/brand/mahfouz-mark-light.svg",
+    alt: "Mahfouz Contracting",
+    aspectRatio: 488.14 / 260.44,
+  },
+  showNameWithLogo: true,
+  /** The reversed mark on the brand navy, square - the tab and home-screen icon. */
+  favicon: {
+    src: "/brand/mahfouz-icon.png",
+    alt: "Mahfouz Contracting",
+    aspectRatio: 1,
+  },
   phones: [
     { label: "Liberia", number: "+231 077 340 0671" },
     { label: "Lebanon", number: "+961 3 246 171" },
@@ -332,9 +353,13 @@ export const fallbackServices: Service[] = [
  *
  * TODO(client): the tags and divisions below are inferred from the project
  * names and the design canvas, not confirmed by the client. They drive the
- * line under every card and the whole filter on /projects, so they need
- * checking before launch. Location, year and client are deliberately left
- * unset rather than guessed — those are claims about specific work.
+ * whole filter on /projects, so they need checking before launch. Year and
+ * client are deliberately left unset rather than guessed — those are claims
+ * about specific work.
+ *
+ * TODO(client): the city and country are the company's own address, set as a
+ * stand-in so the cards have a line under the name. Replace each with where
+ * the work actually was.
  */
 export const fallbackProjects: Project[] = [
   {
@@ -342,6 +367,8 @@ export const fallbackProjects: Project[] = [
     name: "Panels Maintenance",
     slug: "panels-maintenance",
     category: CATEGORY.commercial,
+    city: "Monrovia",
+    country: "Liberia",
     featured: true,
     tags: [TAG.electrical, TAG.maintenance],
     divisions: [DIVISION.electrical, DIVISION.maintenance],
@@ -356,6 +383,8 @@ export const fallbackProjects: Project[] = [
     name: "Green Enterprises",
     slug: "green-enterprises",
     category: CATEGORY.commercial,
+    city: "Monrovia",
+    country: "Liberia",
     tags: [TAG.electrical, TAG.mechanical],
     divisions: [DIVISION.electrical, DIVISION.mechanical],
     cover: {
@@ -369,6 +398,8 @@ export const fallbackProjects: Project[] = [
     name: "Reliable Energy",
     slug: "reliable-energy",
     category: CATEGORY.commercial,
+    city: "Monrovia",
+    country: "Liberia",
     tags: [TAG.electrical],
     divisions: [DIVISION.electrical],
     cover: {
@@ -382,6 +413,8 @@ export const fallbackProjects: Project[] = [
     name: "Branding Ideas",
     slug: "branding-ideas",
     category: CATEGORY.commercial,
+    city: "Monrovia",
+    country: "Liberia",
     tags: [TAG.it],
     divisions: [DIVISION.it],
     cover: {
@@ -393,6 +426,53 @@ export const fallbackProjects: Project[] = [
 ];
 
 /**
+ * The site's own photograph library, for the galleries below. Every one is a
+ * stand-in: none of them shows any of these projects.
+ */
+const LIBRARY = {
+  tower: {
+    src: "/images/site-tower-construction.webp",
+    alt: "Tower under construction with a crane above the exposed frame",
+    aspectRatio: 1289 / 860,
+  },
+  panels: {
+    src: "/images/divisions/electrical.webp",
+    alt: "Electrical distribution panels with cable containment and conduit",
+    aspectRatio: 1024 / 1536,
+  },
+  team: {
+    src: "/images/site-team-review.webp",
+    alt: "Site team reviewing drawings in front of a concrete frame",
+    aspectRatio: 1,
+  },
+  tools: {
+    src: "/images/divisions/maintenance.webp",
+    alt: "Servicing tools laid out for a scheduled maintenance visit",
+    aspectRatio: 1024 / 1536,
+  },
+  plant: {
+    src: "/images/divisions/mechanical.webp",
+    alt: "Air conditioning unit, pipework and fire protection symbols",
+    aspectRatio: 1024 / 1536,
+  },
+  controls: {
+    src: "/images/divisions/it-automation.webp",
+    alt: "Security camera, access keypad and building controls",
+    aspectRatio: 1024 / 1536,
+  },
+  drawings: {
+    src: "/images/divisions/engineering.webp",
+    alt: "Rolled drawings, a floor plan on a clipboard and a pair of dividers",
+    aspectRatio: 1024 / 1536,
+  },
+  skyline: {
+    src: "/images/hero-skyline.webp",
+    alt: "City skyline of high-rise towers seen from above at first light",
+    aspectRatio: 16 / 9,
+  },
+} satisfies Record<string, SiteImage>;
+
+/**
  * Detail-page content, keyed by slug.
  *
  * TODO(client): EVERYTHING BELOW IS PLACEHOLDER AND MUST BE CONFIRMED OR
@@ -402,10 +482,14 @@ export const fallbackProjects: Project[] = [
  * that never happened.
  *
  * It is here so the detail layout can be reviewed against real-looking copy,
- * and it is deliberately limited to the one project the canvas specifies. The
- * other three render the sparse version, which is what an unfilled record
- * genuinely looks like. Every project page carries `noindex` until its
- * "Show in search engines" switch is turned on in the studio.
+ * and the copy is deliberately limited to the one project the canvas
+ * specifies; the other three carry a gallery and nothing else. Every project
+ * page carries `noindex` until its "Show in search engines" switch is turned
+ * on in the studio.
+ *
+ * TODO(client): every gallery is library photography, not pictures of these
+ * jobs, captioned by what each photograph shows rather than as the project's.
+ * Replace them with site photography.
  */
 export const fallbackProjectDetails: Record<string, Partial<ProjectFull>> = {
   "panels-maintenance": {
@@ -428,38 +512,34 @@ export const fallbackProjectDetails: Record<string, Partial<ProjectFull>> = {
       { _id: "ptn-legrand", name: "Legrand" },
       { _id: "ptn-abb", name: "ABB" },
     ],
-    /**
-     * TODO(client): stand-in photographs from the site's own library, not
-     * pictures of this job. They are here so the carousel can be reviewed with
-     * a real mix of shapes - landscape, square and portrait - and the captions
-     * describe what each photograph shows rather than claiming it was taken
-     * on this project. Replace them with site photography.
-     */
+    // A mix of shapes on purpose - landscape, portrait and square - so the
+    // carousel is reviewed against all three.
     gallery: [
-      {
-        src: "/images/site-tower-construction.webp",
-        alt: "Tower under construction with a crane above the exposed frame",
-        aspectRatio: 1289 / 860,
-        caption: "Structure under construction",
-      },
-      {
-        src: "/images/divisions/electrical.webp",
-        alt: "Electrical distribution panels with cable containment and conduit",
-        aspectRatio: 1024 / 1536,
-        caption: "Distribution panels and cable containment",
-      },
-      {
-        src: "/images/site-team-review.webp",
-        alt: "Site team reviewing drawings in front of a concrete frame",
-        aspectRatio: 1,
-        caption: "Drawings reviewed on site",
-      },
-      {
-        src: "/images/divisions/maintenance.webp",
-        alt: "Servicing tools laid out for a scheduled maintenance visit",
-        aspectRatio: 1024 / 1536,
-        caption: "Tools for a scheduled maintenance visit",
-      },
+      { ...LIBRARY.tower, caption: "Structure under construction" },
+      { ...LIBRARY.panels, caption: "Distribution panels and cable containment" },
+      { ...LIBRARY.team, caption: "Drawings reviewed on site" },
+      { ...LIBRARY.tools, caption: "Tools for a scheduled maintenance visit" },
+    ],
+  },
+  "green-enterprises": {
+    gallery: [
+      { ...LIBRARY.plant, caption: "Air conditioning, pipework and fire protection" },
+      { ...LIBRARY.panels, caption: "Distribution panels and cable containment" },
+      { ...LIBRARY.tower, caption: "Structure under construction" },
+    ],
+  },
+  "reliable-energy": {
+    gallery: [
+      { ...LIBRARY.panels, caption: "Distribution panels and cable containment" },
+      { ...LIBRARY.team, caption: "Drawings reviewed on site" },
+      { ...LIBRARY.tools, caption: "Tools for a scheduled maintenance visit" },
+    ],
+  },
+  "branding-ideas": {
+    gallery: [
+      { ...LIBRARY.controls, caption: "Access control, security and building controls" },
+      { ...LIBRARY.drawings, caption: "Drawings and design review" },
+      { ...LIBRARY.skyline, caption: "High-rise towers" },
     ],
   },
 };
@@ -627,10 +707,17 @@ export const fallbackHomePage: HomePage = {
   seo: {},
 };
 
+/*
+ * TODO(client): every page hero below borrows a photograph from the site's own
+ * library - the page heroes all take one now, and a real photograph of the
+ * company's work belongs in each. Swap them in the studio.
+ */
+
 export const fallbackAboutPage: AboutPage = {
   hero: {
     heading: "Engineering, contracting and maintenance, in-house.",
     lead: "Five divisions under one roof, working to a single project program, so design, supply, installation and commissioning meet where they are supposed to.",
+    image: LIBRARY.team,
     buttons: [],
   },
   whoWeAre: {
@@ -701,6 +788,11 @@ export const fallbackServicesPage: ServicesPage = {
   hero: {
     heading: "Five divisions, one scope of responsibility.",
     lead: "Each division works in-house and to a single project program, so design, supply, installation and commissioning meet where they are supposed to.",
+    image: {
+      src: "/images/switchgear-assembly.webp",
+      alt: "Electricians assembling and wiring switchgear panels in a workshop",
+      aspectRatio: 1,
+    },
     buttons: [],
   },
   seo: {
@@ -749,6 +841,8 @@ export const fallbackProjectsPage: ProjectsPage = {
     allProjects: "All projects",
     category: "Category",
     location: "Location",
+    site: "Site",
+    tags: "Tags",
     divisions: "Divisions engaged",
     status: "Status",
     year: "Year",
@@ -777,6 +871,7 @@ export const fallbackContactPage: ContactPage = {
   hero: {
     heading: "Request a quote",
     lead: "Send us the scope and we will come back with an engineered answer, not a guess. For tenders and prequalification we can issue project records and references on request.",
+    image: LIBRARY.panels,
     buttons: [],
   },
   form: {
@@ -837,6 +932,7 @@ export const fallbackNotFoundPage: NotFoundPage = {
   hero: {
     heading: "That page is not in the set.",
     lead: "The address you followed does not exist, or what used to be there has moved. Everywhere the site does go is in the navigation above.",
+    image: LIBRARY.tools,
     buttons: [],
   },
 };
@@ -861,6 +957,7 @@ export const fallbackNotFoundPage: NotFoundPage = {
  */
 export const fallbackPrivacyPolicy: PrivacyPolicy = {
   heading: "Privacy policy",
+  heroImage: LIBRARY.drawings,
   updated: "2026-09-20",
   intro: [
     "This policy explains what this website collects, why, and what happens to it afterwards.",

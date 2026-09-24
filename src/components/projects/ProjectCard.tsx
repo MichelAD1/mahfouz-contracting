@@ -4,24 +4,15 @@ import { pad2 } from "@/lib/format";
 import type { Project } from "@/sanity/lib/types";
 
 /**
- * The meta line under a project's name.
+ * The meta line under a project's name: the country, and nothing else.
  *
- * Its tags first - the same words as the filter buttons, so a card says why it
- * is under the button that was pressed - then where the work was. A project
- * with no tags falls back to naming its divisions. Everything is optional and
- * the line degrades to whatever exists; a project with nothing renders no line
- * at all rather than an empty rule.
+ * The tags stay off the cards - they are the filter's business, and a card
+ * listing them next to the buttons that do the filtering says the same thing
+ * twice. The project's own page carries the tags, the city and the rest. A
+ * project with no country renders no line at all rather than an empty rule.
  */
 export function projectMeta(project: Project): string | null {
-  const labels = (project.tags.length > 0 ? project.tags : project.divisions).map(
-    (term) => term.title,
-  );
-  const parts: string[] = [];
-
-  if (labels.length > 0) parts.push(labels.join(" · "));
-  if (project.location) parts.push(project.location);
-
-  return parts.length > 0 ? parts.join(" - ") : null;
+  return project.country?.trim() || null;
 }
 
 /** A card's position in the grid, numbered from 01 rather than 00. */

@@ -22,6 +22,13 @@ const SIZES = {
 } as const;
 
 /**
+ * A symbol set beside the typeset name is sized against the name, not on its
+ * own: about twice the wordmark's cap height, which is how a horizontal
+ * lockup balances. Heights in px, matching `text-xl`, `text-lg` and `text-2xl`.
+ */
+const SYMBOL_HEIGHT: Record<Size, number> = { header: 26, menu: 24, footer: 32 };
+
+/**
  * Optical balance, the same rule the partner strip uses: set at one height, a
  * square mark reads as a fraction of the size of a long one, because the eye
  * compares area rather than height.
@@ -53,6 +60,7 @@ function LogoImage({
   surface,
   size,
   alt,
+  symbol,
   eager,
   className = "",
 }: {
@@ -60,12 +68,14 @@ function LogoImage({
   surface: Surface;
   size: Size;
   alt: string;
+  /** Set beside the typeset name, and sized against it. */
+  symbol: boolean;
   eager?: boolean;
   className?: string;
 }) {
   const { image, silhouette } = choice;
   const ratio = croppedAspectRatio(image) ?? 3;
-  const height = logoHeight(ratio, size);
+  const height = symbol ? SYMBOL_HEIGHT[size] : logoHeight(ratio, size);
   const width = Math.round(height * ratio);
   const vector = isVector(image);
 
@@ -149,6 +159,7 @@ export function BrandMark({
             surface={ground}
             size={size}
             alt={shown ? alt : ""}
+            symbol={withName}
             eager={eager}
             className={`transition-opacity duration-500 ${shown ? "opacity-100" : "opacity-0"}`}
           />
@@ -161,12 +172,13 @@ export function BrandMark({
       surface={surface}
       size={size}
       alt={alt}
+      symbol={withName}
       eager={eager}
     />
   );
 
   return (
-    <span className="flex items-center gap-3">
+    <span className="flex items-center gap-3.5">
       {mark}
       {withName ? <Wordmark settings={settings} size={size} /> : null}
     </span>
