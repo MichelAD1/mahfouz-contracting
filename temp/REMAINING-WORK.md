@@ -1,8 +1,8 @@
 # Mahfouz Contracting — remaining work to launch
 
-**Status:** Steps 1-13 code complete, plus an unplanned design pass. The site is
-built, seeded and rendering from the CMS, and every word on it is now editable
-in the Studio.
+**Status:** Steps 1-14 code complete, plus an unplanned design pass. The site is
+built, seeded and rendering from the CMS, and every page - hero included - is
+its own document in the Studio.
 
 What is left is no longer code. It is the client's accounts, a domain, a
 deployment, and one walkthrough — tracked in `docs/CLIENT-SETUP.md` and in the
@@ -54,6 +54,8 @@ from:
 - [x] Step 11: Fix the sections landing dim after a client-side navigation
 - [x] Step 12: Design the 404, swap Projects and About, make scrolling instant
 - [x] Step 13: Play the hero's entrance on the sections; cut the 404's route index
+- [x] Step 14: Next 16.3.6; a document per page; tags, categories and filters;
+      the project carousel; the logo; Who we are; Site settings in full
 
 ---
 
@@ -1252,6 +1254,173 @@ The test that distinguishes played from scrubbed is to **scroll once and then ho
 still**: a played animation keeps going, a scrubbed one freezes. It keeps going.
 
 Gates clean on exit codes, `npm run build` exit 0, dataset reseeded.
+
+---
+
+## Step 14 — Every page in the Studio, and the features that needed it — 24 Sep 2026
+
+Asked for in one brief: dynamic project filters from Sanity, a carousel on each
+project page, the logo through Sanity, a proper Who we are section, every page
+and its hero editable on its own, a complete Site settings, nothing hardcoded
+that should be content, and all of it safe when a field is empty. Plus: move to
+the current Next release if nothing breaks.
+
+### Next 16.3.4 → 16.3.6
+
+A patch release, and not an optional one: 16.3.6 fixes a remote-code-execution
+advisory in `next/og`'s `ImageResponse`
+([GHSA-vcvr-r3jv-pc5j](https://github.com/vercel/next.js/security/advisories/GHSA-vcvr-r3jv-pc5j)),
+which is exactly what draws this site's share card. `next` and
+`eslint-config-next` pinned exact, as before; `next-sanity` 13.3.4 accepts any
+Next 16. Upgraded on its own first, on a clean tree, so a break would have been
+the upgrade's: lint, tsc and `npm run build` all clean, every route answering
+as before in dev.
+
+### A document per page
+
+"Page copy" is gone. Each page owns a document now — **Home, Projects,
+Services, About, Contact, Privacy policy, 404** under **Pages** in the Studio —
+and every one opens on its own `pageHero`: heading (Enter for a deliberate line
+break), description, background image, up to two buttons. The single Page copy
+document kept the Studio short, but a hero could be changed in words and never
+in pictures, and "where do I edit the About page" had four answers.
+
+The closing banner stays one shared document, and every page can override any
+field of it for itself.
+
+### The fallback is per document now — and "clear it" finally clears
+
+`fetch.ts` used to merge the CMS over the fallback **field by field**. That made
+every "Clear it to remove it" in the Studio a lie: a cleared link, list or
+checklist came straight back from the fallback. Now a **missing** document
+renders from the fallback whole (site unconfigured, document not created, query
+failed), and an **existing** one is taken as published, except a short list of
+`required` paths per document — the headings and labels a layout cannot stand
+without. Lists are always arrays by the time a component sees them.
+
+Collections follow the same rule: an answered query is the list, even an empty
+one. Otherwise deleting the last placeholder project would have brought all
+four back, and those are records nobody has confirmed.
+
+### Filters: project tags and project categories
+
+Two new document types. **Project tags** drive the filter row and the line
+under each card; **Project categories** replace the category list that was
+typed into the schema (Commercial, Industrial…) and become a second filter row
+once two or more are in use. A button exists only if a project carries it and
+pressing it would change the grid.
+
+The five tags are seeded to mirror the divisions, in the design canvas's order
+(Electrical, Mechanical, IT & Automation, Maintenance, Engineering), so the page
+looks as it did — but a tag is no longer a division, so "Solar" can be added
+without inventing a sixth division. Divisions stay on the project as "Divisions
+engaged".
+
+The filter writes `?tag=` / `?category=` into the address with `replaceState`,
+so a filtered view can be shared; the server still renders every project, and
+the canonical stays `/projects`. Read with `useSyncExternalStore`, so there is
+no hydration mismatch and no Suspense boundary that would have taken the grid
+out of the server HTML.
+
+### The carousel
+
+Native horizontal scroll with CSS scroll snap, not a transform the script
+drives: touch and trackpad swiping, momentum and snapping are the platform's own
+and work before JavaScript. The script adds arrows, the `01 / 04` counter (live
+region), a progress tick on a rule, thumbnails (≥ `sm`), arrow keys / Home /
+End on the focused strip, and click-and-drag for a mouse — snapping is
+suspended during a drag and restored on `scrollend` (with a timeout where that
+event does not exist). Portraits are shown whole over their own blurred LQIP;
+landscapes and squares fill the frame around the hotspot. Captions are a new
+field on gallery images.
+
+**The gallery on Panels Maintenance is placeholder** — four library photographs
+under a TODO, captioned by what they show rather than as this job's.
+
+### The logo
+
+Site settings → Identity: **Logo** (light grounds), **Logo for dark
+backgrounds**, **Show the company name beside the logo**, **Browser tab icon**.
+The header crossfades between the two versions as it turns from transparent to
+paper; with one uploaded, the other ground gets it as a one-colour silhouette.
+Until anything is uploaded the typeset wordmark stays — nothing was invented,
+there is still no logo file. The logo also goes into the JSON-LD.
+
+The favicon moved from `app/favicon.ico` to `public/`: a file-convention icon
+overrides metadata, so the Studio's icon could never have won. It is still the
+create-next-app default until the client uploads one — flagged in
+`docs/CLIENT-SETUP.md`.
+
+### Who we are
+
+The About page's first section: margin label **Who we are**, the statement,
+the body, the photograph with its title block, and four **highlights** under an
+ink rule. The highlights are assembled from what the site already says (About
+text, Capabilities line, division write-ups, the fourth stage) — TODO(client)
+to confirm the wording. The home page shows the short version of the same block,
+so the two cannot disagree; its link label is on the Home document.
+
+### Site settings, in full
+
+Header button, footer headings, bottom-line links and copyright, social links
+(named, not drawn — the footer is a title block), the address split into parts
+for Google, **opening hours** (entered once; the contact page prints them and
+the JSON-LD reads them — the old "change both the Studio and that file"
+coupling is gone), countries served, and the site-wide default title,
+description and **share image**. `/opengraph-image` serves that image when set
+and draws the title-block card from the same settings when not.
+
+### Smaller things on the way
+
+- The Studio's **crop and hotspot now do something**: the crop goes to the CDN,
+  the hotspot becomes `object-position`. Before, both were set and ignored.
+- **"Show in search engines"** on each project replaces the
+  `PROJECT_DETAILS_INDEXABLE` constant — one switch drives the robots tag and
+  the sitemap, and flipping it no longer needs a developer.
+- Project pages read their own `seo` (it was in the schema, never read).
+- Project page headings and fact labels are on the Projects document; "Worked
+  to" is on the Home document.
+- Breadcrumbs use the navigation's own labels.
+- `mailto:` / `tel:` buttons open in place instead of a new tab.
+- The image helpers read the project id from `env.ts`, so client components no
+  longer pull `@sanity/client` into the browser for two strings.
+
+### Verified, 24 Sep 2026
+
+Gates clean on exit codes: `npm run lint`, `npx tsc --noEmit`, `npm run build`
+(0 warnings), `npx sanity schema validate` (0 errors, 0 warnings). An
+independent review of the whole diff found seven faults - fallback project
+pages losing their tags and divisions, a stale snap restore landing mid-drag,
+thumbnail centring measured from the page, inner pages inheriting the home
+page's title when their SEO title was cleared, two carousel accessibility gaps,
+and a category row appearing with one category - all fixed and re-tested.
+
+The seed was dry-run first and checked against `sanity schema extract` output
+(39 documents, 0 problems), then run: **39 documents**, the 15 images deduped
+onto the existing assets. The retired `hero`, `about` and `sectionCopy` are
+still in the dataset and read by nothing (`-- --prune-legacy` removes them).
+One document in the dataset was new: a project tag **"All Work"**, created in
+the Studio on 24 Sep. The seed does not touch it, and it has no button
+because no project carries it - the "All work" button is automatic, worded in
+Pages → Projects → Filters.
+
+Against the CMS, over CDP in headless Chrome: the filter row is All work ·
+Electrical · Mechanical · IT & Automation · Maintenance; Mechanical shows one
+project; `?tag=it-automation` loads filtered and an unknown tag shows all four.
+The carousel steps 01 → 04 by button, arrow key, mouse drag both ways,
+thumbnail and End; Next is `aria-disabled` at the end and keeps focus; two
+drags inside 150ms both land and snapping comes back; a touch swipe at 390px
+moves one photograph. `cdn.sanity.io` per page: home 182, about 71, services
+66, projects 77 (its hero photograph is in the CMS now), a project page with a
+gallery 137. Zero "serving fallback content" warnings.
+
+### Not in this step
+
+- `service.icon` and `service.seo` are still in the schema and still read by
+  nothing; Testimonials are editable and rendered nowhere. Worth a decision
+  before the walkthrough.
+- The enquiry form's success and failure sentences stay in code, as decided in
+  Step 8.
 
 ---
 

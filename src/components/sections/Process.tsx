@@ -43,15 +43,18 @@ const DEPTH = [32, 44, 56, 68] as const;
 export function Process({
   steps,
   heading,
+  lead,
 }: {
   steps: ProcessStep[];
   heading: string;
+  lead?: string;
 }) {
   if (steps.length === 0) return null;
 
   return (
     <div>
       <h2 className="display-sentence t-h2 max-w-[21ch] text-ink">{heading}</h2>
+      {lead ? <p className="mt-6 max-w-[52ch] t-body text-steel">{lead}</p> : null}
 
       <Stagger
         className="mt-[clamp(2.5rem,5vw,4rem)] grid gap-x-[clamp(1.5rem,3vw,2.5rem)] gap-y-12 sm:grid-cols-2 lg:grid-cols-4"
@@ -82,9 +85,9 @@ export function Process({
               {step.step}
             </p>
             <h3 className="mt-4 display-narrow t-h4 text-ink">{step.title}</h3>
-            <p className="mt-2.5 max-w-[30ch] t-body text-steel">
-              {step.description}
-            </p>
+            {step.description ? (
+              <p className="mt-2.5 max-w-[30ch] t-body text-steel">{step.description}</p>
+            ) : null}
           </StaggerItem>
         ))}
       </Stagger>

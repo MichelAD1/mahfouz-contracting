@@ -1,3 +1,5 @@
+import { validOpeningHours } from "@/lib/hours";
+import { hasImage, sanityImageUrl } from "@/sanity/lib/image";
 import type { NavService, SiteSettings } from "@/sanity/lib/types";
 import { absoluteUrl, siteUrl } from "./site";
 
@@ -9,53 +11,40 @@ import { absoluteUrl, siteUrl } from "./site";
  * worth more than any on-page work, and it is the part of Google that reads
  * structured data rather than prose.
  *
- * Name, phones, email and socials are read from the CMS, so the client can
- * correct them without a deploy. The address, hours and service area are
- * constants here instead, and that is deliberate — see below.
+ * Everything here is read from Site settings, so the client can correct it
+ * without a deploy. The address, the hours and the service area used to be
+ * constants in this file beside a note saying to keep them in step with the
+ * studio by hand; they are entered in the studio now, in the parts Google
+ * reads, and the contact page prints the same hours from the same record.
+ * A field left empty is left out, never emitted blank.
  */
+function postalAddress(settings: SiteSettings): Record<string, unknown> | undefined {
+  const { streetAddress, locality, region, postalCode, countryCode } =
+    settings.postalAddress;
 
-/**
- * The machine-readable twin of the address the contact page prints.
- *
- * `settings.address.lines` is four lines of display text, and turning it into
- * a `PostalAddress` means guessing which line is the locality and mapping a
- * country name onto an ISO code. That guess would be silent when it broke, so
- * the structured form is written out once and kept beside the display form.
- *
- * Keep in step with `fallbackHome.settings.address` and the contact document.
- */
-const POSTAL_ADDRESS = {
-  "@type": "PostalAddress",
-  streetAddress: "Sink 14th Street, Bishop Roland J. Diggs Building",
-  addressLocality: "Monrovia",
-  addressRegion: "Montserrado County",
-  addressCountry: "LR",
-} as const;
+  const parts = {
+    streetAddress,
+    addressLocality: locality,
+    addressRegion: region,
+    postalCode,
+    addressCountry: countryCode?.toUpperCase(),
+  };
 
-/**
- * Structured hours, the twin of the contact page's "Hours" row.
- *
- * Same reasoning: that row is free text the client can type anything into, and
- * `openingHoursSpecification` has to parse. Changing the hours means changing
- * both — which is recorded in the plan as a known coupling rather than left to
- * be discovered.
- */
-const OPENING_HOURS = [
-  {
-    "@type": "OpeningHoursSpecification",
-    dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-    opens: "06:00",
-    closes: "18:00",
-  },
-  {
-    "@type": "OpeningHoursSpecification",
-    dayOfWeek: "Saturday",
-    opens: "06:00",
-    closes: "16:00",
-  },
-] as const;
+  const present = Object.fromEntries(
+    Object.entries(parts).filter(([, value]) => Boolean(value)),
+  );
 
-const AREA_SERVED = ["Liberia", "Lebanon"] as const;
+  return Object.keys(present).length > 0
+    ? { "@type": "PostalAddress", ...present }
+    : undefined;
+}
+
+/** The uploaded logo, rasterised where the CDN can - Google's logo rules prefer it. */
+function logoUrl(settings: SiteSettings): string | undefined {
+  const logo = hasImage(settings.logo) ? settings.logo : settings.logoOnDark;
+  if (!hasImage(logo)) return undefined;
+  return logo.url ? sanityImageUrl(logo, { width: 600, format: "png" }) : absoluteUrl(logo.src!);
+}
 
 export function buildBusinessJsonLd({
   settings,
@@ -65,6 +54,9 @@ export function buildBusinessJsonLd({
   services: NavService[];
 }): Record<string, unknown> {
   const [primaryPhone] = settings.phones;
+  const address = postalAddress(settings);
+  const hours = validOpeningHours(settings.openingHours);
+  const logo = logoUrl(settings);
 
   return {
     "@context": "https://schema.org",
@@ -73,28 +65,36 @@ export function buildBusinessJsonLd({
     // rather than describing a second, competing copy of the company.
     "@id": `${siteUrl}/#business`,
     name: settings.companyName,
-    description: settings.footerNote,
-    slogan: settings.tagline,
+    ...(settings.footerNote ? { description: settings.footerNote } : {}),
+    ...(settings.tagline ? { slogan: settings.tagline } : {}),
     url: siteUrl,
-    /**
-     * The Open Graph card, reused. There is no logo asset in the repo — the
-     * wordmark is set in type — and inventing one would be worse than leaving
-     * `logo` out, so a real logo file stays on the client's list.
-     */
+    ...(logo ? { logo } : {}),
+    // The share card: the Site settings image, or the drawn card without one.
     image: absoluteUrl("/opengraph-image"),
-    address: POSTAL_ADDRESS,
+    ...(address ? { address } : {}),
     ...(primaryPhone ? { telephone: primaryPhone.number } : {}),
     ...(settings.emails.length > 0 ? { email: settings.emails[0] } : {}),
     contactPoint: settings.phones.map((phone) => ({
       "@type": "ContactPoint",
       contactType: "sales",
       telephone: phone.number,
-      areaServed: phone.label,
+      ...(phone.label ? { areaServed: phone.label } : {}),
       availableLanguage: "en",
     })),
-    openingHoursSpecification: OPENING_HOURS,
-    areaServed: AREA_SERVED.map((name) => ({ "@type": "Country", name })),
-    knowsAbout: settings.standards,
+    ...(hours.length > 0
+      ? {
+          openingHoursSpecification: hours.map((entry) => ({
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: entry.days,
+            opens: entry.opens,
+            closes: entry.closes,
+          })),
+        }
+      : {}),
+    ...(settings.areaServed.length > 0
+      ? { areaServed: settings.areaServed.map((name) => ({ "@type": "Country", name })) }
+      : {}),
+    ...(settings.standards.length > 0 ? { knowsAbout: settings.standards } : {}),
     ...(settings.socials.length > 0
       ? { sameAs: settings.socials.map((social) => social.url) }
       : {}),

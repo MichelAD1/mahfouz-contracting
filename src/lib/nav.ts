@@ -1,3 +1,5 @@
+import type { NavItem } from "@/sanity/lib/types";
+
 /**
  * Which navigation item the current URL belongs to.
  *
@@ -13,4 +15,12 @@ export function isActivePath(pathname: string, href: string): boolean {
   if (href.startsWith("#") || !href.startsWith("/")) return false;
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+/**
+ * The navigation's own word for a route, for its breadcrumb. Renaming
+ * "Projects" in Site settings renames the crumb that leads back to it too.
+ */
+export function navLabel(nav: NavItem[], href: string, fallback: string): string {
+  return nav.find((item) => item.href === href)?.label ?? fallback;
 }

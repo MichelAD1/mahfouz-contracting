@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { hasImage, imageSrc, sanityImageUrl } from "@/sanity/lib/image";
+import { focalPoint, hasImage, imageSrc, sanityImageUrl } from "@/sanity/lib/image";
 import type { SiteImage as SiteImageType } from "@/sanity/lib/types";
 import { BlueprintPlate } from "./BlueprintPlate";
 import { ImageSlot } from "./ImageSlot";
@@ -13,6 +13,12 @@ type Props = {
   priority?: boolean;
   /** Applies the brand duotone. Off for real photography. */
   duotone?: boolean;
+  /**
+   * `cover` fills the frame and crops, keeping the editor's hotspot in view.
+   * `contain` shows the whole photograph inside it, for a gallery frame whose
+   * shape the photograph does not share.
+   */
+  fit?: "cover" | "contain";
   /**
    * What to draw when there is no asset.
    *
@@ -41,21 +47,23 @@ export function SiteImage({
   className = "",
   priority = false,
   duotone = false,
+  fit = "cover",
   fallback = "slot",
   slotTone = "onPaper",
   fallbackSeed = 0,
   maxWidth = 1800,
 }: Props) {
-  if (!hasImage(image) || !image) {
+  if (!hasImage(image)) {
     if (fallback === "plate") {
       return <BlueprintPlate className={className} seed={fallbackSeed} />;
     }
     return <ImageSlot hint={image?.slotHint} tone={slotTone} className={className} />;
   }
 
-  const src = imageSrc(image)!;
   // Sanity assets are resized at the CDN; local files are served as they are.
-  const resolved = image.url ? sanityImageUrl(image.url, { width: maxWidth }) : src;
+  const resolved = image.url
+    ? sanityImageUrl(image, { width: maxWidth })
+    : imageSrc(image)!;
 
   return (
     <Image
@@ -67,7 +75,11 @@ export function SiteImage({
       loading={priority ? undefined : "lazy"}
       placeholder={image.lqip ? "blur" : "empty"}
       blurDataURL={image.lqip}
-      className={`object-cover ${duotone ? "duotone" : ""} ${className}`}
+      draggable={false}
+      style={fit === "cover" ? { objectPosition: focalPoint(image) } : undefined}
+      className={`${fit === "contain" ? "object-contain" : "object-cover"} ${
+        duotone ? "duotone" : ""
+      } ${className}`}
     />
   );
 }

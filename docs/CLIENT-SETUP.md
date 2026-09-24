@@ -160,15 +160,27 @@ should be a formality someone has actually completed.
 
 ## 9. A logo file
 
-**What to do.** Send the company logo as an **SVG** if one exists, plus a
-**square PNG** at 500×500 or larger.
+**What to do.** Upload it yourself, in the Studio: **Site settings → Identity**.
+There are three slots, and only the first is needed:
+
+- **Logo** — the version for light backgrounds. An **SVG** if one exists,
+  otherwise a PNG with a transparent background.
+- **Logo for dark backgrounds** — a white or light version, for the header over
+  a photograph, the footer and the mobile menu. Without it the site shows the
+  logo above as a white silhouette there, which works for a one-colour mark and
+  loses detail in a multi-colour one.
+- **Browser tab icon** — a **square PNG** at 512×512 or larger.
+
+The moment one is published it replaces the typeset wordmark in the header and
+the footer, and it is given to Google as the company's logo.
 
 **Why.** There is no logo file anywhere in your current site — the name is set
-in type. Google's business listing wants a real image, and so does the preview
-card that appears when someone shares a link to the site.
+in type. Google's business listing wants a real image, and the browser tab still
+shows the web framework's default icon until one is uploaded.
 
 **If skipped.** The site keeps using the typeset wordmark, which looks
-deliberate and works. The Google listing looks emptier than your competitors'.
+deliberate and works. The Google listing looks emptier than your competitors',
+and the browser tab icon is not yours.
 
 ---
 
@@ -215,5 +227,5 @@ there, worse than a policy somebody with authority has read.
 | 6 | Google Search Console | You | No — but do it now, it is free |
 | 7 | Google Business Profile | You | No — **start early**, it is slow |
 | 8 | Partner logo permission | You | No, but before launch |
-| 9 | Logo file | You | No |
+| 9 | Logo file — upload it in the Studio | You | No |
 | 10 | Privacy policy | **Drafted** — you review it | No |

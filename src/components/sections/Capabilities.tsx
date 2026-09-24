@@ -85,9 +85,11 @@ export function Capabilities({
                     >
                       {service.title}
                     </span>
-                    <span className="mt-2 block max-w-[52ch] t-body text-steel">
-                      {service.shortDescription}
-                    </span>
+                    {service.shortDescription ? (
+                      <span className="mt-2 block max-w-[52ch] t-body text-steel">
+                        {service.shortDescription}
+                      </span>
+                    ) : null}
                   </span>
 
                   <span

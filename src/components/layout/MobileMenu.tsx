@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { usePathname } from "next/navigation";
 import { EASE } from "@/components/motion/ease";
+import { BrandMark } from "./BrandMark";
 import { isActivePath } from "@/lib/nav";
 import type { NavItem, SiteSettings } from "@/sanity/lib/types";
 import { telHref } from "@/lib/format";
@@ -76,8 +77,8 @@ export function MobileMenu({ open, onClose, nav, settings }: Props) {
           className="fixed inset-0 z-90 flex flex-col overflow-y-auto overscroll-contain bg-ink px-[var(--gutter)] pb-[max(2rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))] lg:hidden"
         >
           <div className="flex h-11 items-center justify-between">
-            <span className="display text-lg text-paper-bright">
-              {settings.shortName}
+            <span className="text-paper-bright">
+              <BrandMark settings={settings} size="menu" surface="dark" />
             </span>
             <button
               ref={closeRef}
@@ -140,11 +141,11 @@ export function MobileMenu({ open, onClose, nav, settings }: Props) {
               ))}
             </ul>
             <Link
-              href="/contact"
+              href={settings.headerCta.href}
               onClick={onClose}
               className="mt-6 flex w-full items-center justify-center bg-paper-bright px-6 py-5 display-narrow text-[0.8125rem] font-semibold uppercase tracking-[0.08em] text-ink transition-colors duration-300 hover:bg-copper hover:text-paper-bright"
             >
-              Request a Quote
+              {settings.headerCta.label}
             </Link>
           </div>
         </motion.div>

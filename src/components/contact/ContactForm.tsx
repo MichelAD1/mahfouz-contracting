@@ -42,9 +42,9 @@ export function ContactForm({
         <p className="display-sentence t-h3 max-w-[22ch] text-ink">
           {state.message}
         </p>
-        <p className="mt-4 max-w-[46ch] t-body text-steel">
-          {copy.successLead}
-        </p>
+        {copy.successLead ? (
+          <p className="mt-4 max-w-[46ch] t-body text-steel">{copy.successLead}</p>
+        ) : null}
       </div>
     );
   }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PageHero } from "@/components/layout/PageHero";
 import { SectionShell } from "@/components/primitives/SectionShell";
 import { pageMetadata } from "@/lib/metadata";
+import { navLabel } from "@/lib/nav";
 import { getPrivacyPolicy, getSiteFrame } from "@/sanity/lib/fetch";
 
 export const revalidate = 300;
@@ -20,7 +21,10 @@ export async function generateMetadata(): Promise<Metadata> {
     getSiteFrame(),
   ]);
 
-  return pageMetadata(policy.seo, "/privacy-policy", settings.companyName);
+  return pageMetadata(policy.seo, "/privacy-policy", {
+    siteName: settings.companyName,
+    defaults: settings.seo,
+  });
 }
 
 /**
@@ -47,16 +51,20 @@ function formatUpdated(value?: string): string | undefined {
  * as a company that was not listening.
  */
 export default async function PrivacyPolicyPage() {
-  const policy = await getPrivacyPolicy();
+  const [policy, { settings }] = await Promise.all([getPrivacyPolicy(), getSiteFrame()]);
   const [opening, ...rest] = policy.intro;
 
   return (
     <>
       <PageHero
-        crumbs={[{ label: "Home", href: "/" }, { label: "Privacy" }]}
+        crumbs={[
+          { label: navLabel(settings.nav, "/", "Home"), href: "/" },
+          { label: policy.heading },
+        ]}
         seed={4}
         heading={policy.heading}
         lead={opening}
+        image={policy.heroImage}
       />
 
       <SectionShell label={formatUpdated(policy.updated)} divided={false}>

@@ -1,26 +1,36 @@
 import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { getSiteFrame } from "@/sanity/lib/fetch";
+import { hasImage, isVector, sanityImageUrl } from "@/sanity/lib/image";
 
-export const alt =
-  "Mahfouz Contracting - engineering, contracting and maintenance. Five in-house divisions operating in Liberia and Lebanon.";
+export const alt = "Mahfouz Contracting - engineering, contracting and maintenance.";
 
 export const size = { width: 1200, height: 630 };
 
 export const contentType = "image/png";
 
 /**
- * The card is drawn rather than photographed, for the same reason the site is:
- * the photography is mismatched stock, and a title block made of real facts
- * survives being shrunk to a thumbnail in a chat window. It is also the only
- * part of the brand most people will ever see at 300 pixels wide.
+ * Redrawn when Site settings change, on the same window as the pages. It used
+ * to be generated once at build time, which is why its wording had to live in
+ * code; it reads the studio now.
+ */
+export const revalidate = 300;
+
+/**
+ * The share card: whatever a link to this site shows when it is pasted into a
+ * chat, a post or an email. Every page without its own share image points here.
+ *
+ * With a share image set in Site settings, that image is served, cut to the
+ * card's shape around its hotspot. Without one the card is drawn rather than
+ * photographed, for the same reason the site is: the photography is mismatched
+ * stock, and a title block made of real facts survives being shrunk to a
+ * thumbnail in a chat window.
  *
  * The fonts are read from disk instead of `next/font`, which exists to emit
  * CSS for a browser and has nothing to hand a renderer that rasterises on the
  * server. Satori needs the actual outlines, and it cannot read woff2 — hence
- * two plain TrueType files under `assets/fonts`, both OFL. Read at module
- * scope, at build time, because this route has no request-time input and is
- * generated once.
+ * two plain TrueType files under `assets/fonts`, both OFL.
  */
 const archivo = await readFile(join(process.cwd(), "assets/fonts/Archivo-Bold.ttf"));
 const plexMono = await readFile(
@@ -32,6 +42,22 @@ const PAPER = "#f4f2ee";
 const COPPER = "#c9854f";
 const STEEL = "#8b98a6";
 const RULE = "rgba(255, 255, 255, 0.14)";
+
+const NUMBER_WORDS = [
+  "None",
+  "One",
+  "Two",
+  "Three",
+  "Four",
+  "Five",
+  "Six",
+  "Seven",
+  "Eight",
+  "Nine",
+  "Ten",
+  "Eleven",
+  "Twelve",
+];
 
 /** The drawing grid, as positioned hairlines. */
 function Grid() {
@@ -119,7 +145,52 @@ function TitleBlockCell({
   );
 }
 
+/**
+ * The uploaded share image, as PNG bytes - or nothing, and the card is drawn.
+ * SVGs are skipped: the CDN does not rasterise them.
+ */
+async function uploadedCard(
+  image: Parameters<typeof sanityImageUrl>[0] | undefined,
+): Promise<Response | null> {
+  if (!hasImage(image) || !image.url || isVector(image)) return null;
+
+  try {
+    const response = await fetch(
+      sanityImageUrl(image, { width: size.width, height: size.height, format: "png" }),
+      { next: { revalidate } },
+    );
+    if (!response.ok || !response.body) return null;
+
+    return new Response(response.body, { headers: { "content-type": contentType } });
+  } catch (error) {
+    console.error("[share card] the Site settings share image could not be fetched", error);
+    return null;
+  }
+}
+
 export default async function Image() {
+  const { settings, services } = await getSiteFrame();
+
+  const uploaded = await uploadedCard(settings.seo.image);
+  if (uploaded) return uploaded;
+
+  const headline = `${settings.footerNote ?? settings.tagline ?? settings.companyName}.`.replace(
+    /\.+$/,
+    ".",
+  );
+
+  const cells = [
+    {
+      label: "DIVISIONS",
+      value:
+        services.length > 0
+          ? `${NUMBER_WORDS[services.length] ?? services.length}, in-house`
+          : "",
+    },
+    { label: "OPERATING", value: settings.areaServed.join(" & ") },
+    { label: "STANDARDS", value: settings.standards.slice(0, 4).join(" ") },
+  ].filter((cell) => cell.value);
+
   return new ImageResponse(
     (
       <div
@@ -165,23 +236,22 @@ export default async function Image() {
               color: COPPER,
             }}
           >
-            MAHFOUZ CONTRACTING
+            {settings.companyName.toUpperCase()}
           </div>
 
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div
               style={{
                 display: "flex",
-                flexDirection: "column",
                 fontFamily: "Archivo",
                 fontSize: 86,
                 lineHeight: 1.04,
                 letterSpacing: -2,
                 color: PAPER,
+                maxWidth: 1000,
               }}
             >
-              <div style={{ display: "flex" }}>Engineering, contracting</div>
-              <div style={{ display: "flex" }}>and maintenance.</div>
+              {headline}
             </div>
             <div
               style={{
@@ -194,17 +264,27 @@ export default async function Image() {
             />
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              borderTop: `1px solid ${RULE}`,
-              paddingTop: 28,
-            }}
-          >
-            <TitleBlockCell label="DIVISIONS" value="Five, in-house" first />
-            <TitleBlockCell label="OPERATING" value="Liberia & Lebanon" />
-            <TitleBlockCell label="STANDARDS" value="IEC NEC BS NFPA" last />
-          </div>
+          {cells.length > 0 ? (
+            <div
+              style={{
+                display: "flex",
+                borderTop: `1px solid ${RULE}`,
+                paddingTop: 28,
+              }}
+            >
+              {cells.map((cell, index) => (
+                <TitleBlockCell
+                  key={cell.label}
+                  label={cell.label}
+                  value={cell.value}
+                  first={index === 0}
+                  last={index === cells.length - 1}
+                />
+              ))}
+            </div>
+          ) : (
+            <div style={{ display: "flex" }} />
+          )}
         </div>
       </div>
     ),

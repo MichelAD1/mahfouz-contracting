@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { BrandMark } from "./BrandMark";
 import { MobileMenu } from "./MobileMenu";
 import { isActivePath } from "@/lib/nav";
 import type { SiteSettings } from "@/sanity/lib/types";
@@ -41,14 +42,14 @@ export function Header({ settings }: { settings: SiteSettings }) {
         <div className="shell flex h-20 items-center justify-between gap-6">
           <Link
             href="/"
-            className={`flex items-baseline gap-2.5 py-3 transition-colors duration-500 ${ink}`}
+            className={`flex items-center py-3 transition-colors duration-500 ${ink}`}
           >
-            <span className="display text-xl leading-none" translate="no">
-              {settings.shortName}
-            </span>
-            <span className="t-meta opacity-65" translate="no">
-              {settings.descriptor}
-            </span>
+            <BrandMark
+              settings={settings}
+              size="header"
+              surface={solid ? "light" : "dark"}
+              crossfade
+            />
           </Link>
 
           <nav aria-label="Main" className="hidden lg:block">
@@ -76,14 +77,14 @@ export function Header({ settings }: { settings: SiteSettings }) {
 
           <div className="flex items-center gap-3">
             <Link
-              href="/contact"
+              href={settings.headerCta.href}
               className={`hidden items-center px-6 py-3.5 display-narrow text-[0.75rem] font-semibold uppercase tracking-[0.08em] transition-colors duration-300 lg:inline-flex ${
                 solid
                   ? "bg-ink text-paper-bright hover:bg-copper"
                   : "bg-paper-bright/10 text-paper-bright ring-1 ring-inset ring-rule-dark-strong hover:bg-copper hover:ring-copper"
               }`}
             >
-              Request a Quote
+              {settings.headerCta.label}
             </Link>
 
             <button

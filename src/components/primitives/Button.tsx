@@ -63,6 +63,8 @@ export function ButtonLink({
   className = "",
 }: LinkButtonProps) {
   const isInternal = href.startsWith("/") || href.startsWith("#");
+  // A call or an email opens the phone or the mail client, not a new tab.
+  const isHandoff = href.startsWith("mailto:") || href.startsWith("tel:");
   const classes = `${base} ${styles[tone][variant]} ${className}`;
 
   const content = (
@@ -71,6 +73,14 @@ export function ButtonLink({
       {withArrow ? <Arrow /> : null}
     </>
   );
+
+  if (isHandoff) {
+    return (
+      <a href={href} className={classes}>
+        {content}
+      </a>
+    );
+  }
 
   if (!isInternal) {
     return (
