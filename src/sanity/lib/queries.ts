@@ -92,7 +92,7 @@ const SERVICE = groq`{
  * never drags galleries and body copy across the wire to render a thumbnail.
  */
 const PROJECT_CARD = groq`{
-  _id, name, "slug": slug.current, location, year, status, summary, featured,
+  _id, name, "slug": slug.current, city, country, location, year, status, summary, featured,
   "category": category->${TERM},
   "cover": cover${IMAGE},
   "tags": tags[]->${TERM},
@@ -188,7 +188,7 @@ export const PROJECTS_PAGE_QUERY = groq`{
     "more": more${SECTION_INTRO},
     detail{
       overview, scope, equipment, gallery, nextProject, allProjects,
-      category, location, divisions, status, year, client
+      category, location, site, tags, divisions, status, year, client
     },
     "closingCta": closingCta${CLOSING_BANNER},
     "seo": seo${SEO}
@@ -207,7 +207,7 @@ export const SITEMAP_PROJECTS_QUERY = groq`*[_type == "project" && searchVisible
 }`;
 
 export const PROJECT_QUERY = groq`*[_type == "project" && slug.current == $slug][0]{
-  _id, name, "slug": slug.current, location, year, client, status, summary, featured, searchVisible,
+  _id, name, "slug": slug.current, city, country, location, year, client, status, summary, featured, searchVisible,
   "category": category->${TERM},
   "cover": cover${IMAGE},
   "gallery": gallery[]${GALLERY_IMAGE},

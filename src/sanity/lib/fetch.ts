@@ -496,6 +496,8 @@ const DETAIL_LABELS = [
   "allProjects",
   "category",
   "location",
+  "site",
+  "tags",
   "divisions",
   "status",
   "year",

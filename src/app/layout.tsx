@@ -44,7 +44,10 @@ const plexMono = IBM_Plex_Mono({
  * but it cannot stand in as the home-screen icon.
  */
 function faviconIcons(favicon?: SiteImage): Metadata["icons"] {
-  if (!hasImage(favicon) || !favicon.url) return undefined;
+  if (!hasImage(favicon)) return undefined;
+
+  // A file in /public is served as it is; the CDN only sizes CMS uploads.
+  if (!favicon.url) return { icon: [{ url: favicon.src! }], apple: [{ url: favicon.src! }] };
 
   if (isVector(favicon)) return { icon: [{ url: favicon.url, type: "image/svg+xml" }] };
 

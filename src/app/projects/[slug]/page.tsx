@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Fragment, type ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHero } from "@/components/layout/PageHero";
@@ -108,12 +109,40 @@ export default async function ProjectPage({
 }
 
 /**
+ * The project's tags, each a way back into the index filtered by it - the
+ * same buttons the projects page offers, reached from the other side.
+ */
+function TagLinks({ tags }: { tags: ProjectFull["tags"] }) {
+  return (
+    <>
+      {tags.map((tag, index) => (
+        <Fragment key={tag._id}>
+          {index > 0 ? (
+            <span aria-hidden="true" className="text-steel-light">
+              {" · "}
+            </span>
+          ) : null}
+          <Link
+            href={`/projects?tag=${encodeURIComponent(tag.slug)}`}
+            className="underline decoration-rule-dark-strong underline-offset-4 transition-colors duration-300 hover:text-copper-bright hover:decoration-copper-bright"
+          >
+            {tag.title}
+          </Link>
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
+/**
  * The dark strip directly under the hero. Cells with no value are dropped
  * rather than rendered empty, so a sparse record reads as a short bar instead
  * of four labelled blanks.
  *
- * The project's own "Project details" rows follow the fixed facts - the title
- * block the studio has always said they appear in, and until now never did.
+ * Where the work was leads: the city and the country, then the site when the
+ * project names one. The tags follow, then everything else, and the project's
+ * own "Project details" rows close the strip - the title block the studio has
+ * always said they appear in.
  */
 function ProjectFacts({
   project,
@@ -123,16 +152,22 @@ function ProjectFacts({
   labels: ProjectDetailLabels;
 }) {
   const divisions = project.divisions.map((division) => division.title);
+  const place = [project.city, project.country].filter(Boolean).join(", ");
 
-  const facts = [
-    { label: labels.category, value: project.category?.title },
-    { label: labels.location, value: project.location },
-    { label: labels.divisions, value: divisions.join(", ") || undefined },
-    { label: labels.status, value: project.status },
-    { label: labels.year, value: project.year },
-    { label: labels.client, value: project.client },
+  const facts: { label: string; value: ReactNode }[] = [
+    { label: labels.location, value: place || null },
+    { label: labels.site, value: project.location || null },
+    {
+      label: labels.tags,
+      value: project.tags.length > 0 ? <TagLinks tags={project.tags} /> : null,
+    },
+    { label: labels.category, value: project.category?.title || null },
+    { label: labels.divisions, value: divisions.join(", ") || null },
+    { label: labels.status, value: project.status || null },
+    { label: labels.year, value: project.year || null },
+    { label: labels.client, value: project.client || null },
     ...project.details,
-  ].filter((fact): fact is { label: string; value: string } => Boolean(fact.value));
+  ].filter((fact) => Boolean(fact.value));
 
   if (facts.length === 0) return null;
 

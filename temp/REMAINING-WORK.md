@@ -56,6 +56,8 @@ from:
 - [x] Step 13: Play the hero's entrance on the sections; cut the 404's route index
 - [x] Step 14: Next 16.3.6; a document per page; tags, categories and filters;
       the project carousel; the logo; Who we are; Site settings in full
+- [x] Step 15: The MC mark from the brand deck; city and country on projects;
+      a photograph in every image field
 
 ---
 
@@ -1421,6 +1423,87 @@ gallery 137. Zero "serving fallback content" warnings.
   before the walkthrough.
 - The enquiry form's success and failure sentences stay in code, as decided in
   Step 8.
+
+---
+
+## Step 15 — The logo, project locations, no empty image fields — 24 Sep 2026
+
+### Netlify, first
+
+The first Netlify build failed on `/projects/reliable-energy` - "Objects are
+not valid as a React child (found: object with keys {_ref, _type})". It built
+`main`, which was still the pre-Step-14 code, against a dataset already
+reseeded with Step 14's model, where a project's category is a reference: the
+old code printed it as text. Fixed by shipping the code the data was written
+for - PR #9 merged to `main`, and `production` fast-forwarded to the same
+commit, since Netlify deploys `production`. The PR's deploy preview built
+clean on Netlify first.
+
+**The lesson worth keeping:** a reseed changes what the *deployed* code reads.
+Anything that changes a field's type in the dataset has to ship before, or
+with, the reseed - additive fields are the only safe ones to seed early. This
+step's reseed was checked against the deployed code before it ran.
+
+### The mark
+
+Extracted from the brand identity presentation, page 5 - Direction 01, the MC
+monogram - as **vectors**, not a screenshot: the page was read through pdf.js
+in headless Chrome and the four shapes above the lettering taken as SVG paths,
+so the mark is crisp at every size and 907 bytes. The lettering under it is
+18 separate outlined paths and was left out, as asked.
+
+- `public/brand/mahfouz-mark.svg` — navy M `#002365`, grey C `#7a7673`, for
+  light grounds
+- `public/brand/mahfouz-mark-light.svg` — the whole mark in `#fcfcf7`, for dark
+  grounds. Not an invention: page 6 of the same deck shows exactly this on the
+  navy and on the grey
+- `public/brand/mahfouz-icon.png` — that reversed mark on the brand navy,
+  512×512, for the browser tab and the home screen; `public/favicon.ico` is
+  rebuilt from it (16/32/48), replacing the create-next-app default
+
+All three are in Site settings, uploaded to Sanity, with **Show the company
+name beside the logo** on - so the header reads [mark] MAHFOUZ CONTRACTING,
+crossfading between the two versions as it turns from transparent to paper. A
+symbol set beside the name is sized against the name (about twice its cap
+height: 26px in the header, 24 in the menu, 32 in the footer) rather than as a
+logo standing alone. The mark is also on the share card, before the company
+name.
+
+**The deck shows three directions.** Direction 01 is the one asked for; the
+client should confirm it is the chosen one before launch.
+
+### Projects
+
+- **Cards show the country, and nothing else**, under the name. The tags are
+  off the cards: they are the filter's business, and a card listing them beside
+  the buttons that filter by them says the same thing twice.
+- **`city` and `country`** are new fields, in a Location fieldset with the old
+  free-text `location`, now titled "Site or district" - kept, and printed as its
+  own fact when set.
+- **The project page leads with Location (City, Country)**, then the tags - each
+  a link back into the index filtered by it - then category, divisions, status,
+  year, client and the project's own detail rows.
+- All four projects carry **Monrovia, Liberia**: the company's own address as a
+  stand-in, TODO(client) to replace with where each job actually was.
+
+### Existing photographs in every image field
+
+About, Services, Contact, the 404 and the privacy policy heroes now carry
+library photographs under the dark wash; the three projects without a gallery
+have three photographs each, captioned by what they show. The share image in
+Site settings is deliberately left empty: the drawn card - now with the mark -
+is what shares, and a photograph there would replace it.
+
+### Verified
+
+Lint, tsc and `npm run build` clean (0 warnings); `sanity schema validate`
+clean. The seed was dry-run and checked against `sanity schema extract` (39
+documents, 0 problems), then run after confirming nothing had been edited
+since the last one. Against the CMS: the header serves both marks from the
+CDN, every card reads "LIBERIA", the Green Enterprises page leads with
+"Location: Monrovia, Liberia" and linked tags, the carousel counts 01 / 03,
+the favicon links point at the uploaded icon, and the share card draws the
+mark. Zero "serving fallback content" warnings.
 
 ---
 

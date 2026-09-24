@@ -155,6 +155,15 @@ export const project = defineType({
     { name: "meta", title: "Metadata" },
     { name: "search", title: "Search & sharing" },
   ],
+  fieldsets: [
+    {
+      name: "location",
+      title: "Location",
+      description:
+        "The country is printed under the project's name on every card; the project's own page gives the city and the country, and the site if there is one.",
+      options: { columns: 2 },
+    },
+  ],
   fields: [
     defineField({
       name: "name",
@@ -200,7 +209,7 @@ export const project = defineType({
       group: "main",
       of: [{ type: "reference", to: [{ type: "projectTag" }] }],
       description:
-        "Drive the filter on the projects page and the line under each project card, e.g. Electrical, Maintenance. New tags are created under Project tags.",
+        "Drive the filter on the projects page and are listed on the project's own page, e.g. Electrical, Maintenance. New tags are created under Project tags.",
       validation: (rule) => rule.unique(),
     }),
     defineField({
@@ -211,7 +220,29 @@ export const project = defineType({
       description:
         "The sector, e.g. Commercial. Shown on the project page, and offered as a filter once two or more categories are in use.",
     }),
-    defineField({ name: "location", type: "string", group: "meta" }),
+    defineField({
+      name: "city",
+      type: "string",
+      group: "meta",
+      fieldset: "location",
+      description: "e.g. Monrovia.",
+    }),
+    defineField({
+      name: "country",
+      type: "string",
+      group: "meta",
+      fieldset: "location",
+      description: "e.g. Liberia. Shown under the project's name on its card.",
+    }),
+    defineField({
+      name: "location",
+      title: "Site or district",
+      type: "string",
+      group: "meta",
+      fieldset: "location",
+      description:
+        "Optional, and more specific than the city: a district, a building or a site name. Shown on the project's own page only.",
+    }),
     defineField({
       name: "year",
       type: "string",
@@ -233,7 +264,7 @@ export const project = defineType({
       group: "meta",
       of: [{ type: "reference", to: [{ type: "service" }] }],
       description:
-        "Which of your divisions worked on it. Shown on the project page as Divisions engaged, and under the card when the project has no tags.",
+        "Which of your divisions worked on it. Shown on the project page as Divisions engaged.",
       validation: (rule) => rule.unique(),
     }),
     defineField({
@@ -308,12 +339,13 @@ export const project = defineType({
     select: {
       title: "name",
       category: "category.title",
+      country: "country",
       year: "year",
       media: "cover",
     },
-    prepare: ({ title, category, year, media }) => ({
+    prepare: ({ title, category, country, year, media }) => ({
       title,
-      subtitle: [category, year].filter(Boolean).join(", "),
+      subtitle: [category, country, year].filter(Boolean).join(", "),
       media,
     }),
   },
